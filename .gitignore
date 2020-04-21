@@ -1,0 +1,8 @@
+*.pyc
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+._.DS_Store
+.idea/
+.project
+__pycache__/

@@ -1,14 +1,44 @@
 ---
-- name: test play
+- name: Men&Mice FreeIP test play
   hosts: localhost
   connection: local
   become: false
 
   vars:
-    url: http://mandm.example.net/mmws/api
+    url: http://mandm.example.net
     user: apidude
     password: TheAPIDude
+    network:
+      - nononet
+      - examplenet
 
   tasks:
-    - debug:
-        msg: "This is the lookup: {{ lookup('mmfreeip', url=url, user=user, password=password) }}"
+    - name: Set free IP addresses as a fact
+      set_fact:
+        freeips: "{{ query('mm_freeip',
+                         url,
+                         user,
+                         password,
+                         network,
+                         multi=2,
+                         claim=60,
+                         startaddress='172.16.17.100',
+                         excludedhcp=True,
+                         ping=True)
+               }}"
+
+    - name: Get the free IP address and show info
+      debug:
+        msg:
+          - "Free IPs           : {{ freeips }}"
+          - "Queried network(s) : {{ network }}"
+          - "Ansible version    : {{ ansible_version.full }}"
+          - "Python version     : {{ ansible_facts['python_version'] }}"
+          - "Python executable  : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Loop over IP addresses
+      debug:
+        msg:
+          - "Next free IP       : {{ item }}"
+      loop: "{{ freeips }}"
+

@@ -1,1 +1,9 @@
-localhost		ansible_connection=local	ansible_python_interpreter=/home/tonk/virtenv/p2_ans27/bin/python
+localhost		ansible_host=localhost	ansible_connection=local
+
+[localhosts]
+localhost27		ansible_host=localhost	ansible_connection=local	ansible_python_interpreter=/home/tonk/project/klanten/men_and_mice/virtenv/p2_ans27/bin/python
+localhost28		ansible_host=localhost	ansible_connection=local	ansible_python_interpreter=/home/tonk/project/klanten/men_and_mice/virtenv/p2_ans28/bin/python
+localhost29		ansible_host=localhost	ansible_connection=local	ansible_python_interpreter=/home/tonk/project/klanten/men_and_mice/virtenv/p2_ans29/bin/python
+localhost37		ansible_host=localhost	ansible_connection=local	ansible_python_interpreter=/home/tonk/project/klanten/men_and_mice/virtenv/p3_ans27/bin/python
+localhost38		ansible_host=localhost	ansible_connection=local	ansible_python_interpreter=/home/tonk/project/klanten/men_and_mice/virtenv/p3_ans28/bin/python
+localhost39		ansible_host=localhost	ansible_connection=local	ansible_python_interpreter=/home/tonk/project/klanten/men_and_mice/virtenv/p3_ans29/bin/python
