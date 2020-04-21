@@ -1,0 +1,1 @@
+localhost		ansible_connection=local	ansible_python_interpreter=/home/tonk/virtenv/p2_ans27/bin/python

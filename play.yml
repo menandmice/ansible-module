@@ -1,0 +1,14 @@
+---
+- name: test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  vars:
+    url: http://mandm.example.net/mmws/api
+    user: apidude
+    password: TheAPIDude
+
+  tasks:
+    - debug:
+        msg: "This is the lookup: {{ lookup('mmfreeip', url=url, user=user, password=password) }}"
