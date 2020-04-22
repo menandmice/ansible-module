@@ -3,8 +3,8 @@
 for f in p2_ans27 p2_ans28 p2_ans29 p3_ans27 p3_ans28 p3_ans29
 do
 	export f
-	(. ../${f}/bin/activate
-	export ANSIBLE_PYTHON_INTERPRETER=${PWD}/../${f}/bin/python
+	(. ../../${f}/bin/activate
+	export ANSIBLE_PYTHON_INTERPRETER=${PWD}/../../${f}/bin/python
 	ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' play.yml
 	)
 done
