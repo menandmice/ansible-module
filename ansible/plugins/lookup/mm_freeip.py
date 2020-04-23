@@ -1,30 +1,33 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+#
+# Copyright: (c) 2020, Men&Mice
+# GNU General Public License v3.0 (see
+# COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
+#
+# python 3 headers, required if submitting to Ansible
 """Ansible lookup plugin.
 
 Lookup plugin for finding the next free IP address in
 a network zone in the Men&Mice Suite.
 """
 
-# Copyright: (c) 2020, Men&Mice
-# Unknown licence
-# python 3 headers, required if submitting to Ansible
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
-from ansible.errors import AnsibleError, AnsibleParserError, AnsibleModuleError
+from ansible.errors import AnsibleError, AnsibleModuleError
 from ansible.plugins.lookup import LookupBase
 from ansible.utils.display import Display
 from ansible.module_utils._text import to_text
 
-ANSIBLE_METADATA = {'metadata_version': '0.01',
+ANSIBLE_METADATA = {'metadata_version': '0.1',
                     'status': ['preview'],
-                    'supported_by': 'Men&Mice'}
+                    'supported_by': 'community'}
 
-DOCUMENTATION = """
+DOCUMENTATION = r"""
     lookup: mm_freeip
     author: Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
     version_added: "2.7"
-    short_description: Find free IP address(es) in a given network range
+    short_description: Find free IP address(es) in a given network range in the Men&Mice Suite
     description:
       - This lookup returns free IP address(es) in a range or ranges
         specified by the network names C(e.g. examplenet). This can be
@@ -38,85 +41,94 @@ DOCUMENTATION = """
       - requests (python library, https://requests.readthedocs.io)
     options:
       _terms:
-        description: All available options
-        host:
-          description: Men&Mice API server to connect to
-          required: True
-        user:
-          description: userid to login with into the API
-          required: True
-        password:
-          description: password to login with into the API
-          required: True
-          no_log: True
-        network:
-          description:
-            - network zone(s) from which the first free IP address is to be found.
-            - This is either a single network or a list of networks
-          required: True
-        multi:
-          description: Get a list of x number of free IP addresses from the
-            requested zones
-          required: False
-          default: False
-        claim:
-          description: Claim the IP address(es) for the specified amount of time
-          required: False
-          default: False
-        ping:
-          description: ping the address found before returning
-          required: False
-          default: False
-        excludedhcp:
-          description: exclude DHCP reserved ranges from result
-          required: False
-          default: False
-        startaddress:
-          description:
-            - Start address when looking for the next free address
-            - When the start address is not in de zone it will be ignored
-          required: False
-          default: None
+        description: url, user and password
+      mmurl:
+        description: Men&Mice API server to connect to
+        type: str
+        required: True
+      user:
+        description: userid to login with into the API
+        type: str
+        required: True
+      password:
+        description: password to login with into the API
+        type: str
+        required: True
+        no_log: True
+      network:
+        description:
+          - network zone(s) from which the first free IP address is to be found.
+          - This is either a single network or a list of networks
+        type: str
+        required: True
+      multi:
+        description: Get a list of x number of free IP addresses from the
+          requested zones
+        type: int
+        required: False
+        default: False
+      claim:
+        description: Claim the IP address(es) for the specified amount of time
+        type: int
+        required: False
+        default: False
+      ping:
+        description: ping the address found before returning
+        type: bool
+        required: False
+        default: False
+      excludedhcp:
+        description: exclude DHCP reserved ranges from result
+        type: bool
+        required: False
+        default: False
+      startaddress:
+        description:
+          - Start address when looking for the next free address
+          - When the start address is not in de zone it will be ignored
+        type: str
+        required: False
+        default: None
     notes:
       - TODO - Add extra filtering
 """
 
-EXAMPLES = """
+EXAMPLES = r"""
 - name: get the first free IP address in a zone
   debug:
-    msg: "This is the next free IP: {{ lookup('mm_freeip', url, user, passwd, network) }}"
+    msg: "This is the next free IP: {{ lookup('mm_freeip', mmurl, user, passwd, network) }}"
   vars:
-    url: http://mmsuite.example.net
+    mmurl: http://mmsuite.example.net
     user: apiuser
     passwd: apipasswd
     network: examplenet
 
 - name: get the first free IP addresses in multiple zones
   debug:
-    msg: "This is the next free IP: {{ query('mm_freeip', url, user, passwd, network, multi=5, claim=60) }}"
+    msg: "This is the next free IP: {{ query('mm_freeip', mmurl, user, passwd, network, multi=5, claim=60) }}"
   vars:
-    url: http://mmsuite.example.net
+    mmurl: http://mmsuite.example.net
     user: apiuser
     passwd: apipasswd
     network:
       - examplenet
       - examplecom
 
-- name: get the first free IP address in a zone and ping
-  debug:
-    msg: "This is the next free IP: {{ query('mm_freeip', url, user, passwd, network, ping=True) }}"
-  vars:
-    url: http://mmsuite.example.net
-    user: apiuser
-    passwd: apipasswd
-    network: examplenet
+  - name: get the first free IP address in a zone and ping
+    debug:
+      msg: "This is the next free IP: {{ query('mm_freeip', mmurl, user, passwd, network, ping=True) }}"
+    vars:
+      mmurl: http://mmsuite.example.net
+      user: apiuser
+      passwd: apipasswd
+      network: examplenet
 """
 
-RETURN = """
-  _list:
-    description: A list containing the free IP address(es) in the network range
-    fields:
-      0: IP address(es)
+RETURN = r"""
+_list:
+  description: A list containing the free IP address(es) in the network range
+  fields:
+    0: IP address(es)
 """
 
 # Try to import the not standard requests module
@@ -164,7 +176,7 @@ class LookupModule(LookupBase):
     def run(self, terms, variables=None, **kwargs):
         """Variabele terms contains a list with supplied parameters.
 
-        - URL     -> The URL to connect to (M&M API URL)
+        - MMURL   -> The URL to connect to (M&M top URL)
         - User    -> Userid to login with
         - Pass    -> Password to login with
         - Network -> The zone from which the free IP address(es) are found
@@ -178,7 +190,7 @@ class LookupModule(LookupBase):
 
         # Sufficient parameters
         if len(terms) < 4:
-            raise AnsibleError("Not sufficient parameters. Need at least: URL, User, Password and network(s).")
+            raise AnsibleError("Insufficient parameters. Need at least: MMURL, User, Password and network(s).")
 
         # Get the parameters
         url          = terms[0].strip()
