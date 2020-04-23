@@ -126,7 +126,7 @@ def doapi(url, method, provider, databody, result, wantresponse=False):
     """Run an API call.
 
     Parameters:
-        - url          -> Complete URL for the API entry point
+        - url          -> Relative URL for the API entry point
         - method       -> The API method (GET, POST, DELETE,...)
         - provider     -> Needed credentials for the API provider
         - databody     -> Data needed for the API to perform the task
@@ -138,9 +138,17 @@ def doapi(url, method, provider, databody, result, wantresponse=False):
         - The Ansible result dict
     """
     headers = {'Content-Type': 'application/json'}
+    apiurl = "%s/mmws/api/%s" % (provider['mmurl'], url)
 
     try:
-        resp = open_url(url,
+        print(apiurl,
+              method,
+              provider['user'],
+              provider['password'],
+              json.dumps(databody),
+              False,
+              headers)
+        resp = open_url(apiurl,
                         method=method,
                         url_username=provider['user'],
                         url_password=provider['password'],
@@ -149,10 +157,12 @@ def doapi(url, method, provider, databody, result, wantresponse=False):
                         headers=headers)
 
         # Get all API data
-        res = json.loads(resp.read())
         print(json.dumps(databody, sort_keys=True, indent=4, separators=(',', ': ')))
-
         response = resp.read()
+        print("Here 1, response =", response)
+        print("Here 2, result   =", response)
+        res = json.loads(response)
+
         if wantresponse:
             result['message'] = json.loads(response)
         else:
@@ -166,6 +176,7 @@ def doapi(url, method, provider, databody, result, wantresponse=False):
         errbody = json.loads(err.read().decode())
         result['message'] = "%s: %s" % (err.msg, errbody['error']['message'])
         raise AnsibleError(result['message'])
+    print("\n\n\nEnding dourl\n\n\n")
 
     return res['result'], result
 
@@ -214,7 +225,7 @@ def run_module():
     provider = module.params['provider']
     display.vvv(provider)
 
-    url = "%s/mmws/api/Users" % provider['mmurl']
+    url = "Users"
     state = module.params['state']
     display.vvv("State:", state)
 
@@ -241,7 +252,7 @@ def run_module():
     if state == "present":
         http_method = "POST"
         if user_exists:
-            url = "%s/%s" % (url, user_ref)
+            url = "Users/%s" % user_ref
             databody = {"ref": user_ref,
                         "saveComment": "Ansible API",
                         "properties": [
@@ -265,8 +276,7 @@ def run_module():
         if user_exists:
             http_method = "DELETE"
             expect_response = False
-            url = url + "/" + user_ref
-            url = "%s/%s" % (url, user_ref)
+            url = "Users/%s" % user_ref
         else:
             skip = True
 
@@ -277,26 +287,6 @@ def run_module():
 
     if not skip:
         resp, result = doapi(url, http_method, provider, databody, result, expect_response)
-        # try:
-        #     resp = open_url(url, method=http_method,
-        #                     url_username=provider['user'],
-        #                     url_password=provider['password'],
-        #                     data=json.dumps(databody),
-        #                     validate_certs=False,
-        #                     headers={'Content-Type': 'application/json'})
-        #     response = resp.read()
-        #     if expect_response:
-        #         result['message'] = json.loads(response)
-        #     else:
-        #         if resp.status == 200:
-        #             result['message'] = "OK"
-        #         else:
-        #             result['message'] = resp.reason
-        #     result['changed'] = True
-        # except urllib.error.HTTPError as err:
-        #     display.vvv('Error', err.code)
-        #     errbody = json.loads(err.read().decode())
-        #     result['message'] = "%s: %s" % (err.msg, errbody['error']['message'])
 
     # return collected results
     module.exit_json(**result)
