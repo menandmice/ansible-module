@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright: (c) 2019, Men & Mice
+# Copyright: (c) 2020, Men&Mice
 # GNU General Public License v3.0 (see
 # COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """Ansible user module.
@@ -15,6 +15,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 import json
 import urllib
+import mm_include
 from ansible.errors import AnsibleError
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
