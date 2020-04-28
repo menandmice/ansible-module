@@ -239,14 +239,12 @@ def run_module():
     display.vvv("Users:", users)
 
     # If groups are requested, get all groups
-    print(module.params['groups'])
     if module.params['groups']:
         resp, result = getrefs("Groups", provider)
         groups = resp['groups']
         display.vvv("Groups:", groups)
 
     # If roles are requested, get all roles
-    print(module.params['roles'])
     if module.params['roles']:
         resp, result = getrefs("Roles", provider)
         roles = resp['roles']
@@ -280,7 +278,6 @@ def run_module():
         # Create a list of wanted roles
         if module.params['roles']:
             for role in roles:
-                print(role)
                 if role['name'] in module.params['roles']:
                     # This roles is wanted
                     wanted_roles.append({"ref": role['ref'],
@@ -321,7 +318,6 @@ def run_module():
                         }
 
         # Show some debugging
-        print('databody:', databody)
         display.vvv('databody:', databody)
 
     # If requested state is "absent"
