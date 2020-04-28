@@ -20,9 +20,8 @@
                          user,
                          password,
                          network,
-                         multi=2,
+                         multi=5,
                          claim=60,
-                         startaddress='172.16.17.100',
                          excludedhcp=True,
                          ping=True)
                }}"
