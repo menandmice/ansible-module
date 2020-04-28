@@ -255,6 +255,7 @@ def run_module():
                   json.dumps(databody),
                   False,
                   {'Content-Type': 'application/json'})
+            print(databody)
             resp = open_url(url, method=http_method,
                             url_username=provider['user'],
                             url_password=provider['password'],

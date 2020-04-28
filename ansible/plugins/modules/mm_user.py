@@ -15,10 +15,9 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 import json
 import urllib
-from ansible.errors import AnsibleError, AnsibleModuleError
+from ansible.errors import AnsibleError
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
-from ansible.module_utils._text import to_text
 from ansible.utils.display import Display
 
 ANSIBLE_METADATA = {'metadata_version': '0.1',
@@ -122,7 +121,7 @@ TRUEFALSE = {
     False: 1,
 }
 
-def doapi(url, method, provider, databody, result, wantresponse=False):
+def doapi(url, method, provider, databody, result):
     """Run an API call.
 
     Parameters:
@@ -131,7 +130,6 @@ def doapi(url, method, provider, databody, result, wantresponse=False):
         - provider     -> Needed credentials for the API provider
         - databody     -> Data needed for the API to perform the task
         - result       -> Result dict for the end result of the module
-        - wantresponse -> Is the API call expected to return data
 
     Returns:
         - The response from the API call
@@ -141,13 +139,6 @@ def doapi(url, method, provider, databody, result, wantresponse=False):
     apiurl = "%s/mmws/api/%s" % (provider['mmurl'], url)
 
     try:
-        print(apiurl,
-              method,
-              provider['user'],
-              provider['password'],
-              json.dumps(databody),
-              False,
-              headers)
         resp = open_url(apiurl,
                         method=method,
                         url_username=provider['user'],
@@ -156,16 +147,14 @@ def doapi(url, method, provider, databody, result, wantresponse=False):
                         validate_certs=False,
                         headers=headers)
 
-        # Get all API data
-        print(json.dumps(databody, sort_keys=True, indent=4, separators=(',', ': ')))
+        # Get all API data and format return message
         response = resp.read()
-        print("Here 1, response =", response)
-        print("Here 2, result   =", response)
-        res = json.loads(response)
-
-        if wantresponse:
+        if response:
+            res = json.loads(response)
             result['message'] = json.loads(response)
         else:
+            # No response from API
+            res = {}
             if resp.status == 200:
                 result['message'] = "OK"
             else:
@@ -176,14 +165,28 @@ def doapi(url, method, provider, databody, result, wantresponse=False):
         errbody = json.loads(err.read().decode())
         result['message'] = "%s: %s" % (err.msg, errbody['error']['message'])
         raise AnsibleError(result['message'])
-    print("\n\n\nEnding dourl\n\n\n")
 
-    return res['result'], result
+    return res.get('result', ''), result
+
+
+def getrefs(objtype, provider):
+    """Run an API call.
+
+    Parameters:
+        - objtype      -> The object type to get all refs for (User, Group, ...)
+        - provider     -> Needed credentials for the API provider
+
+    Returns:
+        - The response from the API call
+        - The Ansible result dict
+    """
+    result = {}
+    return doapi(objtype, "GET", provider, {}, result)
 
 
 def run_module():
     """Run Ansible module."""
-    # define available arguments/parameters a user can pass to the module
+    # Define available arguments/parameters a user can pass to the module
     module_args = dict(
         state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
         username=dict(type='str', required=True, aliases=['user']),
@@ -197,8 +200,8 @@ def run_module():
         provider=dict(type='dict', required=True, no_log=True),
     )
 
-    # seed the result dict in the object
-    # we primarily care about changed and state
+    # Seed the result dict in the object
+    # Se primarily care about changed and state
     # change is if this module effectively modified the target
     # state will include any data that you want your module to pass back
     # for consumption, for example, in a subsequent task
@@ -207,7 +210,7 @@ def run_module():
         'message': ''
     }
 
-    # the AnsibleModule object will be our abstraction working with Ansible
+    # The AnsibleModule object will be our abstraction working with Ansible
     # this includes instantiation, a couple of common attr would be the
     # args/params passed to the execution, as well as if the module
     # supports check mode
@@ -216,52 +219,94 @@ def run_module():
         supports_check_mode=True
     )
 
-    # if the user is working with this module in only check mode we do not
+    # If the user is working with this module in only check mode we do not
     # want to make any changes to the environment, just return the current
     # state with no modifications
     if module.check_mode:
         module.exit_json(**result)
 
+    # Get all API settings
     provider = module.params['provider']
     display.vvv(provider)
 
-    url = "Users"
+    # Get all users from Men&Mice server, start with Users url
     state = module.params['state']
     display.vvv("State:", state)
 
-    resp = {}
-
-    # get list of all users in the system
-    databody = {}
-    expect_response = True
-
-    resp, result = doapi(url, "GET", provider, databody, result)
+    # Get list of all users in the system
+    resp, result = getrefs("Users", provider)
     users = resp['users']
+    display.vvv("Users:", users)
 
+    # If groups are requested, get all groups
+    print(module.params['groups'])
+    if module.params['groups']:
+        resp, result = getrefs("Groups", provider)
+        groups = resp['groups']
+        display.vvv("Groups:", groups)
+
+    # If roles are requested, get all roles
+    print(module.params['roles'])
+    if module.params['roles']:
+        resp, result = getrefs("Roles", provider)
+        roles = resp['roles']
+        display.vvv("Roles:", roles)
+
+    # Setup loop vars
     user_exists = False
     user_ref = ""
     skip = False
-    expect_response = True
-    http_method = "GET"
 
+    # Check if the user already exists
     for user in users:
         if user['name'] == module.params['username']:
             user_exists = True
             user_ref = user['ref']
+            break
 
+    # If requested state is "present"
     if state == "present":
-        http_method = "POST"
+        # Create a list of wanted groups
+        wanted_groups = []
+        if module.params['groups']:
+            for group in groups:
+                if group['name'] in module.params['groups']:
+                    # This group is wanted
+                    wanted_groups.append({"ref": group['ref'],
+                                          "objType": "Groups",
+                                          "name": group['name']})
+
+        wanted_roles = []
+        # Create a list of wanted roles
+        if module.params['roles']:
+            for role in roles:
+                print(role)
+                if role['name'] in module.params['roles']:
+                    # This roles is wanted
+                    wanted_roles.append({"ref": role['ref'],
+                                         "objType": "Roles",
+                                         "name": role['name']})
+
         if user_exists:
+            # User already present, just update
+            http_method = "PUT"
             url = "Users/%s" % user_ref
             databody = {"ref": user_ref,
                         "saveComment": "Ansible API",
-                        "properties": [
-                            {"name": 'name', "value": module.params['username']},
-                            {"name": 'password', "value": module.params['password']},
-                            {"name": 'fullName', "value": module.params['full_name']},
-                            {"name": 'authenticationType', "value": module.params['authentication_type']}
-                        ]}
+                        "properties": {
+                            "name": module.params['username'],
+                            "password": module.params['password'],
+                            "fullName": module.params['full_name'],
+                            "email": module.params['email'],
+                            "authenticationType": module.params['authentication_type'],
+                            "groups": wanted_groups,
+                            "roles": wanted_roles
+                        }
+                        }
         else:
+            # User not present, create
+            http_method = "POST"
+            url = "Users"
             databody = {"saveComment": "Ansible API",
                         "user": {
                             "name": module.params['username'],
@@ -269,24 +314,34 @@ def run_module():
                             "fullName": module.params['full_name'],
                             "description": module.params['desc'],
                             "email": module.params['email'],
-                            "authenticationType": module.params['authentication_type']
-                        }}
+                            "authenticationType": module.params['authentication_type'],
+                            "groups": wanted_groups,
+                            "roles": wanted_roles
+                        }
+                        }
 
+        # Show some debugging
+        print('databody:', databody)
+        display.vvv('databody:', databody)
+
+    # If requested state is "absent"
     if state == "absent":
+        url = "Users"
+        databody = {}
         if user_exists:
+            # User present, delete
             http_method = "DELETE"
-            expect_response = False
             url = "Users/%s" % user_ref
         else:
+            # User not present, done
+            result = {
+                'changed': False,
+                'message': "User '%s' doesn't exist" % module.params['username']
+            }
             skip = True
 
-    display.vvv("URL    :", url)
-    display.vvv("Method :", http_method)
-    display.vvv("DATA   :", databody)
-    display.vvv("Skip   :", skip)
-
     if not skip:
-        resp, result = doapi(url, http_method, provider, databody, result, expect_response)
+        resp, result = doapi(url, http_method, provider, databody, result)
 
     # return collected results
     module.exit_json(**result)
