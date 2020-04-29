@@ -4,13 +4,11 @@
 # Copyright: (c) 2020, Men&Mice
 # GNU General Public License v3.0 (see
 # COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-"""Ansible IP address module.
+"""Ansible Claim IP address module.
 
 Part of the Men&Mice Ansible integration
 
-Module to manage IP addresses in the Men&Mice Suite.
-  - Claim an IP address in DHCP
-  - Set custom properties
+Module to claim IP addresses in DHCP in the Men&Mice Suite
 """
 
 from __future__ import absolute_import, division, print_function
@@ -35,73 +33,24 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
                     'supported_by': 'community'}
 
 DOCUMENTATION = r'''
-  module: mm_ipa
-  short_description: Manage IP addresses and properties on the Men&Mice Suite
+  module: mm_claimip
+  short_description: Claim IP addresses in DHCP in the Men&Mice Suite
   author:
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Manage IP addresses and properties on the Men&Mice Suite installation
+    - Claim IP addresses in DHCP in the Men&Mice Suite
   options:
-    ipaddress:
-      description: The IP address to work on
-      type: str
-      required: True
-    claimed:
-      description: Claim the IP address
+    state:
+      description: The state of the claim
       type: bool
       required: False
-    dnsrecord:
-      description: DNS record definition for the IP address
-      type: dict
-      required: False
-      suboption:
-        name:
-          description: DNS name of the IP address
-          type: str
-          required: True
-        zone:
-          description: Zone to place the name in
-          type: str
-          required: True
-        rrtype:
-          description: DNS resource type
-          type: str
-          required: False
-          default: A
-        ttl:
-          description: Time To Live in seconds
-          type: int
-          required: False
-    dhcpreservation:
-        description: Create a DHCP reservation for the IP address
-        type: dict
-        required: False
-        suboption:
-          name:
-            description: Name of the DHCP reservation
-            type: str
-            required: True
-          macaddress:
-            description: MAC address for this IP address
-            type: str
-            required: True
-          ddnshost:
-            description: The dynamic DNS host to place the entry in
-            type: str
-            required: False
-          filename:
-            description: Filename to place the entry in
-            type: str
-            required: False
-          servername:
-            description: Server to place the entry in
-            type: str
-            required: False
-          nextserver:
-            description: Next server as DHCP option (bootp)
-            type: str
-            required: False
+      choices: [ absent, present ]
+      default: present
+    ipaddress:
+      description: The IP address(es) to work on
+      type: list
+      required: True
     provider:
       description: Definition of the Men&Mice suite API provider
       type: dict
@@ -123,12 +72,23 @@ DOCUMENTATION = r'''
 '''
 
 EXAMPLES = r'''
-- name: Add the user 'johnd' as an admin
-  mm_user:
-    username: johnd
-    password: password
-    full_name: John Doe
+- name: Claim IP address
+  mm_claimip:
     state: present
+    ipaddress: 172.16.12.14
+    provider:
+      mmurl: http://mmsuite.example.net
+      user: apiuser
+      password: apipasswd
+  delegate_to: localhost
+
+- name: Release claim on IP addresses
+  mm_claimip:
+    state: present
+    ipaddress:
+      - 172.16.12.14
+      - 172.16.12.15
+      - 172.16.12.16
     provider:
       mmurl: http://mmsuite.example.net
       user: apiuser
@@ -145,6 +105,7 @@ message:
 
 # Make display easier
 display = Display()
+
 # The API has another concept of true and false than Python does,
 # so 0 is true and 1 is false.
 TRUEFALSE = {
@@ -156,11 +117,8 @@ def run_module():
     """Run Ansible module."""
     # Define available arguments/parameters a user can pass to the module
     module_args = dict(
-        ipaddress=dict(type='str', required=True),
-        claimed=dict(type='bool', required=False),
-        provider=dict(type='dict', required=True, no_log=True),
-        dnsrecord=dict(type='dict', required=False),
-        dhcpreservation=dict(type='dict', required=False),
+        state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
+        ipaddress=dict(type='list', required=True),
     )
 
     # Seed the result dict in the object
@@ -192,24 +150,25 @@ def run_module():
     provider = module.params['provider']
     display.vvv(provider)
 
-    # Get the IP address and find the reference
-    refs = "IPAMRecords/%s" % module.params['ipaddress']
-    resp, dummy = mm.getsinglerefs(refs, provider)
-    ipaddr_ref = resp['ipamRecord']['addrRef']
-    curclaim = resp['ipamRecord']['claimed']
+    for ipaddress in module.params['ipaddress']:
+        # Get the IP address and find the reference
+        refs = "IPAMRecords/%s" % ipaddress
+        resp, dummy = mm.getsinglerefs(refs, provider)
+        ipaddr_ref = resp['ipamRecord']['addrRef']
+        curclaim = resp['ipamRecord']['claimed']
 
-    # Set the claim for the IP address
-    if module.params['claimed'] is not None and curclaim != module.params['claimed']:
-        http_method = "PUT"
-        url = ipaddr_ref
-        databody = {"ref": ipaddr_ref,
-                    "saveComment": "Ansible API",
-                    "properties": {
-                        "claimed": module.params['claimed']
-                    }
-                    }
-        resp, result = mm.doapi(url, http_method, provider, databody, result)
-        result['message'] = 'Claim set to %s for %s' % (str(module.params['claimed']).lower(), module.params['ipaddress'])
+        # Set the claim for the IP address
+        if curclaim != module.params['state']:
+            http_method = "PUT"
+            url = ipaddr_ref
+            databody = {"ref": ipaddr_ref,
+                        "saveComment": "Ansible API",
+                        "properties": {
+                            "claimed": module.params['claimed']
+                        }
+                        }
+            resp, result = mm.doapi(url, http_method, provider, databody, result)
+            result['message'] += '%s claim for %s' % (str(module.params['claimed']).lower(), ipaddress)
 
     # return collected results
     module.exit_json(**result)

@@ -4,7 +4,7 @@
 # Copyright: (c) 2020, Men&Mice
 # GNU General Public License v3.0 (see
 # COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-"""Include file with standard functions for Men&Mice modules
+"""Include file with standard functions for Men&Mice modules.
 
 Part of the Men&Mice Ansible integration
 """
@@ -13,8 +13,10 @@ import json
 import urllib
 from ansible.errors import AnsibleError
 from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.urls import open_url
+from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
+from ansible.module_utils.urls import open_url, ConnectionError, SSLValidationError
 from ansible.utils.display import Display
+from ansible.module_utils._text import to_text, to_native
 
 # Make display easier
 display = Display()
@@ -41,6 +43,7 @@ def doapi(url, method, provider, databody, result):
     """
     headers = {'Content-Type': 'application/json'}
     apiurl = "%s/mmws/api/%s" % (provider['mmurl'], url)
+    res = {}
 
     try:
         resp = open_url(apiurl,
@@ -64,17 +67,25 @@ def doapi(url, method, provider, databody, result):
             else:
                 result['message'] = resp.reason
         result['changed'] = True
-    except urllib.error.HTTPError as err:
-        display.vvv('Error while connecting to Men & Mice webservice:', err.code)
+    except HTTPError as err:
         errbody = json.loads(err.read().decode())
-        result['message'] = "%s: %s" % (err.msg, errbody['error']['message'])
-        raise AnsibleError(result['message'])
+        if errbody['error']['code'] == 2049:
+            result['message'] = "%s: %s" % (err.msg, errbody['error']['message'])
+        else:
+            result['message'] = "%s: %s" % (err.msg, errbody['error']['message'])
+            raise AnsibleError(result['message'])
+    except URLError as err:
+        raise AnsibleError("Failed lookup url for %s : %s" % (apiurl, to_native(err)))
+    except SSLValidationError as err:
+        raise AnsibleError("Error validating the server's certificate for %s: %s" % (apiurl, to_native(err)))
+    except ConnectionError as err:
+        raise AnsibleError("Error connecting to %s: %s" % (apiurl, to_native(err)))
 
     return res.get('result', ''), result
 
 
 def getrefs(objtype, provider):
-    """Get all objects of a certain type
+    """Get all objects of a certain type.
 
     Parameters
         - objtype  -> Object type to get all refs for (User, Group, ...)
@@ -89,7 +100,7 @@ def getrefs(objtype, provider):
 
 
 def getsinglerefs(objname, provider):
-    """Get all information about a single object
+    """Get all information about a single object.
 
     Parameters
         - objname  -> Object name to get all refs for (IPAMRecords/172.16.17.201)
@@ -101,4 +112,3 @@ def getsinglerefs(objname, provider):
     """
     result = {}
     return doapi(objname, "GET", provider, {}, result)
-

@@ -115,7 +115,7 @@ EXAMPLES = r'''
 
 RETURN = r'''
 message:
-    description: The output message from the Men & Mice System
+    description: The output message from the Men&Mice Suite
     type: str
     returned: always
 '''

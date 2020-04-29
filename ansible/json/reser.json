@@ -1,0 +1,14 @@
+{
+    "ref": "IPAMRecords/22",
+    "properties": {
+        "dhcpReservation": [
+            "name": "kereltje",
+            "clientIdentifier": "33:44:55:66:77:88",
+            "reservationMethod": "HardwareAddress",
+            "addresses": [
+                "172.16.17.9"
+            ],
+            "ddnsHostName": "kareltje.example.net."
+        ]
+    }
+}

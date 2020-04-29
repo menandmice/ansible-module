@@ -1,0 +1,12 @@
+{ "ANSIBLE_MODULE_ARGS": {
+    "state": "present",
+    "name": "koreltje",
+    "ipaddress": "172.16.17.3",
+    "macaddress": "11:22:33:44:55:66",
+    "provider" : {
+        "mmurl": "http://mandm.example.net",
+        "user": "apidude",
+        "password": "TheAPIDude"
+    }
+  }
+}
