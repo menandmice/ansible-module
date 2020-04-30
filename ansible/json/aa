@@ -1,5 +1,3 @@
-// http://mandm.example.net/mmws/api/DHCPScopes/2/DHCPReservations
-// Nog de DHCPScope vinden
 {
   "dhcpReservation": {
     "name": "beppie",
@@ -8,7 +6,6 @@
     "addresses": [
       "172.16.17.9"
     ],
-    "ddnsHostName": "beppie.example.net",
-    "ownerRef": "DHCPScopes/2"
+    "ddnsHostName": "beppie.example.net"
   }
 }

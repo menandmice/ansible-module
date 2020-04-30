@@ -122,12 +122,14 @@ message:
 
 # Make display easier
 display = Display()
-# The API has another concept of true and false than Python does,
-# so 0 is true and 1 is false.
-TRUEFALSE = {
-    True: 0,
-    False: 1,
-}
+
+
+def get_dhcp_zone(provider, ipaddress):
+    """Given an IP Address, find the DHCP Zones."""
+    url = "Ranges?filter=%s" % ipaddress
+
+    resp, result = mm.doapi(url, 'GET', provider, {})
+    print("DHCP ->", resp)
 
 
 def run_module():
@@ -143,7 +145,13 @@ def run_module():
         authentication_type=dict(type='str', required=True),
         groups=dict(type='list', required=False),
         roles=dict(type='list', required=False),
-        provider=dict(type='dict', required=True, no_log=True),
+        provider=dict(type='dict', required=True,
+            options=dict(
+                mmurl=dict(type='str', required=True, no_log=False),
+                user=dict(type='str', required=True, no_log=False),
+                password=dict(type='str', required=True, no_log=True)
+            )
+        )
     )
 
     # Seed the result dict in the object
@@ -175,7 +183,7 @@ def run_module():
     provider = module.params['provider']
     display.vvv(provider)
 
-    # Get all users from Men&Mice server, start with Users url
+    # Get all users from the Men&Mice server, start with Users url
     state = module.params['state']
     display.vvv("State:", state)
 
@@ -283,7 +291,7 @@ def run_module():
             skip = True
 
     if not skip:
-        resp, result = mm.doapi(url, http_method, provider, databody, result)
+        resp, result = mm.doapi(url, http_method, provider, databody)
 
     # return collected results
     module.exit_json(**result)

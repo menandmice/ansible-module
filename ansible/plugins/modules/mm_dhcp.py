@@ -4,7 +4,7 @@
 # Copyright: (c) 2020, Men&Mice
 # GNU General Public License v3.0 (see
 # COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
-"""Ansible DHCP reservation module
+"""Ansible DHCP reservation module.
 
 Part of the Men&Mice Ansible integration
 
@@ -76,6 +76,10 @@ DOCUMENTATION = r'''
       description: Next server as DHCP option (bootp)
       type: str
       required: False
+    deleteunspecified:
+      description: Clear properties that are not explicitly set
+      type: bool
+      required: False
     provider:
       description: Definition of the Men&Mice suite API provider
       type: dict
@@ -120,12 +124,6 @@ message:
 # Make display easier
 display = Display()
 
-# The API has another concept of true and false than Python does,
-# so 0 is true and 1 is false.
-TRUEFALSE = {
-    True: 0,
-    False: 1,
-}
 
 def run_module():
     """Run Ansible module."""
@@ -135,11 +133,18 @@ def run_module():
         name=dict(type='str', required=True),
         ipaddress=dict(type='list', required=True),
         macaddress=dict(type='str', required=True),
-        ddnshost=dict(type='str', required=False),
-        filename=dict(type='str', required=False),
-        servername=dict(type='str', required=False),
-        nextserver=dict(type='str', required=False),
-        provider=dict(type='dict', required=True, no_log=True),
+        ddnshost=dict(type='str', required=False, default=""),
+        filename=dict(type='str', required=False, default=""),
+        servername=dict(type='str', required=False, default=""),
+        nextserver=dict(type='str', required=False, default=""),
+        deleteunspecified=dict(type='bool', required=False, default=False),
+        provider=dict(type='dict', required=True,
+            options=dict(
+                mmurl=dict(type='str', required=True, no_log=False),
+                user=dict(type='str', required=True, no_log=False),
+                password=dict(type='str', required=True, no_log=True)
+            )
+        )
     )
 
     # Seed the result dict in the object
@@ -171,16 +176,89 @@ def run_module():
     provider = module.params['provider']
     display.vvv(provider)
 
-    for ipaddress in module.params['name']:
+    for ipaddress in module.params['ipaddress']:
         # Get the existing reservation for requested IP address
         refs = "IPAMRecords/%s" % ipaddress
         resp, dummy = mm.getsinglerefs(refs, provider)
 
-        # Check DHCP reservations
-        if resp['ipamRecord']['dhcpReservations']":
-            print('Reservation in place', resp)
+        scopes = mm.get_dhcp_scopes(provider, ipaddress)
+        if not scopes:
+            errormsg = 'No DHCP scope for IP address %s', ipaddress
+            raise AnsibleError(errormsg)
+
+        if resp['ipamRecord']['dhcpReservations']:
+            # A reservation for this IP address was found
+            if module.params['state'] == 'present':
+                # If IP address is a string, turn it into a list, as the API
+                # requires that
+                if isinstance(ipaddress, str):
+                    ipaddress = [ipaddress]
+
+                # Reservation wanted, already in place
+                reservations = resp['ipamRecord']['dhcpReservations']
+                http_method = "PUT"
+                for reservation in reservations:
+                    url = "%s/DHCPReservations" % reservation['ref']
+                    databody = {
+                        "ref": reservation['ref'],
+                        "saveComment": "Ansible API",
+                        "deleteUnspecified": module.params.get('deleteunspecified', False),
+                        "properties": {
+                            "name": module.params['name'],
+                            "clientIdentifier": module.params['macaddress'],
+                            "addresses": ipaddress,
+                            "ddnsHostName": module.params.get('ddnshost', ''),
+                            "filename": module.params.get('filename', ''),
+                            "serverName": module.params.get('servername', ''),
+                            "nextServer": module.params.get('nextserver', '')
+                        }
+                    }
+                    print(json.dumps(databody, sort_keys=True, indent=4))
+                    print(str(databody).replace("'", '"'))
+                    resp, dummy = mm.doapi(url, http_method, provider, databody)
+                    result['message'] = 'Reservation for %s updated' % ipaddress
+                    result['changed'] = True
+            else:
+                # Delete the reservations. Empty body, as the ref is sufficient
+                # Not sure if it's possible to have more than one reservation
+                # on an IP address, but as the reservations are a list, just check
+                # the list if the IP address is a member of the reservation
+                http_method = "DELETE"
+                databody = {}
+                result['message'] = "Reservation for "
+                for ref in resp['ipamRecord']['dhcpReservations']:
+                    if ipaddress in ref['addresses']:
+                        url = ref['ref']
+                        resp, dummy = mm.doapi(url, http_method, provider, databody)
+                        result['message'] += "%s " % ipaddress
+                result['message'] += "removed"
+                result['changed'] = True
         else:
-            print('No reservation in place', resp)
+            # If IP address is a string, turn it into a list, as the API
+            # requires that
+            if isinstance(ipaddress, str):
+                ipaddress = [ipaddress]
+
+            # No reservation found. Create one. Try this in each scope.
+            for scope in scopes:
+                http_method = "POST"
+                url = "%s/DHCPReservations" % scope
+                databody = {
+                    "saveComment": "Ansible API",
+                    "dhcpReservation": {
+                        "name": module.params['name'],
+                        "clientIdentifier": module.params['macaddress'],
+                        "reservationMethod": "HardwareAddress",
+                        "addresses": ipaddress,
+                        "ddnsHostName": module.params.get('ddnshost', ''),
+                        "filename": module.params.get('filename', ''),
+                        "serverName": module.params.get('servername', ''),
+                        "nextServer": module.params.get('nextserver', '')
+                    }
+                }
+                resp, dummy = mm.doapi(url, http_method, provider, databody)
+                result['message'] = 'Reservation for %s made' % ipaddress
+                result['changed'] = True
 
     # return collected results
     module.exit_json(**result)

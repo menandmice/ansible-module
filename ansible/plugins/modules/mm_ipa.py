@@ -145,12 +145,7 @@ message:
 
 # Make display easier
 display = Display()
-# The API has another concept of true and false than Python does,
-# so 0 is true and 1 is false.
-TRUEFALSE = {
-    True: 0,
-    False: 1,
-}
+
 
 def run_module():
     """Run Ansible module."""
@@ -158,13 +153,17 @@ def run_module():
     module_args = dict(
         ipaddress=dict(type='str', required=True),
         claimed=dict(type='bool', required=False),
-        provider=dict(type='dict', required=True, no_log=True),
+        provider=dict(type='dict', required=True,
+                      mmurl=dict(type='str', required=True, no_log=False),
+                      user=dict(type='str', required=True, no_log=False),
+                      password=dict(type='str', required=True, no_log=True)
+                      ),
         dnsrecord=dict(type='dict', required=False),
         dhcpreservation=dict(type='dict', required=False),
     )
 
     # Seed the result dict in the object
-    # Se primarily care about changed and state
+    # We primarily care about changed and state
     # change is if this module effectively modified the target
     # state will include any data that you want your module to pass back
     # for consumption, for example, in a subsequent task
@@ -208,7 +207,7 @@ def run_module():
                         "claimed": module.params['claimed']
                     }
                     }
-        resp, result = mm.doapi(url, http_method, provider, databody, result)
+        resp, result = mm.doapi(url, http_method, provider, databody)
         result['message'] = 'Claim set to %s for %s' % (str(module.params['claimed']).lower(), module.params['ipaddress'])
 
     # return collected results

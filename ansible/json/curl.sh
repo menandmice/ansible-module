@@ -4,9 +4,9 @@
 
 URL="${1}"
 shift
-CMD="curl -v"
+CMD="curl -vs"
+CMD="${CMD} --header Content-Type:application/json"
 CMD="${CMD} --user apidude:TheAPIDude"
-CMD="${CMD} -H 'Content-Type: application/json'"
 CMD="${CMD} ${@}"
 CMD="${CMD} http://mandm.example.net/mmws/api/${URL}"
 

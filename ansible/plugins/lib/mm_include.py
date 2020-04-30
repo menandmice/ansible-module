@@ -10,16 +10,16 @@ Part of the Men&Mice Ansible integration
 """
 
 import json
-import urllib
 from ansible.errors import AnsibleError
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
-from ansible.module_utils.urls import open_url, ConnectionError, SSLValidationError
+from ansible.module_utils.urls import open_url, SSLValidationError
 from ansible.utils.display import Display
 from ansible.module_utils._text import to_text, to_native
 
 # Make display easier
 display = Display()
+
 # The API has another concept of true and false than Python does,
 # so 0 is true and 1 is false.
 TRUEFALSE = {
@@ -27,7 +27,12 @@ TRUEFALSE = {
     False: 1,
 }
 
-def doapi(url, method, provider, databody, result):
+STATEBOOL = {
+    'present': True,
+    'absent': False
+}
+
+def doapi(url, method, provider, databody):
     """Run an API call.
 
     Parameters:
@@ -35,7 +40,6 @@ def doapi(url, method, provider, databody, result):
         - method       -> The API method (GET, POST, DELETE,...)
         - provider     -> Needed credentials for the API provider
         - databody     -> Data needed for the API to perform the task
-        - result       -> Result dict for the end result of the module
 
     Returns:
         - The response from the API call
@@ -44,6 +48,7 @@ def doapi(url, method, provider, databody, result):
     headers = {'Content-Type': 'application/json'}
     apiurl = "%s/mmws/api/%s" % (provider['mmurl'], url)
     res = {}
+    result = {}
 
     try:
         resp = open_url(apiurl,
@@ -95,8 +100,7 @@ def getrefs(objtype, provider):
         - The response from the API call
         - The Ansible result dict
     """
-    result = {}
-    return doapi(objtype, "GET", provider, {}, result)
+    return doapi(objtype, "GET", provider, {})
 
 
 def getsinglerefs(objname, provider):
@@ -110,5 +114,24 @@ def getsinglerefs(objname, provider):
         - The response from the API call
         - The Ansible result dict
     """
-    result = {}
-    return doapi(objname, "GET", provider, {}, result)
+    return doapi(objname, "GET", provider, {})
+
+
+def get_dhcp_scopes(provider, ipaddress):
+    """Given an IP Address, find the DHCP scopes."""
+    url = "Ranges?filter=%s" % ipaddress
+
+    # Get the information of this IP range.
+    # I'm not sure if an IP address can be part of multiple DHCP
+    # scopes, but in the API it's defined as a list, so find them all.
+    resp, dummy = doapi(url, 'GET', provider, {})
+
+    # Gather all DHCP scopes for this IP address
+    scopes = []
+    if resp:
+        for dhcpranges in resp['ranges']:
+            for scope in dhcpranges['dhcpScopes']:
+                scopes.append(scope['ref'])
+
+    # Return all scopes
+    return scopes
