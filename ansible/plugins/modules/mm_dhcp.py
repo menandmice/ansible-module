@@ -234,31 +234,32 @@ def run_module():
                 result['message'] += "removed"
                 result['changed'] = True
         else:
-            # If IP address is a string, turn it into a list, as the API
-            # requires that
-            if isinstance(ipaddress, str):
-                ipaddress = [ipaddress]
+            if module.params['state'] == 'present':
+                # If IP address is a string, turn it into a list, as the API
+                # requires that
+                if isinstance(ipaddress, str):
+                    ipaddress = [ipaddress]
 
-            # No reservation found. Create one. Try this in each scope.
-            for scope in scopes:
-                http_method = "POST"
-                url = "%s/DHCPReservations" % scope
-                databody = {
-                    "saveComment": "Ansible API",
-                    "dhcpReservation": {
-                        "name": module.params['name'],
-                        "clientIdentifier": module.params['macaddress'],
-                        "reservationMethod": "HardwareAddress",
-                        "addresses": ipaddress,
-                        "ddnsHostName": module.params.get('ddnshost', ''),
-                        "filename": module.params.get('filename', ''),
-                        "serverName": module.params.get('servername', ''),
-                        "nextServer": module.params.get('nextserver', '')
+                # No reservation found. Create one. Try this in each scope.
+                for scope in scopes:
+                    http_method = "POST"
+                    url = "%s/DHCPReservations" % scope
+                    databody = {
+                        "saveComment": "Ansible API",
+                        "dhcpReservation": {
+                            "name": module.params['name'],
+                            "clientIdentifier": module.params['macaddress'],
+                            "reservationMethod": "HardwareAddress",
+                            "addresses": ipaddress,
+                            "ddnsHostName": module.params.get('ddnshost', ''),
+                            "filename": module.params.get('filename', ''),
+                            "serverName": module.params.get('servername', ''),
+                            "nextServer": module.params.get('nextserver', '')
+                        }
                     }
-                }
-                resp, dummy = mm.doapi(url, http_method, provider, databody)
-                result['message'] = 'Reservation for %s made' % ipaddress
-                result['changed'] = True
+                    resp, dummy = mm.doapi(url, http_method, provider, databody)
+                    result['message'] = 'Reservation for %s made' % ipaddress
+                    result['changed'] = True
 
     # return collected results
     module.exit_json(**result)
