@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# ./getreser IP address
+
+IP="${1:-172.16.17.9}"
+CMD="curl -vs"
+CMD="${CMD} -X GET"
+CMD="${CMD} --header Content-Type:application/json"
+CMD="${CMD} --user apidude:TheAPIDude"
+CMD="${CMD} http://mandm.example.net/mmws/api/IPAMRecords/${IP}"
+
+${CMD} | jq .
+echo ${CMD}

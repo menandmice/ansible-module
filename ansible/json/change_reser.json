@@ -1,0 +1,16 @@
+{
+    "deleteUnspecified": false,
+    "properties": {
+        "addresses": [
+            "172.16.17.9"
+        ],
+        "clientIdentifier": "11:22:33:44:55:66",
+        "ddnsHostName": "",
+        "filename": "",
+        "name": "petertje",
+        "nextServer": "",
+        "serverName": ""
+    },
+    "ref": "DHCPReservations/38",
+    "saveComment": "Ansible API"
+}

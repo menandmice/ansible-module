@@ -194,41 +194,45 @@ def run_module():
                 if isinstance(ipaddress, str):
                     ipaddress = [ipaddress]
 
-                # Reservation wanted, already in place
+                # Reservation wanted, already in place so update
                 reservations = resp['ipamRecord']['dhcpReservations']
                 http_method = "PUT"
+                print(reservations)
                 for reservation in reservations:
-                    url = "%s/DHCPReservations" % reservation['ref']
+                    url = "%s" % reservation['ref']
                     databody = {
                         "ref": reservation['ref'],
                         "saveComment": "Ansible API",
                         "deleteUnspecified": module.params.get('deleteunspecified', False),
-                        "properties": {
+                        "properties": [{
                             "name": module.params['name'],
                             "clientIdentifier": module.params['macaddress'],
                             "addresses": ipaddress,
                             "ddnsHostName": module.params.get('ddnshost', ''),
                             "filename": module.params.get('filename', ''),
                             "serverName": module.params.get('servername', ''),
-                            "nextServer": module.params.get('nextserver', '')
-                        }
+                            "nextServer": module.params.get('nextserver', ''),
+                            "ownerRef": reservation['ownerRef']
+                        }]
                     }
+                    print('present and reservation update')
+                    print(url, "--", http_method)
                     print(json.dumps(databody, sort_keys=True, indent=4))
-                    print(str(databody).replace("'", '"'))
                     resp, dummy = mm.doapi(url, http_method, provider, databody)
+                    print(resp)
                     result['message'] = 'Reservation for %s updated' % ipaddress
                     result['changed'] = True
             else:
                 # Delete the reservations. Empty body, as the ref is sufficient
-                # Not sure if it's possible to have more than one reservation
-                # on an IP address, but as the reservations are a list, just check
-                # the list if the IP address is a member of the reservation
                 http_method = "DELETE"
                 databody = {}
                 result['message'] = "Reservation for "
                 for ref in resp['ipamRecord']['dhcpReservations']:
                     if ipaddress in ref['addresses']:
                         url = ref['ref']
+                        print('absent and reservation')
+                        print(url)
+                        print(json.dumps(databody, sort_keys=True, indent=4))
                         resp, dummy = mm.doapi(url, http_method, provider, databody)
                         result['message'] += "%s " % ipaddress
                 result['message'] += "removed"
@@ -257,9 +261,16 @@ def run_module():
                             "nextServer": module.params.get('nextserver', '')
                         }
                     }
+                    print('present')
+                    print(url)
+                    print(json.dumps(databody, sort_keys=True, indent=4))
                     resp, dummy = mm.doapi(url, http_method, provider, databody)
                     result['message'] = 'Reservation for %s made' % ipaddress
                     result['changed'] = True
+            else:
+                print('absent')
+                result['message'] = 'Reservation for %s unchanged' % ipaddress
+                result['changed'] = False
 
     # return collected results
     module.exit_json(**result)

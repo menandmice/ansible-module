@@ -1,0 +1,2 @@
+Maybe try to query it via GetDHCPReservations
+/mmws/api/command/GetIPAMRecord?addrRef=172.16.17.9

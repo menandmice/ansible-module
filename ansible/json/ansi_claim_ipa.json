@@ -1,6 +1,6 @@
 { "ANSIBLE_MODULE_ARGS": {
     "ipaddress": "172.16.17.3",
-    "state": "absent",
+    "state": "present",
     "provider" : {
         "mmurl": "http://mandm.example.net",
         "user": "apidude",
