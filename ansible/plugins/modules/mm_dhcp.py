@@ -189,11 +189,6 @@ def run_module():
         if resp['ipamRecord']['dhcpReservations']:
             # A reservation for this IP address was found
             if module.params['state'] == 'present':
-                # If IP address is a string, turn it into a list, as the API
-                # requires that
-                if isinstance(ipaddress, str):
-                    ipaddress = [ipaddress]
-
                 # Reservation wanted, already in place so update
                 reservations = resp['ipamRecord']['dhcpReservations']
                 http_method = "PUT"
@@ -204,16 +199,15 @@ def run_module():
                         "ref": reservation['ref'],
                         "saveComment": "Ansible API",
                         "deleteUnspecified": module.params.get('deleteunspecified', False),
-                        "properties": [{
-                            "name": module.params['name'],
-                            "clientIdentifier": module.params['macaddress'],
-                            "addresses": ipaddress,
-                            "ddnsHostName": module.params.get('ddnshost', ''),
-                            "filename": module.params.get('filename', ''),
-                            "serverName": module.params.get('servername', ''),
-                            "nextServer": module.params.get('nextserver', ''),
-                            "ownerRef": reservation['ownerRef']
-                        }]
+                        "properties": [
+                            {"name": "name", "value": module.params['name']},
+                            {"name": "clientIdentifier", "value": module.params['macaddress']},
+                            {"name": "addresses", "value": ipaddress},
+                            {"name": "ddnsHostName", "value": module.params.get('ddnshost', '')},
+                            {"name": "filename", "value": module.params.get('filename', '')},
+                            {"name": "serverName", "value": module.params.get('servername', '')},
+                            {"name": "nextServer", "value": module.params.get('nextserver', '')}
+                        ]
                     }
                     print('present and reservation update')
                     print(url, "--", http_method)
