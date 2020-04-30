@@ -10,7 +10,6 @@
     password: TheAPIDude
     network:
       - nononet
-      - examplenet
 
   tasks:
     - name: Set free IP addresses as a fact

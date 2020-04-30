@@ -222,11 +222,15 @@ class LookupModule(LookupBase):
             sess = requests.Session()
             rcode, answer = getrequest(sess, rangeurl, user, passwd, params)
 
-            # If the returncode = 200 the zone exits, otherwise error
+            # If the returncode != 200 something is wrong
             if rcode != 200:
-                raise AnsibleError("Network '%s' does not exist." % network)
+                raise AnsibleError("An api error occured. %s", answer)
 
-            # Come here, the network exists, get the first free IP address
+            # Some ranges found?? If the network does not exist or when there
+            #  are no more IPs available an empty list is returned
+            if not answer['result']['ranges']:
+                return []
+
             # Get the range reference
             ref = answer['result']['ranges'][0]['ref']
 
