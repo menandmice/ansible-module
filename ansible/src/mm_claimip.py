@@ -1,9 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-#
-# Copyright: (c) 2020, Men&Mice
-# GNU General Public License v3.0 (see
-# COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """Ansible Claim IP address module.
 
 Part of the Men&Mice Ansible integration
@@ -14,17 +8,20 @@ Module to claim IP addresses in DHCP in the Men&Mice Suite
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-# Set the library search path (add .../../lib) to ensure the modules can be
-# found
+#IMPORTS_START
 import sys
 import os
-import json
 import urllib
 import mm_include as mm
 from ansible.errors import AnsibleError
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible.utils.display import Display
+try:
+    from ansible.utils_utils.common import json
+except ImportError:
+    import json
+#IMPORTS_END
 
 ANSIBLE_METADATA = {'metadata_version': '0.1',
                     'status': ['preview'],
@@ -104,6 +101,8 @@ message:
 # Make display easier
 display = Display()
 
+#IMPORT_INCLUDE
+
 
 def run_module():
     """Run Ansible module."""
@@ -152,7 +151,7 @@ def run_module():
     for ipaddress in module.params['ipaddress']:
         # Get the IP address and find the reference
         refs = "IPAMRecords/%s" % ipaddress
-        resp, dummy = mm.getsinglerefs(refs, provider)
+        resp = mm.get_single_refs(refs, provider)
         ipaddr_ref = resp['ipamRecord']['addrRef']
         curclaim = resp['ipamRecord']['claimed']
 

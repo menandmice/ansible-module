@@ -1,0 +1,15 @@
+#!/bin/bash
+# vi: set sw=4 ts=4 ai:
+
+cp -p COPYING ../library
+for f in mm_*.py
+do
+	cp -p header ../library/${f}
+	sed												\
+		-e '/^#IMPORTS_END/r imports'				\
+		-e '/^#IMPORTS_START$/,/^#IMPORTS_END$/d'	\
+		-e '/^#IMPORT_INCLUDE$/r include'			\
+		-e '/^#IMPORT_INCLUDE$/d'					\
+		-e 's/ mm\./ /g'							\
+		${f} >> ../library/${f}
+	done

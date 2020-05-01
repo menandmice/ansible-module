@@ -1,5 +1,5 @@
 ---
-- name: Men&Mice FreeIP test play
+- name: Men&Mice DHCP test play
   hosts: localhost
   connection: local
   become: false

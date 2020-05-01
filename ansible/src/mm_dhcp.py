@@ -1,9 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-#
-# Copyright: (c) 2020, Men&Mice
-# GNU General Public License v3.0 (see
-# COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 """Ansible DHCP reservation module.
 
 Part of the Men&Mice Ansible integration
@@ -15,8 +9,7 @@ Module to manage DHCP reservations in the Men&Mice Suite
 from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
-# Set the library search path (add .../../lib) to ensure the modules can be
-# found
+#IMPORTS_START
 import sys
 import os
 import urllib
@@ -29,6 +22,7 @@ try:
     from ansible.utils_utils.common import json
 except ImportError:
     import json
+#IMPORTS_END
 
 ANSIBLE_METADATA = {'metadata_version': '0.1',
                     'status': ['preview'],
@@ -129,6 +123,8 @@ message:
 # Make display easier
 display = Display()
 
+#IMPORT_INCLUDE
+
 
 def run_module():
     """Run Ansible module."""
@@ -184,7 +180,7 @@ def run_module():
     for ipaddress in module.params['ipaddress']:
         # Get the existing reservation for requested IP address
         refs = "IPAMRecords/%s" % ipaddress
-        resp = mm.getsinglerefs(refs, provider)
+        resp = mm.get_single_refs(refs, provider)
 
         scopes = mm.get_dhcp_scopes(provider, ipaddress)
         if not scopes:
