@@ -49,7 +49,10 @@ DOCUMENTATION = r'''
       choices: [ absent, present ]
       default: present
     name:
-      description: hostname for the reservation
+      description:
+        - Name of the reservation
+        - When the name is changed a new reservation is made and if
+          it is on the same IP address it will be ignored
       type: str
       required: True
     ipaddress:
@@ -101,12 +104,12 @@ DOCUMENTATION = r'''
 '''
 
 EXAMPLES = r'''
-- name: Add the user 'johnd' as an admin
-  mm_user:
-    username: johnd
-    password: password
-    full_name: John Doe
+- name: Add a reservation for an IP address
+  mm_dhcp:
     state: present
+    name: myreservation
+    ipaddress: 172.16.17.8
+    macaddress: 44:55:66:77:88:99
     provider:
       mmurl: http://mmsuite.example.net
       user: apiuser
@@ -179,7 +182,7 @@ def run_module():
     for ipaddress in module.params['ipaddress']:
         # Get the existing reservation for requested IP address
         refs = "IPAMRecords/%s" % ipaddress
-        resp, dummy = mm.getsinglerefs(refs, provider)
+        resp = mm.getsinglerefs(refs, provider)
 
         scopes = mm.get_dhcp_scopes(provider, ipaddress)
         if not scopes:
@@ -192,7 +195,6 @@ def run_module():
                 # Reservation wanted, already in place so update
                 reservations = resp['ipamRecord']['dhcpReservations']
                 http_method = "PUT"
-                print(reservations)
                 for reservation in reservations:
                     url = "%s" % reservation['ref']
                     databody = {
@@ -209,28 +211,17 @@ def run_module():
                             {"name": "nextServer", "value": module.params.get('nextserver', '')}
                         ]
                     }
-                    print('present and reservation update')
-                    print(url, "--", http_method)
-                    print(json.dumps(databody, sort_keys=True, indent=4))
-                    resp, dummy = mm.doapi(url, http_method, provider, databody)
-                    print(resp)
-                    result['message'] = 'Reservation for %s updated' % ipaddress
+                    result = mm.doapi(url, http_method, provider, databody)
                     result['changed'] = True
             else:
                 # Delete the reservations. Empty body, as the ref is sufficient
                 http_method = "DELETE"
                 databody = {}
-                result['message'] = "Reservation for "
                 for ref in resp['ipamRecord']['dhcpReservations']:
                     if ipaddress in ref['addresses']:
                         url = ref['ref']
-                        print('absent and reservation')
-                        print(url)
-                        print(json.dumps(databody, sort_keys=True, indent=4))
-                        resp, dummy = mm.doapi(url, http_method, provider, databody)
-                        result['message'] += "%s " % ipaddress
-                result['message'] += "removed"
-                result['changed'] = True
+                        result = mm.doapi(url, http_method, provider, databody)
+                    result['changed'] = True
         else:
             if module.params['state'] == 'present':
                 # If IP address is a string, turn it into a list, as the API
@@ -255,14 +246,9 @@ def run_module():
                             "nextServer": module.params.get('nextserver', '')
                         }
                     }
-                    print('present')
-                    print(url)
-                    print(json.dumps(databody, sort_keys=True, indent=4))
-                    resp, dummy = mm.doapi(url, http_method, provider, databody)
-                    result['message'] = 'Reservation for %s made' % ipaddress
+                    result = mm.doapi(url, http_method, provider, databody)
                     result['changed'] = True
             else:
-                print('absent')
                 result['message'] = 'Reservation for %s unchanged' % ipaddress
                 result['changed'] = False
 

@@ -169,8 +169,7 @@ def run_module():
                             "claimed": statebool
                         }
                         }
-            resp, result = mm.doapi(url, http_method, provider, databody)
-            result['message'] = 'Change claim to %s for %s' % (module.params['state'], ipaddress)
+            result = mm.doapi(url, http_method, provider, databody)
         else:
             result['message'] = 'No claim change for %s' % ipaddress
 

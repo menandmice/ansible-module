@@ -128,7 +128,7 @@ def get_dhcp_zone(provider, ipaddress):
     """Given an IP Address, find the DHCP Zones."""
     url = "Ranges?filter=%s" % ipaddress
 
-    resp, result = mm.doapi(url, 'GET', provider, {})
+    result = mm.doapi(url, 'GET', provider, {})
     print("DHCP ->", resp)
 
 
@@ -291,7 +291,7 @@ def run_module():
             skip = True
 
     if not skip:
-        resp, result = mm.doapi(url, http_method, provider, databody)
+        result = mm.doapi(url, http_method, provider, databody)
 
     # return collected results
     module.exit_json(**result)

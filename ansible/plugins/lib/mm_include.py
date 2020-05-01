@@ -47,8 +47,8 @@ def doapi(url, method, provider, databody):
     """
     headers = {'Content-Type': 'application/json'}
     apiurl = "%s/mmws/api/%s" % (provider['mmurl'], url)
-    res = {}
     result = {}
+    result['code'] = 204
 
     try:
         resp = open_url(apiurl,
@@ -62,18 +62,15 @@ def doapi(url, method, provider, databody):
         # Get all API data and format return message
         response = resp.read()
         if response:
-            res = json.loads(response)
             result['message'] = json.loads(response)
         else:
             # No response from API
-            res = {}
-            if resp.status == 200:
-                result['message'] = "OK"
-            else:
-                result['message'] = resp.reason
+            result['message'] = resp.reason
+        result['code'] = resp.status
         result['changed'] = True
     except HTTPError as err:
         errbody = json.loads(err.read().decode())
+        result['code'] = errbody['error']['code']
         if errbody['error']['code'] == 2049:
             result['message'] = "%s: %s" % (err.msg, errbody['error']['message'])
         else:
@@ -86,7 +83,9 @@ def doapi(url, method, provider, databody):
     except ConnectionError as err:
         raise AnsibleError("Error connecting to %s: %s" % (apiurl, to_native(err)))
 
-    return res.get('result', ''), result
+    if result['code'] == 204 and result['message'] == "No Content":
+        result['message'] = "Success"
+    return result
 
 
 def getrefs(objtype, provider):
@@ -114,7 +113,8 @@ def getsinglerefs(objname, provider):
         - The response from the API call
         - The Ansible result dict
     """
-    return doapi(objname, "GET", provider, {})
+    resp = doapi(objname, "GET", provider, {})
+    return resp['message']['result']
 
 
 def get_dhcp_scopes(provider, ipaddress):
@@ -124,12 +124,12 @@ def get_dhcp_scopes(provider, ipaddress):
     # Get the information of this IP range.
     # I'm not sure if an IP address can be part of multiple DHCP
     # scopes, but in the API it's defined as a list, so find them all.
-    resp, dummy = doapi(url, 'GET', provider, {})
+    resp = doapi(url, 'GET', provider, {})
 
     # Gather all DHCP scopes for this IP address
     scopes = []
     if resp:
-        for dhcpranges in resp['ranges']:
+        for dhcpranges in resp['message']['result']['ranges']:
             for scope in dhcpranges['dhcpScopes']:
                 scopes.append(scope['ref'])
 

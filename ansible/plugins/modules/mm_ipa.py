@@ -1,3 +1,7 @@
+This is a very heavy WIP and NOT functional
+Just experimental code
+
+
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
