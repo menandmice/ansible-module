@@ -14,10 +14,17 @@
   # very heavy development, it is kept seperate for now.
   # When development is done, it will be injected into all
   # modules, to ensure all modules are self-contained.
-  environment:
-    PYTHONPATH: "{{ ansible_env.HOME }}/project/klanten/men_and_mice/virtenv/ansible/ansible/module_utils:{{ ansible_env.PYTHONPATH | default(omit) }}"
+  #environment:
+  #  PYTHONPATH: "{{ ansible_env.HOME }}/project/klanten/men_and_mice/virtenv/ansible/ansible/module_utils:{{ ansible_env.PYTHONPATH | default(omit) }}"
 
   tasks:
+    - name: Ansible information
+      debug:
+        msg:
+          - "Ansible version   : {{ ansible_version.full }}"
+          - "Python version    : {{ ansible_facts['python_version'] }}"
+          - "Python executable : {{ ansible_facts['python']['executable'] }}"
+
     - name: Add a reservation for an IP address
       mm_dhcp:
         state: present
@@ -88,13 +95,25 @@
           mmurl: "{{ url }}"
           user: "{{ user }}"
           password: "{{ password }}"
-      delegate_to: localhost
 
     - name: delete reservation (correct one)
       mm_dhcp:
         state: absent
         name: myreservation
         ipaddress: 172.16.17.8
+        macaddress: 44:55:66:77:88:99
+        provider:
+          mmurl: "{{ url }}"
+          user: "{{ user }}"
+          password: "{{ password }}"
+      delegate_to: localhost
+      delegate_to: localhost
+
+    - name: create reservation in invalid range
+      mm_dhcp:
+        state: present
+        name: reservationnonet
+        ipaddress: 172.16.17.58
         macaddress: 44:55:66:77:88:99
         provider:
           mmurl: "{{ url }}"

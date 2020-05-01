@@ -12,6 +12,7 @@ Part of the Men&Mice Ansible integration
 import json
 from ansible.errors import AnsibleError
 from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.connection import ConnectionError
 from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
 from ansible.module_utils.urls import open_url, SSLValidationError
 from ansible.utils.display import Display
@@ -60,12 +61,15 @@ def doapi(url, method, provider, databody):
 
         # Get all API data and format return message
         response = resp.read()
-        if resp.status == 200:
+        if resp.code == 200:
             # 200 => Data in the body
             result['message'] = json.loads(response)
         else:
             # No response from API (204 => No data)
-            result['message'] = resp.reason
+            try:
+                result['message'] = resp.reason
+            except AttributeError:
+                result['message'] = ""
         result['changed'] = True
     except HTTPError as err:
         errbody = json.loads(err.read().decode())

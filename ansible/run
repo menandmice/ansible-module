@@ -1,10 +1,46 @@
 #!/bin/bash
+# When run like: DEBUG=1 ./run play_dhcp.yml
+# Ansibles debug is turned on, with '-vvvv'
 
-for f in p2_ans27 p2_ans28 p2_ans29 p3_ans27 p3_ans28 p3_ans29
+if [[ ${#} -lt 1 ]]
+then
+	echo "Need a playbook to run" >&2
+	exit 1
+fi
+
+# Two parameters, first one is Pyton / Ansible version
+if [[ ${#} -eq 2 ]]
+then
+	PYANS="${1}"
+	shift
+else
+	PYANS="p2_ans27 p2_ans28 p2_ans29 p3_ans27 p3_ans28 p3_ans29"
+fi
+
+# Check DEBUG
+[[ ${DEBUG:-0} -eq 1 ]] && DBG='-vvvv' || DBG=''
+export DBG
+
+# Set some common vars
+TOPDIR="${HOME}/project/klanten/men_and_mice/virtenv"
+export ANSIBLE_LIBRARY=${HOME}/.ansible/plugins/modules:/usr/share/ansible/plugins/modules
+export PYTHONPATH=${TOPDIR}/ansible/ansible/module_utils
+
+# And loop di loop
+for f in ${PYANS}
 do
+	# Export everything, because we run all commands in a subshell to prevent
+	# tainting the environment
 	export f
+	export PYTHVER=$(echo ${f%%_*} | tr -d 'p')
+	[[ ${PYTHVER} -eq 2 ]] && PYTHVER="2.7" || PYTHVER="3.6"
+
 	(. ../../${f}/bin/activate
+	export ANSIBLE_LIBRARY=${TOPDIR}/virtenv/${f}/lib/python${PYTHVER}/site-packages/ansible
 	export ANSIBLE_PYTHON_INTERPRETER=${PWD}/../../${f}/bin/python
-	ansible-playbook -e 'ansible_python_interpreter="/usr/bin/env python"' play.yml
+	ansible-playbook ${DBG} -e 'ansible_python_interpreter="/usr/bin/env python"' "${@}"
 	)
+	echo
+	echo "=============================================================="
+	echo
 done
