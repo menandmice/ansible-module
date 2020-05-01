@@ -18,8 +18,6 @@ __metaclass__ = type
 # found
 import sys
 import os
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(sys.argv[0]), '..', 'lib')))
-
 import json
 import urllib
 import mm_include as mm

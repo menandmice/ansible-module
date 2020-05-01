@@ -1,0 +1,103 @@
+---
+- name: Men&Mice FreeIP test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  vars:
+    url: http://mandm.example.net
+    user: apidude
+    password: TheAPIDude
+
+  # At the moment there is a seperate library that handles
+  # all kinds of tasks for the modules. As it is still under
+  # very heavy development, it is kept seperate for now.
+  # When development is done, it will be injected into all
+  # modules, to ensure all modules are self-contained.
+  environment:
+    PYTHONPATH: "{{ ansible_env.HOME }}/project/klanten/men_and_mice/virtenv/ansible/ansible/module_utils:{{ ansible_env.PYTHONPATH | default(omit) }}"
+
+  tasks:
+    - name: Add a reservation for an IP address
+      mm_dhcp:
+        state: present
+        name: myreservation
+        ipaddress: 172.16.17.8
+        macaddress: 44:55:66:77:88:00
+        provider:
+          mmurl: "{{ url }}"
+          user: "{{ user }}"
+          password: "{{ password }}"
+      delegate_to: localhost
+
+    - name: check idempotentie
+      mm_dhcp:
+        state: present
+        name: myreservation
+        ipaddress: 172.16.17.8
+        macaddress: 44:55:66:77:88:00
+        provider:
+          mmurl: "{{ url }}"
+          user: "{{ user }}"
+          password: "{{ password }}"
+      delegate_to: localhost
+
+    - name: change mac
+      mm_dhcp:
+        state: present
+        name: myreservation
+        ipaddress: 172.16.17.8
+        macaddress: 44:55:66:77:88:99
+        provider:
+          mmurl: "{{ url }}"
+          user: "{{ user }}"
+          password: "{{ password }}"
+      delegate_to: localhost
+
+    - name: change ip
+      mm_dhcp:
+        state: present
+        name: myreservation
+        ipaddress: 172.16.17.9
+        macaddress: 44:55:66:77:88:99
+        provider:
+          mmurl: "{{ url }}"
+          user: "{{ user }}"
+          password: "{{ password }}"
+      delegate_to: localhost
+
+    - name: change name
+      mm_dhcp:
+        state: present
+        name: movemyreservation
+        ipaddress: 172.16.17.9
+        macaddress: 44:55:66:77:88:99
+        provider:
+          mmurl: "{{ url }}"
+          user: "{{ user }}"
+          password: "{{ password }}"
+      delegate_to: localhost
+
+    - name: delete reservation (wrong one)
+      mm_dhcp:
+        state: absent
+        name: movemyreservation
+        ipaddress: 172.16.17.9
+        macaddress: 44:55:66:77:88:99
+        provider:
+          mmurl: "{{ url }}"
+          user: "{{ user }}"
+          password: "{{ password }}"
+      delegate_to: localhost
+
+    - name: delete reservation (correct one)
+      mm_dhcp:
+        state: absent
+        name: myreservation
+        ipaddress: 172.16.17.8
+        macaddress: 44:55:66:77:88:99
+        provider:
+          mmurl: "{{ url }}"
+          user: "{{ user }}"
+          password: "{{ password }}"
+      delegate_to: localhost

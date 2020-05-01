@@ -48,7 +48,6 @@ def doapi(url, method, provider, databody):
     headers = {'Content-Type': 'application/json'}
     apiurl = "%s/mmws/api/%s" % (provider['mmurl'], url)
     result = {}
-    result['code'] = 204
 
     try:
         resp = open_url(apiurl,
@@ -61,21 +60,21 @@ def doapi(url, method, provider, databody):
 
         # Get all API data and format return message
         response = resp.read()
-        if response:
+        if resp.status == 200:
+            # 200 => Data in the body
             result['message'] = json.loads(response)
         else:
-            # No response from API
+            # No response from API (204 => No data)
             result['message'] = resp.reason
-        result['code'] = resp.status
         result['changed'] = True
     except HTTPError as err:
         errbody = json.loads(err.read().decode())
-        result['code'] = errbody['error']['code']
-        if errbody['error']['code'] == 2049:
-            result['message'] = "%s: %s" % (err.msg, errbody['error']['message'])
-        else:
-            result['message'] = "%s: %s" % (err.msg, errbody['error']['message'])
-            raise AnsibleError(result['message'])
+        result['changed'] = False
+        result['warnings'] = "%s: %s (%s)" % (
+            err.msg,
+            errbody['error']['message'],
+            errbody['error']['code']
+            )
     except URLError as err:
         raise AnsibleError("Failed lookup url for %s : %s" % (apiurl, to_native(err)))
     except SSLValidationError as err:
@@ -83,8 +82,8 @@ def doapi(url, method, provider, databody):
     except ConnectionError as err:
         raise AnsibleError("Error connecting to %s: %s" % (apiurl, to_native(err)))
 
-    if result['code'] == 204 and result['message'] == "No Content":
-        result['message'] = "Success"
+    if result.get('message', "") == "No Content":
+        result['message'] = ""
     return result
 
 

@@ -19,11 +19,10 @@ __metaclass__ = type
 # found
 import sys
 import os
-sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(sys.argv[0]), '..', 'lib')))
-
 import json
 import urllib
 import mm_include as mm
+from ansible.utils.display import Display
 from ansible.errors import AnsibleError
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
@@ -51,12 +50,13 @@ DOCUMENTATION = r'''
     name:
       description:
         - Name of the reservation
-        - When the name is changed a new reservation is made and if
-          it is on the same IP address it will be ignored
       type: str
       required: True
     ipaddress:
-      description: The IP address(es) to make a reservation on
+      description:
+        - The IP address(es) to make a reservation on
+        - When the IP address is changed a new reservation is made
+        - It is not allowed to make reservations in DHCP blocks
       type: list
       required: True
     macaddress:
@@ -196,7 +196,18 @@ def run_module():
                 reservations = resp['ipamRecord']['dhcpReservations']
                 http_method = "PUT"
                 for reservation in reservations:
-                    url = "%s" % reservation['ref']
+                    # Build a databody from the current reservation to check
+                    # if it is already correct
+                    reserveprops = [
+                        {"name": "name", "value": reservation['name']},
+                        {"name": "clientIdentifier", "value": reservation['clientIdentifier']},
+                        {"name": "addresses", "value": reservation['addresses'][0]},
+                        {"name": "ddnsHostName", "value": reservation['ddnsHostName']},
+                        {"name": "filename", "value": reservation['filename']},
+                        {"name": "serverName", "value": reservation['serverName']},
+                        {"name": "nextServer", "value": reservation['nextServer']},
+                    ]
+
                     databody = {
                         "ref": reservation['ref'],
                         "saveComment": "Ansible API",
@@ -211,8 +222,14 @@ def run_module():
                             {"name": "nextServer", "value": module.params.get('nextserver', '')}
                         ]
                     }
-                    result = mm.doapi(url, http_method, provider, databody)
-                    result['changed'] = True
+
+                    if reserveprops == databody['properties']:
+                        result['message'] = "Reservation already done"
+                        #result['changed'] = False
+                    else:
+                        url = "%s" % reservation['ref']
+                        result = mm.doapi(url, http_method, provider, databody)
+                        #result['changed'] = True
             else:
                 # Delete the reservations. Empty body, as the ref is sufficient
                 http_method = "DELETE"
@@ -221,7 +238,7 @@ def run_module():
                     if ipaddress in ref['addresses']:
                         url = ref['ref']
                         result = mm.doapi(url, http_method, provider, databody)
-                    result['changed'] = True
+                    #result['changed'] = True
         else:
             if module.params['state'] == 'present':
                 # If IP address is a string, turn it into a list, as the API
@@ -247,10 +264,10 @@ def run_module():
                         }
                     }
                     result = mm.doapi(url, http_method, provider, databody)
-                    result['changed'] = True
+                    #result['changed'] = True
             else:
                 result['message'] = 'Reservation for %s unchanged' % ipaddress
-                result['changed'] = False
+                #result['changed'] = False
 
     # return collected results
     module.exit_json(**result)
