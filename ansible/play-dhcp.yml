@@ -107,7 +107,6 @@
           user: "{{ user }}"
           password: "{{ password }}"
       delegate_to: localhost
-      delegate_to: localhost
 
     - name: create reservation in invalid range
       mm_dhcp:

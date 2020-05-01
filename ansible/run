@@ -21,14 +21,13 @@ fi
 [[ ${DEBUG:-0} -eq 1 ]] && DBG='-vvvv' || DBG=''
 export DBG
 
-# Set some common vars
-TOPDIR="${HOME}/project/klanten/men_and_mice/virtenv"
-export ANSIBLE_LIBRARY=${HOME}/.ansible/plugins/modules:/usr/share/ansible/plugins/modules
-export PYTHONPATH=${TOPDIR}/ansible/ansible/module_utils
-
 # And loop di loop
 for f in ${PYANS}
 do
+	echo
+	echo "= Running for ${f} ========================================================="
+	echo
+
 	# Export everything, because we run all commands in a subshell to prevent
 	# tainting the environment
 	export f
@@ -36,11 +35,7 @@ do
 	[[ ${PYTHVER} -eq 2 ]] && PYTHVER="2.7" || PYTHVER="3.6"
 
 	(. ../../${f}/bin/activate
-	export ANSIBLE_LIBRARY=${TOPDIR}/virtenv/${f}/lib/python${PYTHVER}/site-packages/ansible
 	export ANSIBLE_PYTHON_INTERPRETER=${PWD}/../../${f}/bin/python
-	ansible-playbook ${DBG} -e 'ansible_python_interpreter="/usr/bin/env python"' "${@}"
+	ansible-playbook ${DBG} -e 'ansible_python_interpreter="/usr/bin/env python"' "${@}" 0</dev/null
 	)
-	echo
-	echo "=============================================================="
-	echo
 done
