@@ -152,6 +152,12 @@ def run_module():
         # Get the IP address and find the reference
         refs = "IPAMRecords/%s" % ipaddress
         resp = mm.get_single_refs(refs, provider)
+        if not isinstance(resp, dict):
+	    result.pop('message', None)
+            result['warnings'] = resp
+            result['changed'] = False
+            break
+
         ipaddr_ref = resp['ipamRecord']['addrRef']
         curclaim = resp['ipamRecord']['claimed']
 

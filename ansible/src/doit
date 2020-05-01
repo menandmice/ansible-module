@@ -2,6 +2,7 @@
 # vi: set sw=4 ts=4 ai:
 
 cp -p COPYING ../library
+touch ../library/__init__.py
 for f in mm_*.py
 do
 	cp -p header ../library/${f}
