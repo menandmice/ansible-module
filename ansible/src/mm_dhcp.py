@@ -223,11 +223,9 @@ def run_module():
 
                     if reserveprops == databody['properties']:
                         result['message'] = "Reservation already done"
-                        #result['changed'] = False
                     else:
                         url = "%s" % reservation['ref']
                         result = mm.doapi(url, http_method, provider, databody)
-                        #result['changed'] = True
             else:
                 # Delete the reservations. Empty body, as the ref is sufficient
                 http_method = "DELETE"
@@ -236,7 +234,6 @@ def run_module():
                     if ipaddress in ref['addresses']:
                         url = ref['ref']
                         result = mm.doapi(url, http_method, provider, databody)
-                    #result['changed'] = True
         else:
             if module.params['state'] == 'present':
                 # If IP address is a string, turn it into a list, as the API

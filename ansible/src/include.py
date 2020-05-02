@@ -94,13 +94,13 @@ def get_single_refs(objname, provider):
         - The Ansible result dict
     """
     resp = doapi(objname, "GET", provider, {})
-    resp = doapi(objname, "GET", provider, {})
     if resp.get('message'):
         return resp['message']['result']
-    elif resp.get('warnings'):
+
+    if resp.get('warnings'):
         return resp['warnings']
-    else:
-        return "Unknow error"
+
+    return "Unknow error"
 
 
 def get_dhcp_scopes(provider, ipaddress):

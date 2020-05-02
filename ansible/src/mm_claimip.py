@@ -150,6 +150,9 @@ def run_module():
 
     for ipaddress in module.params['ipaddress']:
         # Get the IP address and find the reference
+        # If the returned value is not a dictionairy containing
+        # all results, it just contains the error messages.
+        # No result, so we're done.
         refs = "IPAMRecords/%s" % ipaddress
         resp = mm.get_single_refs(refs, provider)
         if not isinstance(resp, dict):

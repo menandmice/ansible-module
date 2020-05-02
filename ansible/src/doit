@@ -9,7 +9,7 @@ do
 	sed												\
 		-e '/^#IMPORTS_END/r imports'				\
 		-e '/^#IMPORTS_START$/,/^#IMPORTS_END$/d'	\
-		-e '/^#IMPORT_INCLUDE$/r include'			\
+		-e '/^#IMPORT_INCLUDE$/r include.py'		\
 		-e '/^#IMPORT_INCLUDE$/d'					\
 		-e 's/ mm\./ /g'							\
 		${f} >> ../library/${f}
