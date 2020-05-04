@@ -150,14 +150,12 @@ def run_module():
 
     for ipaddress in module.params['ipaddress']:
         # Get the IP address and find the reference
-        # If the returned value is not a dictionairy containing
-        # all results, it just contains the error messages.
-        # No result, so we're done.
+        # If the 'invalid' key exists, the request failed.
         refs = "IPAMRecords/%s" % ipaddress
         resp = mm.get_single_refs(refs, provider)
-        if not isinstance(resp, dict):
+        if resp.get('invalid', None):
             result.pop('message', None)
-            result['warnings'] = resp
+            result['warnings'] = resp.get('warnings', None)
             result['changed'] = False
             break
 

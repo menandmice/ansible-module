@@ -98,7 +98,8 @@ def get_single_refs(objname, provider):
         return resp['message']['result']
 
     if resp.get('warnings'):
-        return resp['warnings']
+        resp['invalid'] = True
+        return resp
 
     return "Unknow error"
 

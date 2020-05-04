@@ -190,6 +190,15 @@ def run_module():
     # Get the IP address and find the reference
     refs = "IPAMRecords/%s" % module.params['ipaddress']
     resp = mm.get_single_refs(refs, provider)
+    # If the 'invalid' key exists, the request failed.
+    if resp.get('invalid', None):
+        result.pop('message', None)
+        result['warnings'] = resp.get('warnings', None)
+        result['changed'] = False
+
+        # return collected results
+        module.exit_json(**result)
+
     ipaddr_ref = resp['ipamRecord']['addrRef']
     curclaim = resp['ipamRecord']['claimed']
 

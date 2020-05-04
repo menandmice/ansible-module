@@ -181,6 +181,12 @@ def run_module():
         # Get the existing reservation for requested IP address
         refs = "IPAMRecords/%s" % ipaddress
         resp = mm.get_single_refs(refs, provider)
+        # If the 'invalid' key exists, the request failed.
+        if resp.get('invalid', None):
+            result.pop('message', None)
+            result['warnings'] = resp.get('warnings', None)
+            result['changed'] = False
+            break
 
         scopes = mm.get_dhcp_scopes(provider, ipaddress)
         if not scopes:
