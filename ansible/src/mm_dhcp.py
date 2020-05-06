@@ -139,14 +139,12 @@ def run_module():
         servername=dict(type='str', required=False, default=""),
         nextserver=dict(type='str', required=False, default=""),
         deleteunspecified=dict(type='bool', required=False, default=False),
-        provider=dict(type='dict', required=True,
-            options=dict(
-                mmurl=dict(type='str', required=True, no_log=False),
-                user=dict(type='str', required=True, no_log=False),
-                password=dict(type='str', required=True, no_log=True)
-            )
-        )
-    )
+        provider=dict(
+            type='dict', required=True,
+            options=dict(mmurl=dict(type='str', required=True, no_log=False),
+                         user=dict(type='str', required=True, no_log=False),
+                         password=dict(type='str', required=True, no_log=True)
+                         )))
 
     # Seed the result dict in the object
     # We primarily care about changed and state

@@ -1,0 +1,14 @@
+{
+  "saveComment": "Ansible API",
+  "dnsZone": {
+    "name": "Tons zone",
+    "dynamic": false,
+    "type": "Master",
+    "dnssecSigned": false,
+    "dnsViewRef": "DNSViews/1",
+    "customProperties": [
+      {"name": "owner", "value": "Ton Kersten"},
+      {"name": "place", "value": "At the attick"}
+    ]
+  }
+}

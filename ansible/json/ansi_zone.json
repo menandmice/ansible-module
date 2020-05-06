@@ -1,0 +1,19 @@
+{ "ANSIBLE_MODULE_ARGS": {
+    "state": "present",
+    "name": "TonsZone",
+    "nameserver": "mandm.example.net",
+    "masters": "172.16.32.65",
+    "dynamic": true,
+    "servtype": "Master",
+    "authority": "dns1.example.net",
+    "customproperties": [
+      {"name": "owner", "value": "Ton Kersten"},
+      {"name": "place", "value": "At the attick"}
+    ],
+    "provider" : {
+        "mmurl": "http://mandm.example.net",
+        "user": "apidude",
+        "password": "TheAPIDude"
+    }
+  }
+}

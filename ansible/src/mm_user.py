@@ -142,14 +142,12 @@ def run_module():
         authentication_type=dict(type='str', required=True),
         groups=dict(type='list', required=False),
         roles=dict(type='list', required=False),
-        provider=dict(type='dict', required=True,
-            options=dict(
-                mmurl=dict(type='str', required=True, no_log=False),
-                user=dict(type='str', required=True, no_log=False),
-                password=dict(type='str', required=True, no_log=True)
-            )
-        )
-    )
+        provider=dict(
+            type='dict', required=True,
+            options=dict(mmurl=dict(type='str', required=True, no_log=False),
+                         user=dict(type='str', required=True, no_log=False),
+                         password=dict(type='str', required=True, no_log=True)
+                         )))
 
     # Seed the result dict in the object
     # Se primarily care about changed and state
@@ -241,15 +239,14 @@ def run_module():
             url = "Users/%s" % user_ref
             databody = {"ref": user_ref,
                         "saveComment": "Ansible API",
-                        "properties": {
-                            "name": module.params['username'],
-                            "password": module.params['password'],
-                            "fullName": module.params['full_name'],
-                            "email": module.params['email'],
-                            "authenticationType": module.params['authentication_type'],
-                            "groups": wanted_groups,
-                            "roles": wanted_roles
-                        }
+                        "properties": [
+                             { "name": 'name', "value": module.params['username'] },
+                             { "name": 'password', "value": module.params['password'] },
+                             { "name": 'fullName', "value": module.params['full_name'] },
+                             { "name": 'authenticationType', "value": module.params['authentication_type'] },
+                             { "name": 'groups', "value": wanted_groups },
+                             { "name": 'roles', "value":  wanted_roles}
+                             ],
                         }
         else:
             # User not present, create

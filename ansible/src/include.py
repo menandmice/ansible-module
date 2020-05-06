@@ -41,6 +41,9 @@ def doapi(url, method, provider, databody):
         if resp.code == 200:
             # 200 => Data in the body
             result['message'] = json.loads(response)
+        elif resp.code == 201:
+            # 201 => Data in the body??
+            result['message'] = json.loads(response)
         else:
             # No response from API (204 => No data)
             try:

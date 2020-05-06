@@ -110,14 +110,12 @@ def run_module():
     module_args = dict(
         state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
         ipaddress=dict(type='list', required=True),
-        provider=dict(type='dict', required=True,
-            options=dict(
-                mmurl=dict(type='str', required=True, no_log=False),
-                user=dict(type='str', required=True, no_log=False),
-                password=dict(type='str', required=True, no_log=True)
-            )
-        )
-    )
+        provider=dict(
+            type='dict', required=True,
+            options=dict(mmurl=dict(type='str', required=True, no_log=False),
+                         user=dict(type='str', required=True, no_log=False),
+                         password=dict(type='str', required=True, no_log=True)
+                         )))
 
     # Seed the result dict in the object
     # We primarily care about changed and state

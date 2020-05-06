@@ -149,14 +149,14 @@ def run_module():
     module_args = dict(
         ipaddress=dict(type='str', required=True),
         claimed=dict(type='bool', required=False),
-        provider=dict(type='dict', required=True,
-                      mmurl=dict(type='str', required=True, no_log=False),
-                      user=dict(type='str', required=True, no_log=False),
-                      password=dict(type='str', required=True, no_log=True)
-                      ),
         dnsrecord=dict(type='dict', required=False),
         dhcpreservation=dict(type='dict', required=False),
-    )
+        provider=dict(
+            type='dict', required=True,
+            options=dict(mmurl=dict(type='str', required=True, no_log=False),
+                         user=dict(type='str', required=True, no_log=False),
+                         password=dict(type='str', required=True, no_log=True)
+                         )))
 
     # Seed the result dict in the object
     # We primarily care about changed and state

@@ -5,6 +5,7 @@ cp -p COPYING ../library
 touch ../library/__init__.py
 for f in mm_*.py
 do
+	echo "Converting ${f}"
 	cp -p header ../library/${f}
 	sed												\
 		-e '/^#IMPORTS_END/r imports'				\
