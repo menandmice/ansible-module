@@ -38,12 +38,17 @@ def doapi(url, method, provider, databody):
 
         # Get all API data and format return message
         response = resp.read()
+        print('response = ', response)
+        print('respcode = ', resp.code)
         if resp.code == 200:
             # 200 => Data in the body
             result['message'] = json.loads(response)
         elif resp.code == 201:
-            # 201 => Data in the body??
-            result['message'] = json.loads(response)
+            # 201 => Sometimes data in the body??
+            try:
+                result['message'] = json.loads(response)
+            except json.decoder.JSONDecodeError:
+                result['message'] = ""
         else:
             # No response from API (204 => No data)
             try:

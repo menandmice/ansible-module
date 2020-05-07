@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# As the final modules contain a lot of duplicate code, they are
+# assembled (for now) with the `doit` command. But this has to
+# be done after every change. This little script automates that.
+# Whenever a file changes in the current directory, the `doit` command
+# is run.
+
 inotifywait -m -e close_write . | \
 	while read dir op file
 	do

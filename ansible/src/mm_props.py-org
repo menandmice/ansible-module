@@ -1,8 +1,8 @@
-"""Ansible Zone Management module.
+"""Ansible Custom Properties Management module.
 
 Part of the Men&Mice Ansible integration
 
-Module to manage DNS-Zones in the Men&Mice Suite
+Module to manage DNS-Zone custom properties in the Men&Mice Suite
 """
 
 from __future__ import absolute_import, division, print_function
@@ -28,81 +28,55 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
                     'supported_by': 'community'}
 
 DOCUMENTATION = r'''
-  module: mm_zone
-  short_description: Manage DNS zones in the Men&Mice Suite
+  module: mm_props
+  short_description: Manage DNS-Zone custom properties in the Men&Mice Suite
   author:
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Manage DNS zones in the Men&Mice Suite
+    - Manage DNS-Zone custom properties in the Men&Mice Suite
   options:
-    state:
-      description: The state of the zone
-      type: bool
-      required: False
-      choices: [ absent, present ]
-      default: present
-    name:
-      description: Name of the zone
-      type: str
-      required: True
-    nameserver:
-      description: Namserver to define the zone on
-      type: str
-      required: True
-    authority:
-      description: Name of the DNS server that contains the zone or
-                   the string "[Active Directory]" if the zone is AD integrated
-      type: str
-      required: False
-    servtype:
-      description: Type of the master server, like "master" or "slave"
-      type: str
-      required: True
-    desc:
-      description: Short description of the zone
-      type: str
-      required: False
-    dynamic:
-      description: Dynamic DNS zone
-      type: bool
-      required: False
-      default: False
-    masters:
-      description: The IP addresses of the master servers if the new zone is
-                   not a master zone.
-      type: list
-      required: False
-    dnssecsigned:
-      description: True if the zone is a DNSSEC signed zone
-      type: bool
-      required: False
-    kskids:
-      description: A comma separated string of IDs of KSKs, starting with
-                   active keys, then inactive keys in parenthesis
-      type: str
-      required: False
-    zskids:
-      description: A comma separated string of IDs of ZSKs, starting with
-                   active keys, then inactive keys in parenthesis
-      type: str
-      required: False
-    adintegrated:
-      description: True if the zone is Active Directory integrated
-      type: bool
-      required: False
-    adreplicationtype:
-      description: Type of the AD replication
-      type: str
-      required: False
-    adpartition:
-      description: The AD partition if the zone is Active Directory integrated
-      type: str
-      required: False
     customproperties:
-      description: Custom properties for the zone, list of properties
+      description: Custom properties to define, list of properties
       type: list
-      required: False
+      required: True
+      suboptions:
+        state:
+          description: The state of the properties or properties
+          type: bool
+          required: False
+          choices: [ absent, present ]
+          default: present
+        name:
+          description: Name of the property
+          required: True
+          type: str
+        proptype:
+          description: Type of the property
+          choices: [ text, yesno, ipaddress, number ]
+          required: False
+          type: str
+          default: text
+        dest:
+          description: Where to define the custom property
+          choices: [ dnsserver, dhcpserver, zone, iprange, ipaddress, device, interface, cloudnet, cloudaccount ]
+          required: True
+          type: str
+        madatory:
+          description: Is the property mandatory
+          required: False
+          type: bool
+          default: False
+        readonly:
+          description: Is the property read only
+          required: False
+          type: bool
+          default: False
+        multiline:
+          description: Is the property multiline
+          required: False
+          type: bool
+          default: False
     provider:
       description: Definition of the Men&Mice suite API provider
       type: dict
@@ -124,28 +98,16 @@ DOCUMENTATION = r'''
 '''
 
 EXAMPLES = r'''
-- name: Create a new zone
-  mm_zone:
-    state: present
-    name: example.com
-    nameserver: ns1.example.com
-    desc: Example zone
-    authority: mmsuite.example.net
+- name: Set deinition for custom properties
+  mm_props:
     customproperties:
       - name: location
-        value: Reykjavik
-    provider:
-      mmurl: http://mmsuite.example.net
-      user: apiuser
-      password: apipasswd
-  delegate_to: localhost
-
-- name: Release a zone
-  mm_claimip:
-    state: absent
-    name: example.com
-    nameserver: ns1.example.com
-    authority: mmsuite.example.net
+        state: present
+        proptype: text
+        dest: zone
+      - name: where
+        state: absent
+        dest: zone
     provider:
       mmurl: http://mmsuite.example.net
       user: apiuser
@@ -166,25 +128,24 @@ display = Display()
 #IMPORT_INCLUDE
 
 
+PROPTYPES = ['text', 'yesno', 'ipaddress', 'number']
+DESTTYPES = ['dnsserver', 'dhcpserver', 'zone', 'iprange', 'ipaddress',
+             'device', 'interface', 'cloudnet', 'cloudaccount']
+
 def run_module():
     """Run Ansible module."""
     # Define available arguments/parameters a user can pass to the module
     module_args = dict(
-        state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
-        name=dict(type='str', required=True),
-        nameserver=dict(type='str', required=True),
-        authority=dict(type='str', required=False),
-        desc=dict(type='str', required=False),
-        servtype=dict(type='str', required=False),
-        dynamic=dict(type='bool', required=False, default=False),
-        masters=dict(type='list', required=False),
-        dnssecsigned=dict(type='bool', required=False),
-        kskids=dict(type='str', required=False),
-        zskids=dict(type='str', required=False),
-        adintegrate=dict(type='bool', required=False),
-        adreplicationtype=dict(type='str', required=False),
-        adpartition=dict(type='str', required=False),
-        customproperties=dict(type='list', required=False),
+        customproperties=dict(
+            type='list', required=True,
+            options=dict(name=dict(type='str', required=True),
+                         state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
+                         proptype=dict(type='str', required=False, default='text', choices=PROPTYPES),
+                         dest=dict(type='str', required=True, choices=DESTTYPES),
+                         mandatory=dict(type='bool', required=False, default=False),
+                         readonly=dict(type='bool', required=False, default=False),
+                         multiline=dict(type='bool', required=False, default=False)
+                         )),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -220,6 +181,8 @@ def run_module():
     # Get all API settings
     provider = module.params['provider']
     display.vvv(provider)
+
+    print(module.params)
 
     # If absent is requested, make a quick delete
     if module.params['state'] == 'absent':
