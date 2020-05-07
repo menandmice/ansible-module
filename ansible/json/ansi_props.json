@@ -1,13 +1,13 @@
 { "ANSIBLE_MODULE_ARGS": {
     "name": "place",
     "state": "present",
-    "proptype": "text",
+    "proptype": "yesno",
     "dest": "zone",
-    "mandatory": true,
+    "mandatory": false,
     "listitems": [
     	    "one",
-    	    "two",
     	    "three",
+    	    "two",
     	    "four"
     ],
     "provider" : {

@@ -47,7 +47,10 @@ DOCUMENTATION = r'''
         required: True
         type: str
     proptype:
-        description: Type of the property
+        description:
+          - Type of the property
+          - These are not the types as described in the API, but the types
+            as you can see them in the Men&Mice Management Console
         choices: [ text, yesno, ipaddress, number ]
         required: False
         type: str
@@ -82,9 +85,20 @@ DOCUMENTATION = r'''
         required: False
         type: str
     listitems:
-        description: The items in the selection list. Required if C(list) is True
+        description: The items in the selection list.
         required: False
         type: list
+    cloudtags:
+        description: Associated cloud tags
+        required: False
+        type: list
+    updateexisting:
+        description:
+         - Should objects be updated with the new values
+         - Only valid when updating a property, otherwise ignored
+        required: False
+        type: bool
+        default: False
     provider:
       description: Definition of the Men&Mice suite API provider
       type: dict
@@ -167,8 +181,10 @@ def run_module():
         readonly=dict(type='bool', required=False, default=False),
         multiline=dict(type='bool', required=False, default=False),
         system=dict(type='bool', required=False, default=False),
-        defaultvalue=dict(type='str', required=False),
-        listitems=dict(type='list', required=False),
+        updateexisting=dict(type='bool', required=False, default=False),
+        defaultvalue=dict(type='str', required=False, default=''),
+        cloudtags=dict(type='list', required=False, default=[]),
+        listitems=dict(type='list', required=False, default=[]),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -206,7 +222,7 @@ def run_module():
     display.vvv(provider)
 
     # If absent is requested, make a quick delete
-    # I just use `1` as the reference, as it should always be there
+    # Just use `1` as the reference, as it should always be there
     if module.params['state'] == 'absent':
         http_method = "DELETE"
         url = "%s/1/PropertyDefinitions/%s" % (DEST2URL[module.params.get('dest')],
@@ -215,46 +231,71 @@ def run_module():
         result = mm.doapi(url, http_method, provider, databody)
         module.exit_json(**result)
 
-    # OK. It should be present. Check if it is already there
+    # OK. The property should be present. Check if it is already there
     http_method = "GET"
     url = "%s/1/PropertyDefinitions/%s" % (DEST2URL[module.params.get('dest')],
                                            module.params.get('name'))
     databody = {}
     resp = mm.doapi(url, http_method, provider, databody)
 
-    print('resp = ', resp)
+    # Whether adding or updating the property, the databody is almost the
+    # same. So, define it once and change things when needed.
+    databody = {
+        "propertyDefinition": {
+            "name": module.params.get('name'),
+            "type": TYPE2TYPE[module.params.get('proptype')],
+            "system": module.params.get('system'),
+            "mandatory": module.params.get('mandatory'),
+            "readOnly": module.params.get('readonly'),
+            "multiLine": module.params.get('multiline'),
+            "defaultValue": module.params.get('defaultvalue', ''),
+        }
+    }
+
+    # Add the extra parameters when wanted
+    if module.params.get('proptype') == 'text':
+        # Tags are only supported for customfields of type string
+        databody['propertyDefinition']['cloudTags'] = module.params.get('cloudtags', [])
+        # Only string type custom properties can have a list of predefined values
+        databody['propertyDefinition']['listItems'] = module.params.get('listitems', [])
+
+    # Check if the property needs to be created or updated
     if resp.get('warnings', None):
         # Not there, yet. Create the property
-        print('Maken')
         http_method = "POST"
         url = "%s/1/PropertyDefinitions" % DEST2URL[module.params.get('dest')]
-        print(url)
-        databody = {
-            "saveComment": "Ansible API",
-            "propertyDefinition": {
-                "name": module.params.get('name'),
-                "type": TYPE2TYPE[module.params.get('proptype')],
-                "system": module.params.get('system'),
-                "mandatory": module.params.get('mandatory'),
-                "readOnly": module.params.get('readonly'),
-                "multiLine": module.params.get('multiline'),
-            }
-        }
-        if module.params.get('defaultvalue', None):
-            databody['propertyDefinition']['defaultValue'] = module.params.get('defaultvalue')
-
-        if module.params.get('listitems', None):
-            databody['propertyDefinition']['listItems'] = module.params.get('listitems')
-
-        print('databody = ', str(databody).replace("'", '"'))
-        resp = mm.doapi(url, http_method, provider, databody)
-        print(resp)
     else:
-        # Property already exists, update it
+        # Property already exists, check if it needs an update
+        curprop = resp['message']['result']
+        print('curprop =  ', curprop)
+        print('databody = ', databody)
+
+        # To bad it is not possible to just compare two dicts.
+        # When the type is not string it is not allowed to have tags and
+        # a predefined list. So they cannot be in the databody. But a request
+        # to the API does return them as empty lists. So, just loop.
+        changed = False
+        for k in databody:
+            if databody[k] != curprop[k]:
+                changed = True
+        if changed:
+            # Current property in Men&Mice matches wanted property
+            # No change needed
+            result['changed'] = False
+            module.exit_json(**result)
+
         http_method = "PUT"
         url = "%s/1/PropertyDefinitions/%s" % (DEST2URL[module.params.get('dest')],
                                                module.params.get('name'))
-        databody = {}
+
+        # Add the extra parameters when wanted
+        if module.params.get('updateexisting', None):
+            databody['updateExisting'] = module.params.get('updatexisting')
+
+    databody['saveComment'] = 'Ansible API'
+    print('databody = ', str(databody).replace("'", '"'))
+    result = mm.doapi(url, http_method, provider, databody)
+    print(result)
 
     # return collected results
     module.exit_json(**result)
