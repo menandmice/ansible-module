@@ -7,8 +7,8 @@
     "servtype": "Master",
     "authority": "dns1.example.net",
     "customproperties": [
-      {"name": "owner", "value": "Ton Kersten"},
-      {"name": "place", "value": "At the attick"}
+      {"name": "owner", "value": "Beppie di Klaveri"},
+      {"name": "place", "value": "At Groesbeek"}
     ],
     "provider" : {
         "mmurl": "http://mandm.example.net",

@@ -1,15 +1,9 @@
 { "ANSIBLE_MODULE_ARGS": {
-    "name": "place",
+    "name": "dhcpplace",
     "state": "present",
-    "proptype": "yesno",
-    "dest": "zone",
+    "proptype": "text",
+    "dest": "dhcpserver",
     "mandatory": false,
-    "listitems": [
-    	    "three",
-    	    "one",
-    	    "four",
-    	    "two"
-    ],
     "provider" : {
         "mmurl": "http://mandm.example.net",
         "user": "apidude",

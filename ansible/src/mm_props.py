@@ -169,6 +169,7 @@ TYPE2TYPE = {
     'number': 'Integer',
 }
 
+
 def run_module():
     """Run Ansible module."""
     # Define available arguments/parameters a user can pass to the module
@@ -302,6 +303,7 @@ def run_module():
 def main():
     """Start here."""
     run_module()
+
 
 if __name__ == '__main__':
     main()

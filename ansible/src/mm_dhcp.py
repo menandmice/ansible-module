@@ -79,6 +79,13 @@ DOCUMENTATION = r'''
       description: Clear properties that are not explicitly set
       type: bool
       required: False
+    customproperties:
+      description:
+        - Custom properties for the zone
+        - These properties must already exist
+`        - See also C(mm_props)
+      type: list
+      required: False
     provider:
       description: Definition of the Men&Mice suite API provider
       type: dict
@@ -139,6 +146,7 @@ def run_module():
         servername=dict(type='str', required=False, default=""),
         nextserver=dict(type='str', required=False, default=""),
         deleteunspecified=dict(type='bool', required=False, default=False),
+        customproperties=dict(type='list', required=False),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -200,6 +208,7 @@ def run_module():
                 for reservation in reservations:
                     # Build a databody from the current reservation to check
                     # if it is already correct
+                    print(reservation)
                     reserveprops = [
                         {"name": "name", "value": reservation['name']},
                         {"name": "clientIdentifier", "value": reservation['clientIdentifier']},
@@ -224,6 +233,12 @@ def run_module():
                             {"name": "nextServer", "value": module.params.get('nextserver', '')}
                         ]
                     }
+                    # Define all custom properties, if needed
+                    if module.params.get('customproperties', None):
+                        for prop in module.params.get('customproperties'):
+                            k = prop['name']
+                            v = prop['value']
+                        databody["properties"].append({"name": k, "value": v})
 
                     if reserveprops == databody['properties']:
                         result['message'] = "Reservation already done"
@@ -262,11 +277,19 @@ def run_module():
                             "nextServer": module.params.get('nextserver', '')
                         }
                     }
+                    # Define all custom properties, if needed
+                    if module.params.get('customproperties', None):
+                        props = []
+                        for prop in module.params.get('customproperties'):
+                            k = prop['name']
+                            v = prop['value']
+                            props.append({"name": k, "value": v})
+                        databody["dhcpReservation"]['customProperties'] = props
+
+                    # Execute the API
                     result = mm.doapi(url, http_method, provider, databody)
-                    #result['changed'] = True
             else:
-                result['message'] = 'Reservation for %s unchanged' % ipaddress
-                #result['changed'] = False
+                result['changed'] = False
 
     # return collected results
     module.exit_json(**result)
@@ -275,6 +298,7 @@ def run_module():
 def main():
     """Start here."""
     run_module()
+
 
 if __name__ == '__main__':
     main()

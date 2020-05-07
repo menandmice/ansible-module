@@ -10,6 +10,7 @@ STATEBOOL = {
     'absent': False
 }
 
+
 def doapi(url, method, provider, databody):
     """Run an API call.
 
@@ -57,11 +58,10 @@ def doapi(url, method, provider, databody):
     except HTTPError as err:
         errbody = json.loads(err.read().decode())
         result['changed'] = False
-        result['warnings'] = "%s: %s (%s)" % (
-            err.msg,
-            errbody['error']['message'],
-            errbody['error']['code']
-            )
+        result['warnings'] = "%s: %s (%s)" % (err.msg,
+                                              errbody['error']['message'],
+                                              errbody['error']['code']
+                                              )
     except URLError as err:
         raise AnsibleError("Failed lookup url for %s : %s" % (apiurl, to_native(err)))
     except SSLValidationError as err:

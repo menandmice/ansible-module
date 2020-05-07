@@ -3,6 +3,10 @@
     "name": "patertje",
     "ipaddress": "172.16.17.8",
     "macaddress": "44:55:66:77:88:66",
+    "customproperties": [
+      {"name": "dhcpowner", "value": "Beppie di Klaveri"},
+      {"name": "dhcpplace", "value": "At Groesbeek"}
+    ],
     "provider" : {
         "mmurl": "http://mandm.example.net",
         "user": "apidude",

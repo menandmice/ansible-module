@@ -46,6 +46,13 @@ DOCUMENTATION = r'''
       description: The IP address(es) to work on
       type: list
       required: True
+    customproperties:
+      description:
+        - Custom properties for the zone
+        - These properties must already exist
+`        - See also C(mm_props)
+      type: list
+      required: False
     provider:
       description: Definition of the Men&Mice suite API provider
       type: dict
@@ -110,6 +117,7 @@ def run_module():
     module_args = dict(
         state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
         ipaddress=dict(type='list', required=True),
+        customproperties=dict(type='list', required=False),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -171,6 +179,15 @@ def run_module():
                             "claimed": statebool
                         }
                         }
+
+            # Define all custom properties, if needed
+            if module.params.get('customproperties', None):
+                for prop in module.params.get('customproperties'):
+                    k = prop['name']
+                    v = prop['value']
+                    databody["properties"].append({"name": k, "value": v})
+
+            # Execute the API
             result = mm.doapi(url, http_method, provider, databody)
         else:
             result['message'] = 'No claim change for %s' % ipaddress
@@ -182,6 +199,7 @@ def run_module():
 def main():
     """Start here."""
     run_module()
+
 
 if __name__ == '__main__':
     main()
