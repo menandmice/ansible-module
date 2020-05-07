@@ -5,7 +5,7 @@
   become: false
 
   vars:
-    url: http://mandm.example.net
+    mmurl: http://mandm.example.net
     user: apidude
     password: TheAPIDude
     network:
@@ -15,7 +15,7 @@
     - name: Set free IP addresses as a fact
       set_fact:
         freeips: "{{ query('mm_freeip',
-                         url,
+                         mmurl,
                          user,
                          password,
                          network,

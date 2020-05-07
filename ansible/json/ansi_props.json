@@ -5,10 +5,10 @@
     "dest": "zone",
     "mandatory": false,
     "listitems": [
-    	    "one",
     	    "three",
-    	    "two",
-    	    "four"
+    	    "one",
+    	    "four",
+    	    "two"
     ],
     "provider" : {
         "mmurl": "http://mandm.example.net",

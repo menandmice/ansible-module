@@ -5,9 +5,10 @@
   become: false
 
   vars:
-    url: http://mandm.example.net
-    user: apidude
-    password: TheAPIDude
+    provider:
+      mmurl: http://mandm.example.net
+      user: apidude
+      password: TheAPIDude
 
   tasks:
     - name: Ansible information
@@ -21,39 +22,27 @@
       mm_claimip:
         state: present
         ipaddress: 172.16.12.14
-        provider:
-          mmurl: "{{ url }}"
-          user: "{{ user }}"
-          password: "{{ password }}"
+        provider: "{{ provider }"
       delegate_to: localhost
 
     - name: Check idempotentie
       mm_claimip:
         state: present
         ipaddress: 172.16.12.14
-        provider:
-          mmurl: "{{ url }}"
-          user: "{{ user }}"
-          password: "{{ password }}"
+        provider: "{{ provider }"
       delegate_to: localhost
 
     - name: Unclaim IP address
       mm_claimip:
         state: present
         ipaddress: 172.16.12.14
-        provider:
-          mmurl: "{{ url }}"
-          user: "{{ user }}"
-          password: "{{ password }}"
+        provider: "{{ provider }"
       delegate_to: localhost
 
     - name: Claim stupid IP address
       mm_claimip:
         state: present
         ipaddress: 456.978.12.14
-        provider:
-          mmurl: "{{ url }}"
-          user: "{{ user }}"
-          password: "{{ password }}"
+        provider: "{{ provider }"
       delegate_to: localhost
 

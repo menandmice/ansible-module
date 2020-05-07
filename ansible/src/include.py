@@ -45,7 +45,7 @@ def doapi(url, method, provider, databody):
             # 201 => Sometimes data in the body??
             try:
                 result['message'] = json.loads(response)
-            except json.decoder.JSONDecodeError:
+            except ValueError:
                 result['message'] = ""
         else:
             # No response from API (204 => No data)

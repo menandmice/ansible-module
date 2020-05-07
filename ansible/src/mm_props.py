@@ -221,22 +221,24 @@ def run_module():
     provider = module.params['provider']
     display.vvv(provider)
 
-    # If absent is requested, make a quick delete
-    # Just use `1` as the reference, as it should always be there
-    if module.params['state'] == 'absent':
-        http_method = "DELETE"
-        url = "%s/1/PropertyDefinitions/%s" % (DEST2URL[module.params.get('dest')],
-                                               module.params.get('name'))
-        databody = {}
-        result = mm.doapi(url, http_method, provider, databody)
-        module.exit_json(**result)
-
-    # OK. The property should be present. Check if it is already there
+    # Check if the property is already present
     http_method = "GET"
     url = "%s/1/PropertyDefinitions/%s" % (DEST2URL[module.params.get('dest')],
                                            module.params.get('name'))
     databody = {}
     resp = mm.doapi(url, http_method, provider, databody)
+
+    # If absent is requested, make a quick delete
+    # Just use `1` as the reference, as it should always be there
+    if module.params['state'] == 'absent':
+        if not resp.get('warnings', None):
+            # Property is present, deletion is required
+            http_method = "DELETE"
+            url = "%s/1/PropertyDefinitions/%s" % (DEST2URL[module.params.get('dest')],
+                                                   module.params.get('name'))
+            databody = {}
+            result = mm.doapi(url, http_method, provider, databody)
+        module.exit_json(**result)
 
     # Whether adding or updating the property, the databody is almost the
     # same. So, define it once and change things when needed.
@@ -267,18 +269,16 @@ def run_module():
     else:
         # Property already exists, check if it needs an update
         curprop = resp['message']['result']
-        print('curprop =  ', curprop)
-        print('databody = ', databody)
 
         # To bad it is not possible to just compare two dicts.
-        # When the type is not string it is not allowed to have tags and
-        # a predefined list. So they cannot be in the databody. But a request
-        # to the API does return them as empty lists. So, just loop.
-        changed = False
+        # When the property type is not string it is not allowed to have
+        # tags and a predefined list. So they cannot be in the databody.
+        # But a request to the API does return them as empty lists.
+        # So, just loop.
         for k in databody:
             if databody[k] != curprop[k]:
-                changed = True
-        if changed:
+                break
+        else:
             # Current property in Men&Mice matches wanted property
             # No change needed
             result['changed'] = False
@@ -293,9 +293,7 @@ def run_module():
             databody['updateExisting'] = module.params.get('updatexisting')
 
     databody['saveComment'] = 'Ansible API'
-    print('databody = ', str(databody).replace("'", '"'))
     result = mm.doapi(url, http_method, provider, databody)
-    print(result)
 
     # return collected results
     module.exit_json(**result)
