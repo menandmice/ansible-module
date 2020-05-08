@@ -34,16 +34,110 @@ source ~/venv/python3/bin/activate && source ~/venv/ansible/hacking/env-setup
 python -m ansible.modules.mandm.mm_zone ~/venv/src/json/ansi_zone.json
 ```
 
+With an Ansible JSON file looking like:
+
+```
+{ "ANSIBLE_MODULE_ARGS": {
+    "state": "present",
+    "name": "TonsZone",
+    "nameserver": "mandm.example.net",
+    "masters": "172.16.32.65",
+    "dynamic": true,
+    "servtype": "Master",
+    "authority": "dns1.example.net",
+    "customproperties": [
+      {"name": "owner", "value": "Beppie di Klaveri"},
+      {"name": "place", "value": "At Groesbeek"}
+    ],
+    "provider" : {
+        "mmurl": "http://mandm.example.net",
+        "user": "apidude",
+        "password": "TheAPIDude"
+    }
+  }
+}
+```
+
 ## Route
 
-- allocate an IP address (meaning claim it/find the next free one, set
-  a custom property) in an existing subnet/range
-- add/modify/delete a DNS record (A/AAAA record, but also CNAME or
-  PTR..the PTR is usually maintained automatically, so you don't have to
-  worry about it when you add an A or AAAA record)
+[X] Allocate an IP address (meaning claim it/find the next free one, set
+    a custom property) in an existing subnet/range
+    - This is split into multiple parts
+      [X] Create custom properties, for a server, zone, whatever
+          `mm_props`
+      [X] Find the next free IP address in a zone (lookup plugin)
+          `mm_freeip`
+      [X] Claim the IP address and set custom properties
+          `mm_claimip`
+[ ] Add/modify/delete a DNS record (A/AAAA record, but also CNAME or
+    PTR. The PTR is usually maintained automatically, so you don't have
+    to worry about it when you add an A or AAAA record)
+    `mm_dnsrecord`
+
+    - Get IPAM on IP address
+    - Get DNSRecords ref
+      - Create DNS Record
+      - Get DNS Record and change
 
 Not that often then:
-- create/delete/modify a DHCP reservation in an existing scope
-- allocate/free up a new subnet
-- Then the rest of the functionality.. like create a scope and and so
-  on...
+[X] Create/delete/modify a DHCP reservation in an existing scope
+    `mm_dhcp`
+[x] Create/delete/modify a DNS zone
+    `mm_zone`
+[ ] Allocate/free up a new subnet
+[ ] Then the rest of the functionality.. like create a scope and so on...
+
+
+# The Module Map
+
+## Basic
+
+[ ] Run API commands against Men&Mice API
+    [X] Generic user authentication
+    [X] Handle High availability
+        - TonK: If I understood correctly what David said, the HA
+          functionality is created by a round-robin DNS entry.
+          So, when one server is down, I just wait a little and
+          give it a retry.
+    [X] Handle errors reported by Men&Mice Central API
+
+## Generic
+
+[ ] Ansible plugin installer
+[X] Inline documentation for Ansible user
+[ ] General documentation for Ansible user
+[ ] Inventory information to Ansible
+[ ] Ansible Playbook
+[ ] Ansible roles for Men&Mice
+[ ] Support generically available Ansible version and
+    support newer than 2.7
+    - TonK: Support Ansible 2.[789] with Python[23]
+    - TonK: Create a Molecule test set (lot of work, takes long, not
+      easy, so expensive)
+
+## DNS
+
+[ ] Get/Set properties for DNS and IPAM
+[ ] Create a DNS Resource record in Men&Mice
+[ ] Modify a DNS Resource record in Men&Mice
+[ ] Set hostname for IP address in Men&Mice
+
+## IPAM
+
+[X] Get next free IP address of a range
+
+## DHCP
+
+[X] Create/modify a DHCP reservation
+
+## Nice to have
+
+[ ] Create/Remove Men&Mice users/groups
+[X] Create/delete a DNS zone
+[ ] Create/delete IP range
+[ ] Create/delete DHCP scope
+[ ] Get/set properties on DHCP scopes
+[ ] Create/delete DHCP options
+    [ ] For a DHCP server
+    [ ] For a DHCP scope
+

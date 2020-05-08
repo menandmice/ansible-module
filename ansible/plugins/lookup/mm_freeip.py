@@ -12,6 +12,7 @@ Lookup plugin for finding the next free IP address in
 a network zone in the Men&Mice Suite.
 """
 
+import time
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 from ansible.errors import AnsibleError, AnsibleModuleError
@@ -89,8 +90,14 @@ DOCUMENTATION = r"""
         type: str
         required: False
         default: None
-    notes:
-      - TODO - Add extra filtering
+      filter:
+        description:
+          - Men&Mice Suite filter statement
+          - Filter validation is done by the Men&Mice suite, not in the plugin
+          - More filter info on https://docs.menandmice.com/display/MM930/Quickfilter
+        type: str
+        required: False
+        default: None
 """
 
 EXAMPLES = r"""
@@ -152,22 +159,32 @@ def getrequest(sess, url, user, passwd, params={}):
     """Conduct the API call and return the result."""
     headers = {'Content-Type': 'application/json'}
 
-    try:
-        answer = sess.get(url, auth=(user, passwd),
-                          headers=headers,
-                          params=params)
-    except requests.ConnectionError:
-        raise AnsibleError("Could not connect to M&M server")
+    # Maximum and current number of tries to connect to the Men&Mice API
+    MAXTRIES = 5
+    tries = 0
 
-    try:
-        json = answer.json()
-    except ValueError:
-        json = {}
+    while tries <= 4:
+        tries += 1
+        try:
+            answer = sess.get(url, auth=(user, passwd),
+                            headers=headers,
+                            params=params)
+        except requests.ConnectionError:
+            if tries == MAXTRIES:
+                raise AnsibleError("Could not connect to Men&Mice server")
+            else:
+                # There was a connection error, wait a little and retry
+                time.sleep(0.25)
 
-    display.vvv("statuscode  = |%s|" % answer.status_code)
-    display.vvv("answer_json = |%s|" % json)
+        try:
+            json = answer.json()
+        except ValueError:
+            json = {}
 
-    return answer.status_code, json
+        display.vvv("statuscode  = |%s|" % answer.status_code)
+        display.vvv("answer_json = |%s|" % json)
+
+        return answer.status_code, json
 
 
 class LookupModule(LookupBase):
@@ -176,7 +193,7 @@ class LookupModule(LookupBase):
     def run(self, terms, variables=None, **kwargs):
         """Variabele terms contains a list with supplied parameters.
 
-        - MMURL   -> The URL to connect to (M&M top URL)
+        - MMURL   -> The URL to connect to (Men&Mice top URL)
         - User    -> Userid to login with
         - Pass    -> Password to login with
         - Network -> The zone from which the free IP address(es) are found
@@ -205,6 +222,7 @@ class LookupModule(LookupBase):
         ping         = TRUEFALSE[kwargs.get('ping', True)]
         excludedhcp  = TRUEFALSE[kwargs.get('excludedhcp', False)]
         startaddress = kwargs.get('startaddress', "")
+        filter       = kwargs.get('filter', "")
 
         # Loop over all networks
         ret = []
@@ -226,8 +244,8 @@ class LookupModule(LookupBase):
             if rcode != 200:
                 raise AnsibleError("An api error occured. %s", answer)
 
-            # Some ranges found?? If the network does not exist or when there
-            #  are no more IPs available an empty list is returned
+            # Some ranges found? If the network does not exist or when there
+            # are no more IPs available an empty list is returned
             if not answer['result']['ranges']:
                 return []
 
@@ -243,6 +261,11 @@ class LookupModule(LookupBase):
                 params['startAddress'] = startaddress
             freeipurl = '%s/mmws/api/%s/NextFreeAddress' % (url, ref)
 
+            # Was a filter specified?
+            if filter:
+                freeipurl += '?filter=%s' % filter
+
+            # Display some debugging
             display.vvv("freeipurl    = |%s|" % freeipurl)
             display.vvv("params       = |%s|" % params)
             display.vvv("multi        = |%s|" % multi)

@@ -276,6 +276,7 @@ def run_module():
             # User present, delete
             http_method = "DELETE"
             url = "Users/%s" % user_ref
+            databody = {"saveComment": "Ansible API"}
         else:
             # User not present, done
             result = {

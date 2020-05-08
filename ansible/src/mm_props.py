@@ -237,7 +237,7 @@ def run_module():
             http_method = "DELETE"
             url = "%s/1/PropertyDefinitions/%s" % (DEST2URL[module.params.get('dest')],
                                                    module.params.get('name'))
-            databody = {}
+            databody = {"saveComment": "Ansible API"}
             result = mm.doapi(url, http_method, provider, databody)
         module.exit_json(**result)
 

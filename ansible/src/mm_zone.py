@@ -100,7 +100,7 @@ DOCUMENTATION = r'''
       description:
         - Custom properties for the zone
         - These properties must already exist
-`        - See also C(mm_props)
+        - See also C(mm_props)
       type: list
       required: False
     provider:
@@ -232,7 +232,7 @@ def run_module():
 
         http_method = "DELETE"
         url = "DNSZones/%s" % module.params.get('name')
-        databody = {}
+        databody = {"saveComment": "Ansible API"}
         result = mm.doapi(url, http_method, provider, databody)
         module.exit_json(**result)
 

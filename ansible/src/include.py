@@ -1,5 +1,5 @@
-# The API has another concept of true and false than Python does,
-# so 0 is true and 1 is false.
+# The API sometimes has another concept of true and false than Python
+# does, so 0 is true and 1 is false.
 TRUEFALSE = {
     True: 0,
     False: 1,
@@ -23,55 +23,75 @@ def doapi(url, method, provider, databody):
     Returns:
         - The response from the API call
         - The Ansible result dict
+
+    When connection errors arise, there will be a multiple of tries,
+    each a couple of seconds apart, this to handle high-availability
     """
     headers = {'Content-Type': 'application/json'}
     apiurl = "%s/mmws/api/%s" % (provider['mmurl'], url)
     result = {}
 
-    try:
-        resp = open_url(apiurl,
-                        method=method,
-                        url_username=provider['user'],
-                        url_password=provider['password'],
-                        data=json.dumps(databody),
-                        validate_certs=False,
-                        headers=headers)
+    # Maximum and current number of tries to connect to the Men&Mice API
+    MAXTRIES = 5
+    tries = 0
 
-        # Get all API data and format return message
-        response = resp.read()
-        if resp.code == 200:
-            # 200 => Data in the body
-            result['message'] = json.loads(response)
-        elif resp.code == 201:
-            # 201 => Sometimes data in the body??
-            try:
+    while tries <= 4:
+        tries += 1
+        try:
+            resp = open_url(apiurl,
+                            method=method,
+                            url_username=provider['user'],
+                            url_password=provider['password'],
+                            data=json.dumps(databody),
+                            validate_certs=False,
+                            headers=headers)
+
+            # Response codes of the API are:
+            #  - 200 => All OK, data returned in the body
+            #  - 204 => All OK, no data returned in the body
+            #  - *   => Something is wrong, error data in the body
+            # But sometimes there is a situation where the response code
+            # was 201 and with data in the body, so that is picked up as well
+
+            # Get all API data and format return message
+            response = resp.read()
+            if resp.code == 200:
+                # 200 => Data in the body
                 result['message'] = json.loads(response)
-            except ValueError:
-                result['message'] = ""
-        else:
-            # No response from API (204 => No data)
-            try:
-                result['message'] = resp.reason
-            except AttributeError:
-                result['message'] = ""
-        result['changed'] = True
-    except HTTPError as err:
-        errbody = json.loads(err.read().decode())
-        result['changed'] = False
-        result['warnings'] = "%s: %s (%s)" % (err.msg,
-                                              errbody['error']['message'],
-                                              errbody['error']['code']
-                                              )
-    except URLError as err:
-        raise AnsibleError("Failed lookup url for %s : %s" % (apiurl, to_native(err)))
-    except SSLValidationError as err:
-        raise AnsibleError("Error validating the server's certificate for %s: %s" % (apiurl, to_native(err)))
-    except ConnectionError as err:
-        raise AnsibleError("Error connecting to %s: %s" % (apiurl, to_native(err)))
+            elif resp.code == 201:
+                # 201 => Sometimes data in the body??
+                try:
+                    result['message'] = json.loads(response)
+                except ValueError:
+                    result['message'] = ""
+            else:
+                # No response from API (204 => No data)
+                try:
+                    result['message'] = resp.reason
+                except AttributeError:
+                    result['message'] = ""
+            result['changed'] = True
+        except HTTPError as err:
+            errbody = json.loads(err.read().decode())
+            result['changed'] = False
+            result['warnings'] = "%s: %s (%s)" % (err.msg,
+                                                  errbody['error']['message'],
+                                                  errbody['error']['code']
+                                                  )
+        except URLError as err:
+            raise AnsibleError("Failed lookup url for %s : %s" % (apiurl, to_native(err)))
+        except SSLValidationError as err:
+            raise AnsibleError("Error validating the server's certificate for %s: %s" % (apiurl, to_native(err)))
+        except ConnectionError as err:
+            if tries == MAXTRIES:
+                raise AnsibleError("Error connecting to %s: %s" % (apiurl, to_native(err)))
+            else:
+                # There was a connection error, wait a little and retry
+                time.sleep(0.25)
 
-    if result.get('message', "") == "No Content":
-        result['message'] = ""
-    return result
+        if result.get('message', "") == "No Content":
+            result['message'] = ""
+        return result
 
 
 def getrefs(objtype, provider):

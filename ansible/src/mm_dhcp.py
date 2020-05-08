@@ -208,7 +208,6 @@ def run_module():
                 for reservation in reservations:
                     # Build a databody from the current reservation to check
                     # if it is already correct
-                    print(reservation)
                     reserveprops = [
                         {"name": "name", "value": reservation['name']},
                         {"name": "clientIdentifier", "value": reservation['clientIdentifier']},
@@ -233,13 +232,6 @@ def run_module():
                             {"name": "nextServer", "value": module.params.get('nextserver', '')}
                         ]
                     }
-                    # Define all custom properties, if needed
-                    if module.params.get('customproperties', None):
-                        for prop in module.params.get('customproperties'):
-                            k = prop['name']
-                            v = prop['value']
-                        databody["properties"].append({"name": k, "value": v})
-
                     if reserveprops == databody['properties']:
                         result['message'] = "Reservation already done"
                     else:
@@ -248,7 +240,7 @@ def run_module():
             else:
                 # Delete the reservations. Empty body, as the ref is sufficient
                 http_method = "DELETE"
-                databody = {}
+                databody = {"saveComment": "Ansible API"}
                 for ref in resp['ipamRecord']['dhcpReservations']:
                     if ipaddress in ref['addresses']:
                         url = ref['ref']
