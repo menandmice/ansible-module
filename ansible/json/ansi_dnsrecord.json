@@ -1,8 +1,11 @@
 { "ANSIBLE_MODULE_ARGS": {
     "state": "present",
-    "dynamic": true,
-    "type": "master",
-    "authority": "dns1.example.net",
+    "name": "beatles",
+    "dnszone": "testzone",
+    "data": "192.168.10.12",
+    "comment": "From The API side",
+    "ttl": "40",
+    "rrtype": "A",
     "provider" : {
         "mmurl": "http://mandm.example.net",
         "user": "apidude",

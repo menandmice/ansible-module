@@ -76,8 +76,12 @@ With an Ansible JSON file looking like:
 
     - Get IPAM on IP address
     - Get DNSRecords ref
-      - Create DNS Record
-      - Get DNS Record and change
+      if found:
+        - Create DNS Record
+        - Get DNS Record and change
+      otherwise:
+        - Get DNSZoneRef
+        - Create DNS record
 
 Not that often then:
 [X] Create/delete/modify a DHCP reservation in an existing scope
