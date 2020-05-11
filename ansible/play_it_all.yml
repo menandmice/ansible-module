@@ -1,0 +1,58 @@
+---
+- name: Men&Mice test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  vars:
+    network: nononet
+
+  tasks:
+    - name: Ansible information
+      debug:
+        msg:
+          - "Ansible version   : {{ ansible_version.full }}"
+          - "Python version    : {{ ansible_facts['python_version'] }}"
+          - "Python executable : {{ ansible_facts['python']['executable'] }}"
+
+    - name: define custom properties for this network range
+      mm_props:
+        name: location
+        state: present
+        proptype: text
+        dest: ipaddress
+        provider: "{{ provider }}"
+
+    - name: Set free IP addresses as a fact
+      set_fact:
+        freeips: "{{ query('mm_freeip', provider, network, claim=60, excludedhcp=True) }}"
+
+    - name: Get the free IP address and show info
+      debug:
+        msg:
+          - "Free IPs           : {{ freeips }}"
+          - "Queried network(s) : {{ network }}"
+
+    - name: Claim IP address
+      mm_claimip:
+        state: present
+        ipaddress: "{{ freeips }}"
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    # The `mm_freeip` plugin always returns a list, but the request was for just 1
+    # IP address. The `mm_dnsrecord` only needs a single IP address. That's why the
+    # list-slice `[0]` is used.
+    - name: Set a DNS record for the claimed IP
+      mm_dnsrecord:
+        dnszone: testzone
+        data: testhost
+        name: "{{ freeips[0] }}"
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Get all info for this IP address
+      debug:
+        var: freeipinfo
+      vars:
+        freeipinfo: "{{ query('mm_ipinfo', provider, freeips[0]) | to_nice_json }}"

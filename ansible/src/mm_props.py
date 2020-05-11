@@ -37,68 +37,68 @@ DOCUMENTATION = r'''
     - Manage DNS-Zone custom properties in the Men&Mice Suite
   options:
     state:
-        description: The state of the properties or properties
-        type: bool
-        required: False
-        choices: [ absent, present ]
-        default: present
+      description: The state of the properties or properties
+      type: bool
+      required: False
+      choices: [ absent, present ]
+      default: present
     name:
-        description: Name of the property
-        required: True
-        type: str
+      description: Name of the property
+      required: True
+      type: str
     proptype:
-        description:
-          - Type of the property
-          - These are not the types as described in the API, but the types
-            as you can see them in the Men&Mice Management Console
-        choices: [ text, yesno, ipaddress, number ]
-        required: False
-        type: str
-        default: text
+      description:
+        - Type of the property
+        - These are not the types as described in the API, but the types
+          as you can see them in the Men&Mice Management Console
+      choices: [ text, yesno, ipaddress, number ]
+      required: False
+      type: str
+      default: text
     dest:
-        description: Where to define the custom property
-        choices: [ dnsserver, dhcpserver, zone, iprange, ipaddress, device, interface, cloudnet, cloudaccount ]
-        required: True
-        type: str
+      description: Where to define the custom property
+      choices: [ dnsserver, dhcpserver, zone, iprange, ipaddress, device, interface, cloudnet, cloudaccount ]
+      required: True
+      type: str
     madatory:
-        description: Is the property mandatory
-        required: False
-        type: bool
-        default: False
+      description: Is the property mandatory
+      required: False
+      type: bool
+      default: False
     system:
-        description: Is the property system defined
-        required: False
-        type: bool
-        default: False
+      description: Is the property system defined
+      required: False
+      type: bool
+      default: False
     readonly:
-        description: Is the property read only
-        required: False
-        type: bool
-        default: False
+      description: Is the property read only
+      required: False
+      type: bool
+      default: False
     multiline:
-        description: Is the property multiline
-        required: False
-        type: bool
-        default: False
-    defaultvalue
-        description: Default value of the property
-        required: False
-        type: str
+      description: Is the property multiline
+      required: False
+      type: bool
+      default: False
+    defaultvalue:
+      description: Default value of the property
+      required: False
+      type: str
     listitems:
-        description: The items in the selection list.
-        required: False
-        type: list
+      description: The items in the selection list.
+      required: False
+      type: list
     cloudtags:
-        description: Associated cloud tags
-        required: False
-        type: list
+      description: Associated cloud tags
+      required: False
+      type: list
     updateexisting:
-        description:
-         - Should objects be updated with the new values
-         - Only valid when updating a property, otherwise ignored
-        required: False
-        type: bool
-        default: False
+      description:
+        - Should objects be updated with the new values
+        - Only valid when updating a property, otherwise ignored
+      required: False
+      type: bool
+      default: False
     provider:
       description: Definition of the Men&Mice suite API provider
       type: dict

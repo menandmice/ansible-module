@@ -289,7 +289,7 @@ class LookupModule(LookupBase):
 
             # Some ranges found? If the network does not exist or when there
             # are no more IPs available an empty list is returned
-            if result.get('message').get('totalResults', 1) == 0:
+            if result.get('message').get('result').get('totalResults', 1) == 0:
                 return []
 
             # Get the range reference
