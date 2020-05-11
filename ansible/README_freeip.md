@@ -7,60 +7,29 @@ in a certain network, defined in the Men&Mice suite.
 
 ### Requirements
 
-The Men&Mice FreeIP plugin needs Ansible to work with Ansible version 2.7
-as the minimum. Either Python version 2 and Python version 3 will do.
+The Men&Mice FreeIP plugin needs Ansible to work with Ansible version
+2.7 as the minimum. Either Python version 2 and Python version 3 will
+do.
 
 Of course the Men&Mice Suite is required with an API user with password
 that has full rights in the Men&Mice Suite!
 
-### Extra library
-
-As the Men&Mice FreeIP plugin uses the `requests` module, this needs to
-be installed on the Ansible control node. How to install this, depends on
-your underlying operating system and the Python version used for Ansible.
-Some examples:
-
-```
-# Python2
-pip install requests
-
-# Python3
-pip install requests
-
-# RHEL / CentOS7 with Python 2
-yum -y install python2-requests
-
-# RHEL / CentOS7 with Python 3
-yum -y install python36-requests
-
-# RHEL8 / CentOS8 with Python 2
-dnf -y install python2-requests
-
-# RHEL8 / CentOS8 with Python 3
-dnf -y install python3-requests
-
-# Debian 10 / Ubuntu 18.04 LTS with Python 2
-apt-get -y install python-requests
-
-# Debian 10 / Ubuntu 18.04 LTS with Python 3
-apt-get -y install python3-requests
-```
-
 ### Plugin installation
 
-In the `ansible` top directory create a directory `plugins/lookups`
-and place the file `mm_freeip.py` in this directory.
+In the `ansible` top directory create a directory `plugins/lookups` and
+place the file `mm_freeip.py` in this directory.
 
-Now point Ansible to this directory so ansible can find the plugin.
-In the `ansible.cfg` set the `lookup_plugins` to search this directory
-as well.
+Now point Ansible to this directory so ansible can find the plugin.  In
+the `ansible.cfg` set the `lookup_plugins` to search this directory as
+well.
 
 ```
 lookup_plugins = /usr/share/ansible_plugins/lookup_plugins:/etc/ansible/plugins/lookup
 ```
 
-Of course it is possible to place the plugin in one of the standard Ansible
-plugin directories (`${HOME}/.ansible/plugins/lookup` or `/usr/share/ansible/plugins/lookup`)
+Of course it is possible to place the plugin in one of the standard
+Ansible plugin directories (`${HOME}/.ansible/plugins/lookup` or
+`/usr/share/ansible/plugins/lookup`)
 
 An easy way to see if the plugin is installed correctly is:
 
@@ -70,13 +39,13 @@ ansible-doc -t lookup mm_freeip
 
 ## Usage
 
-When using the Men&Mice FreeIP plugin something needs to be taken into account.
-When running an Ansible lookup plugin, this lookup action takes place every time
-the variable is referenced. So it will not be possible to claim an IP address
-for further reference, this way. This has to do with the way Ansible works.
-A solution for this is to assign all collected IP addresses to an Ansible
-fact, but here you need to make sure the factname is not used over multiple
-hosts.
+When using the Men&Mice FreeIP plugin something needs to be taken into
+account.  When running an Ansible lookup plugin, this lookup action
+takes place every time the variable is referenced. So it will not be
+possible to claim an IP address for further reference, this way. This
+has to do with the way Ansible works.  A solution for this is to assign
+all collected IP addresses to an Ansible fact, but here you need to make
+sure the factname is not used over multiple hosts.
 
 Example usage:
 
@@ -88,18 +57,17 @@ Example usage:
   become: false
 
   vars:
-    url: http://mandm.example.net
-    user: apiuser
-    password: apipassword
+    provider:
+      mmurl: http://mandm.example.net
+      user: apiuser
+      password: apipassword
     network: examplenet
 
   tasks:
     - name: Set free IP addresses as a fact
       set_fact:
         freeips: "{{ query('mm_freeip',
-                           url,
-                           user,
-                           password,
+                           provider,
                            network,
                            multi=15,
                            claim=60,
