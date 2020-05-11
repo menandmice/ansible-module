@@ -102,7 +102,8 @@ Not that often then:
         - TonK: If I understood correctly what David said, the HA
           functionality is created by a round-robin DNS entry.
           So, when one server is down, I just wait a little and
-          give it a retry.
+          give it a retry. This is what I have implemented in
+          the API call, at the moment.
     [X] Handle errors reported by Men&Mice Central API
 
 ## Generic
@@ -112,6 +113,8 @@ Not that often then:
 [ ] General documentation for Ansible user
 [ ] Inventory information to Ansible
 [ ] Ansible Playbook
+    - Currently a test playbook per module, eventually a playbook
+      that does something useful.
 [ ] Ansible roles for Men&Mice
 [ ] Support generically available Ansible version and
     support newer than 2.7
@@ -122,8 +125,8 @@ Not that often then:
 ## DNS
 
 [ ] Get/Set properties for DNS and IPAM
-[ ] Create a DNS Resource record in Men&Mice
-[ ] Modify a DNS Resource record in Men&Mice
+[X] Create a DNS Resource record in Men&Mice
+[X] Modify a DNS Resource record in Men&Mice
 [ ] Set hostname for IP address in Men&Mice
 
 ## IPAM

@@ -5,9 +5,10 @@
   become: false
 
   vars:
-    mmurl: http://mandm.example.net
-    user: apidude
-    password: TheAPIDude
+    provider:
+      mmurl: http://mandm.example.net
+      user: apidude
+      password: TheAPIDude
     network:
       - nononet
 
@@ -15,11 +16,9 @@
     - name: Set free IP addresses as a fact
       set_fact:
         freeips: "{{ query('mm_freeip',
-                         mmurl,
-                         user,
-                         password,
+                         provider,
                          network,
-                         multi=5,
+                         multi=225,
                          claim=60,
                          excludedhcp=True,
                          ping=True)

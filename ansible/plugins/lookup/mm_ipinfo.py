@@ -8,14 +8,20 @@
 # -*- coding: utf-8 -*-
 #
 # Copyright: (c) 2020, Men&Mice
+# GNU General Public License v3.0
+# see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+#
+# Copyright: (c) 2020, Men&Mice
 # GNU General Public License v3.0 (see
 # COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 #
 # python 3 headers, required if submitting to Ansible
 """Ansible lookup plugin.
 
-Lookup plugin for finding the next free IP address in
-a network zone in the Men&Mice Suite.
+Lookup plugin for finding information about an IP address
+in the Men&Mice Suite.
 """
 
 from __future__ import (absolute_import, division, print_function)
@@ -38,21 +44,12 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
                     'supported_by': 'community'}
 
 DOCUMENTATION = r"""
-    lookup: mm_freeip
+    lookup: mm_ipinfo
     author: Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
     version_added: "2.7"
-    short_description: Find free IP address(es) in a given network range in the Men&Mice Suite
+    short_description: Find information Rof an IP address
     description:
-      - This lookup returns free IP address(es) in a range or ranges
-        specified by the network names C(e.g. examplenet). This can be
-        a string or a list
-      - If multiple IP addresses are returned, the results will be returned as
-        a comma-separated list.
-        In such cases you may want to pass option C(wantlist=True) to the plugin,
-        which will result in the record values being returned as a list
-        over which you can iterate later on (or use C(query) instead)
-    requirements:
-      - requests (python library, https://requests.readthedocs.io)
+      - This lookup collects info of an IP address
     options:
       provider:
         description: Definition of the Men&Mice suite API provider
@@ -72,89 +69,30 @@ DOCUMENTATION = r"""
             required: True
             type: str
             no_log: True
-      network:
+      ipaddress:
         description:
-          - network zone(s) from which the first free IP address is to be found.
-          - This is either a single network or a list of networks
+          - The IP address that is examined
         type: str
         required: True
-      multi:
-        description: Get a list of x number of free IP addresses from the
-          requested zones
-        type: int
-        required: False
-        default: False
-      claim:
-        description: Claim the IP address(es) for the specified amount of time
-        type: int
-        required: False
-        default: False
-      ping:
-        description: ping the address found before returning
-        type: bool
-        required: False
-        default: False
-      excludedhcp:
-        description: exclude DHCP reserved ranges from result
-        type: bool
-        required: False
-        default: False
-      startaddress:
-        description:
-          - Start address when looking for the next free address
-          - When the start address is not in de zone it will be ignored
-        type: str
-        required: False
-        default: None
-      filter:
-        description:
-          - Men&Mice Suite filter statement
-          - Filter validation is done by the Men&Mice suite, not in the plugin
-          - More filter info on https://docs.menandmice.com/display/MM930/Quickfilter
-        type: str
-        required: False
-        default: None
 """
 
 EXAMPLES = r"""
-- name: get the first free IP address in a zone
+- name: Find all info for IP 192.168.10.11
   debug:
-    msg: "This is the next free IP: {{ lookup('mm_freeip', provider, network) }}"
+    msg: "Info for IP: {{ lookup('mm_ipinfo', provider, '192.168.10.11') }}"
   vars:
     provider:
       mmurl: http://mmsuite.example.net
       user: apiuser
       password: apipasswd
-    network: examplenet
-
-- name: get the first free IP addresses in multiple zones
-  debug:
-    msg: "This is the next free IP: {{ query('mm_freeip', provider, network, multi=5, claim=60) }}"
-  vars:
-    mmurl: http://mmsuite.example.net
-    user: apiuser
-    passwd: apipasswd
-    network:
-      - examplenet
-      - examplecom
-
-  - name: get the first free IP address in a zone and ping
-    debug:
-      msg: "This is the next free IP: {{ query('mm_freeip', provider, network, ping=True) }}"
-    vars:
-      mmurl: http://mmsuite.example.net
-      user: apiuser
-      passwd: apipasswd
-      network: examplenet
 """
 
 RETURN = r"""
 _list:
-  description: A list containing the free IP address(es) in the network range
+  description: A dict containing all results
   fields:
     0: IP address(es)
 """
-
 
 display = Display()
 
@@ -255,71 +193,27 @@ class LookupModule(LookupBase):
     def run(self, terms, variables=None, **kwargs):
         """Variabele terms contains a list with supplied parameters.
 
-        - provider -> Definition of the Men&Mice suite API provider
-        - Network  -> The zone from which the free IP address(es) are found
-                      Either: CIDR notation, network notation or network name
-                      e.g. 192.168.63.0/24 or 192.168.63.0 or examplenet
-                      Either string or list
+        - provider  -> Definition of the Men&Mice suite API provider
+        - IPAddress -> The IPAddress to examine
         """
+        # Is the requests module available
         # Sufficient parameters
         if len(terms) < 2:
-            raise AnsibleError("Insufficient parameters. Need at least: MMURL, User, Password and network(s).")
+            raise AnsibleError("Insufficient parameters. Need at least: MMURL, User, Password and IPAddress.")
+
+        # Build the result list
+        ret = []
 
         # Get the parameters
-        provider = terms[0]
-        if isinstance(terms[1], str):
-            networks = [terms[1].strip()]
-        else:
-            networks = list(map(str.strip, terms[1]))
-        multi        = kwargs.get('multi', 1)
-        claim        = kwargs.get('claim', 0)
-        ping         = TRUEFALSE[kwargs.get('ping', True)]
-        excludedhcp  = TRUEFALSE[kwargs.get('excludedhcp', False)]
-        startaddress = kwargs.get('startaddress', "")
-        ipfilter     = kwargs.get('filter', "")
+        provider  = terms[0]
+        ipaddress = terms[1].strip()
 
-        # Loop over all networks
-        ret = []
-        for network in networks:
-            # Get the requested network ranges
-            http_method = "GET"
-            url = "Ranges"
-            databody = {'filter': network}
-            result = doapi(url, http_method, provider, databody)
+        # Call the API to find info
+        http_method = "GET"
+        url = "%s/%s" % ('IPAMRecords', ipaddress)
+        databody = {}
+        result = doapi(url, http_method, provider, databody)
 
-            # Some ranges found? If the network does not exist or when there
-            # are no more IPs available an empty list is returned
-            if result.get('message').get('totalResults', 1) == 0:
-                return []
-
-            # Get the range reference
-            ref = result['message']['result']['ranges'][0]['ref']
-
-            # Build parameter list
-            databody = {}
-            databody['temporaryClaimTime'] = claim
-            databody['ping']               = ping
-            databody['excludeDHCP']        = excludedhcp
-            if startaddress:
-                databody['startAddress'] = startaddress
-            url = '%s/NextFreeAddress' % ref
-
-            # Was a filter specified?
-            if ipfilter:
-                url += '?filter=%s' % ipfilter
-
-            # Get requested number of free IP addresses
-            for dummy in range(multi):
-                result = doapi(url, http_method, provider, databody)
-                display.vvv("loopanswer  = |%s|" % result)
-
-                # If there are no more free IP Addresses, the API returns
-                # an empty result.
-                if result['message'] == '':
-                    raise AnsibleModuleError("Insufficient free IP addresses for '%s'" % network)
-
-                # Keep what was found
-                ret.append(to_text(result['message']['result']['address']))
-
-        # Return the result
+        if isinstance(result, dict):
+            ret.append(result.get('message', {}).get('result', {}).get('ipamRecord', {}))
         return ret

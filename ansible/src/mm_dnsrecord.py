@@ -59,7 +59,8 @@ DOCUMENTATION = r'''
     rrtype:
       description: RR Type for the IP address
       type: str
-      required: True
+      required: False
+      default: A
       choices: [
                 A, AAAA, CNAME, DNAME,
                 DLV, DNSKEY, DS, HINFO,
@@ -113,7 +114,7 @@ DOCUMENTATION = r'''
 '''
 
 EXAMPLES = r'''
-- name: Set deinition for custom properties
+- name: Set DNS record in zone for a defined name
   mm_dnsrecord:
     name: beatles
     state: present
@@ -162,7 +163,7 @@ def run_module():
         enabled=dict(type='bool', required=False, default=True),
         aging=dict(type='int', required=False, default=0),
         dnszone=dict(type='str', required=True),
-        rrtype=dict(type='str', required=True, choices=RRTYPES),
+        rrtype=dict(type='str', required=False, default='A', choices=RRTYPES),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -202,9 +203,10 @@ def run_module():
     # Try to get all name of DNS Zone info
     refs = "DNSZones?filter=%s" % module.params.get('dnszone')
     zoneresp = mm.get_single_refs(refs, provider)
-    if zoneresp.get('invalid', False):
+    if zoneresp.get('totalResults', 1) == 0:
         # Zone does not exists
-        # return collected results
+        # Set warning
+        result['warnings'] = "DNS Zone '%s' does not exist" % module.params.get('dnszone')
         module.exit_json(**result)
     zoneref = zoneresp['dnsZones'][0]['ref']
 
@@ -227,8 +229,6 @@ def run_module():
         module.exit_json(**result)
 
     # Come here the DNS record should be present
-    print("=-" * 40)
-    print(iparesp)
     if iparesp.get('totalResults', 1) == 0:
         # Absent, create
         http_method = "POST"

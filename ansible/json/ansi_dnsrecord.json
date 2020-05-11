@@ -1,7 +1,7 @@
 { "ANSIBLE_MODULE_ARGS": {
     "state": "present",
     "name": "beatles",
-    "dnszone": "testzone",
+    "dnszone": "notthetestzone",
     "data": "192.168.10.12",
     "comment": "From The API side",
     "ttl": "40",

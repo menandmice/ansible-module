@@ -50,7 +50,7 @@ DOCUMENTATION = r'''
       description:
         - Custom properties for the zone
         - These properties must already exist
-`        - See also C(mm_props)
+        - See also C(mm_props)
       type: list
       required: False
     provider:
