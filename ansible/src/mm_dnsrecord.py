@@ -284,8 +284,6 @@ def run_module():
                 change = True
                 break
 
-        print(databody)
-        print(url)
         # If change needed, call the API
         if change:
             result = mm.doapi(url, http_method, provider, databody)
