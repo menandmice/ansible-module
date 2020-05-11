@@ -202,7 +202,6 @@ def run_module():
     # Try to get all name of DNS Zone info
     refs = "DNSZones?filter=%s" % module.params.get('dnszone')
     zoneresp = mm.get_single_refs(refs, provider)
-    print("=" * 80)
     if zoneresp.get('invalid', False):
         # Zone does not exists
         # return collected results
@@ -228,6 +227,8 @@ def run_module():
         module.exit_json(**result)
 
     # Come here the DNS record should be present
+    print("=-" * 40)
+    print(iparesp)
     if iparesp.get('totalResults', 1) == 0:
         # Absent, create
         http_method = "POST"
@@ -249,10 +250,12 @@ def run_module():
         }
         result = mm.doapi(url, http_method, provider, databody)
     else:
+        # Present, check if an update is needed
         iparef = iparesp['dnsRecords'][0]['ref']
         http_method = "PUT"
         url = "%s" % iparef
-        print('iparesp = ', iparesp['dnsRecords'][0])
+        # Not all parameters are past for an update, as some are read/only
+        # e.g. 'aging'
         databody = {
             "saveComment": "Ansible API",
             "ref": iparef,
@@ -263,11 +266,23 @@ def run_module():
                 {"name": "data", "value": module.params.get('data')},
                 {"name": "comment", "value": module.params.get('comment', "")},
                 {"name": "enabled", "value": module.params.get('enabled')},
-                {"name": "aging", "value": module.params.get('aging', 0)},
             ]
         }
-        print('databody = ', databody)
-        result = mm.doapi(url, http_method, provider, databody)
+
+        # Check if the requested data is equal to the current data
+        change = False
+        for key in databody['properties']:
+            name = key['name']
+            val  = key['value']
+
+            # Check if it is in the current values
+            if val != iparesp['dnsRecords'][0].get(name, 'unknown'):
+                change = True
+                break
+
+        # If change needed, call the API
+        if change:
+            result = mm.doapi(url, http_method, provider, databody)
 
     # return collected results
     module.exit_json(**result)

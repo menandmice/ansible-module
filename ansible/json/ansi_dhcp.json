@@ -2,7 +2,7 @@
     "state": "present",
     "name": "patertje",
     "ipaddress": "172.16.17.8",
-    "macaddress": "44:55:66:77:88:66",
+    "macaddress": "44:55:66:77:88:77",
     "provider" : {
         "mmurl": "http://mandm.example.net",
         "user": "apidude",

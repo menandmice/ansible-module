@@ -206,18 +206,6 @@ def run_module():
                 reservations = resp['ipamRecord']['dhcpReservations']
                 http_method = "PUT"
                 for reservation in reservations:
-                    # Build a databody from the current reservation to check
-                    # if it is already correct
-                    reserveprops = [
-                        {"name": "name", "value": reservation['name']},
-                        {"name": "clientIdentifier", "value": reservation['clientIdentifier']},
-                        {"name": "addresses", "value": reservation['addresses'][0]},
-                        {"name": "ddnsHostName", "value": reservation['ddnsHostName']},
-                        {"name": "filename", "value": reservation['filename']},
-                        {"name": "serverName", "value": reservation['serverName']},
-                        {"name": "nextServer", "value": reservation['nextServer']},
-                    ]
-
                     databody = {
                         "ref": reservation['ref'],
                         "saveComment": "Ansible API",
@@ -232,9 +220,26 @@ def run_module():
                             {"name": "nextServer", "value": module.params.get('nextserver', '')}
                         ]
                     }
-                    if reserveprops == databody['properties']:
-                        result['message'] = "Reservation already done"
-                    else:
+
+                    # Check if the requested data is equal to the current data
+                    # How lovely: The API returns the IP address as a list, so it seems
+                    # logical to offer the IP address as a list as well. But this is
+                    # not allowed, IP address needs to be a string. So that needs
+                    # to be taken into consideration.
+                    change = False
+                    for key in databody['properties']:
+                        name = key['name']
+                        val  = key['value']
+                        if name == 'addresses' and isinstance(val, str):
+                            val = [val]
+
+                        # Check if it is in the current values
+                        if val != reservation.get(name, 'unknown'):
+                            change = True
+                            break
+
+                    if change:
+                        result['changed'] = True
                         url = "%s" % reservation['ref']
                         result = mm.doapi(url, http_method, provider, databody)
             else:
