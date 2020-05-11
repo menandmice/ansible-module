@@ -70,8 +70,9 @@ DOCUMENTATION = r'''
       ]
     ttl:
       description: Specifies the Time-To-Live of the DNS record
-      type: str
+      type: int
       required: False
+      default: 0 (Same as zone)
     comment:
       description:
         - Comment string for the record.
@@ -158,7 +159,7 @@ def run_module():
         state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
         name=dict(type='str', required=True),
         data=dict(type='str', required=True),
-        ttl=dict(type='str', required=False),
+        ttl=dict(type='int', required=False, default=0),
         comment=dict(type='str', required=False),
         enabled=dict(type='bool', required=False, default=True),
         aging=dict(type='int', required=False, default=0),
@@ -239,15 +240,17 @@ def run_module():
                 {
                     "name": module.params.get('name'),
                     "type": module.params.get('rrtype'),
-                    "ttl": module.params.get('ttl', ""),
                     "data": module.params.get('data'),
-                    "comment": module.params.get('comment', ""),
+                    "comment": module.params.get('comment', ''),
                     "enabled": module.params.get('enabled'),
                     "aging": module.params.get('aging', 0),
                     "dnsZoneRef": zoneref
                 }
             ]
         }
+        if module.params.get('ttl'):
+            databody['dnsRecords'][0]['ttl'] = str(module.params.get('ttl'))
+
         result = mm.doapi(url, http_method, provider, databody)
     else:
         # Present, check if an update is needed
@@ -255,19 +258,20 @@ def run_module():
         http_method = "PUT"
         url = "%s" % iparef
         # Not all parameters are past for an update, as some are read/only
-        # e.g. 'aging'
+        # e.g. 'type', 'aging'
         databody = {
             "saveComment": "Ansible API",
             "ref": iparef,
             "properties": [
                 {"name": "name", "value": module.params.get('name')},
-                {"name": "type", "value": module.params.get('rrtype')},
-                {"name": "ttl", "value": module.params.get('ttl', "")},
                 {"name": "data", "value": module.params.get('data')},
                 {"name": "comment", "value": module.params.get('comment', "")},
                 {"name": "enabled", "value": module.params.get('enabled')},
             ]
         }
+        if module.params.get('ttl'):
+            databody['properties'].append({'name': 'ttl',
+                                           'value': str(module.params.get('ttl'))})
 
         # Check if the requested data is equal to the current data
         change = False
@@ -280,6 +284,8 @@ def run_module():
                 change = True
                 break
 
+        print(databody)
+        print(url)
         # If change needed, call the API
         if change:
             result = mm.doapi(url, http_method, provider, databody)

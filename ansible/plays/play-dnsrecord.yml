@@ -42,6 +42,19 @@
         provider: "{{ provider }}"
       delegate_to: localhost
 
+    - name: Set DNS record with errornous values
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: AAAA
+        dnszone: testzone
+        data: 192.168.10.127
+        comment: From The API side
+        ttl: apple
+        provider: "{{ provider }}"
+      delegate_to: localhost
+      ignore_errors: true
+
     - name: Change record
       mm_dnsrecord:
         state: present
