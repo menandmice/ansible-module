@@ -13,7 +13,7 @@
   tasks:
     - name: Set get IP info
       set_fact:
-        ipinfo: "{{ query('mm_ipinfo', provider, '172.16.12.13') }}"
+        ipinfo: "{{ query('mm_ipinfo', provider, '172.16.17.2') }}"
 
     - name: Get the free IP address and show info
       debug:

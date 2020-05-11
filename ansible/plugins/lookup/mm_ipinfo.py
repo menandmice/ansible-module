@@ -214,6 +214,35 @@ class LookupModule(LookupBase):
         databody = {}
         result = doapi(url, http_method, provider, databody)
 
+        # Collect all information
         if isinstance(result, dict):
-            ret.append(result.get('message', {}).get('result', {}).get('ipamRecord', {}))
+            res = result['message']['result']['ipamRecord']
+            ret.append({'address': res['address']})
+            ret.append({'claimed': res['claimed']})
+            ret.append({'state': res['state']})
+
+            # If defined in DNS
+            if res['dnsHosts']:
+                dns = {
+                    'name': res['dnsHosts'][0]['dnsRecord']['name'],
+                    'type': res['dnsHosts'][0]['dnsRecord']['type'],
+                    'ttl': res['dnsHosts'][0]['dnsRecord']['ttl'],
+                    'comment': res['dnsHosts'][0]['dnsRecord']['comment'],
+                    'enabled': res['dnsHosts'][0]['dnsRecord']['enabled']
+                }
+                ret.append({'dnshosts': dns})
+
+            # If defined in DHCP
+            if res['dhcpReservations']:
+                dhcp = {
+                    'name': res['dhcpReservations'][0]['name'],
+                    'clientidentifier': res['dhcpReservations'][0]['clientIdentifier'],
+                    'addresses': res['dhcpReservations'][0]['addresses'],
+                    'ddnshostname': res['dhcpReservations'][0]['ddnsHostName'],
+                }
+                ret.append({'dhcpReservations': dhcp})
+
+            # If there are custom properties
+            ret.append({'customProperties': res['customProperties']})
+
         return ret

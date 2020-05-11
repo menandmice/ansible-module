@@ -125,9 +125,10 @@ Not that often then:
 ## DNS
 
 [ ] Get/Set properties for DNS and IPAM
+    - Can be set, plugin is under way for getting it
 [X] Create a DNS Resource record in Men&Mice
 [X] Modify a DNS Resource record in Men&Mice
-[ ] Set hostname for IP address in Men&Mice
+[X] Set hostname for IP address in Men&Mice
 
 ## IPAM
 
