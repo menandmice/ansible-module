@@ -5,10 +5,6 @@
   become: false
 
   vars:
-    provider:
-      mmurl: http://mandm.example.net
-      user: apidude
-      password: TheAPIDude
     network:
       - nononet
 

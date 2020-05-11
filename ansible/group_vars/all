@@ -1,0 +1,5 @@
+---
+provider:
+  mmurl: http://mmsuite.example.net
+  user: apidude
+  password: TheAPIDude

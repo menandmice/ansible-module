@@ -39,18 +39,18 @@ With an Ansible JSON file looking like:
 ```
 { "ANSIBLE_MODULE_ARGS": {
     "state": "present",
-    "name": "TonsZone",
-    "nameserver": "mandm.example.net",
+    "name": "testzone",
+    "nameserver": "mmsuite.example.net",
     "masters": "172.16.32.65",
     "dynamic": true,
     "servtype": "Master",
     "authority": "dns1.example.net",
     "customproperties": [
-      {"name": "owner", "value": "Beppie di Klaveri"},
-      {"name": "place", "value": "At Groesbeek"}
+      {"name": "owner", "value": "Ton Kersten"},
+      {"name": "place", "value": "Groesbeek"}
     ],
     "provider" : {
-        "mmurl": "http://mandm.example.net",
+        "mmurl": "http://mmsuite.example.net",
         "user": "apidude",
         "password": "TheAPIDude"
     }

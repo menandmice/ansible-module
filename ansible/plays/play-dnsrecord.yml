@@ -4,12 +4,6 @@
   connection: local
   become: false
 
-  vars:
-    provider:
-      mmurl: http://mandm.example.net
-      user: apidude
-      password: TheAPIDude
-
   tasks:
     - name: Ansible information
       debug:
