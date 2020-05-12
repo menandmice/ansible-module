@@ -79,13 +79,6 @@ DOCUMENTATION = r'''
       description: Clear properties that are not explicitly set
       type: bool
       required: False
-    customproperties:
-      description:
-        - Custom properties for the zone
-        - These properties must already exist
-        - See also C(mm_props)
-      type: list
-      required: False
     provider:
       description: Definition of the Men&Mice suite API provider
       type: dict
@@ -146,7 +139,6 @@ def run_module():
         servername=dict(type='str', required=False, default=""),
         nextserver=dict(type='str', required=False, default=""),
         deleteunspecified=dict(type='bool', required=False, default=False),
-        customproperties=dict(type='list', required=False),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -275,12 +267,6 @@ def run_module():
                             "nextServer": module.params.get('nextserver', '')
                         }
                     }
-                    # Define all custom properties, if needed
-                    #if module.params.get('customproperties', None):
-                    #    for prop in module.params.get('customproperties'):
-                    #        k = prop['name']
-                    #        v = prop['value']
-                    #        databody["properties"][k] = v
 
                     # Execute the API
                     result = mm.doapi(url, http_method, provider, databody)

@@ -140,7 +140,7 @@ EXAMPLES = r'''
   delegate_to: localhost
 
 - name: Release a zone
-  mm_claimip:
+  mm_zone:
     state: absent
     name: example.com
     nameserver: ns1.example.com

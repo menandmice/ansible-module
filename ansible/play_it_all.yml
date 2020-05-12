@@ -42,9 +42,6 @@
         ipaddress: "{{ freeips }}"
         macaddress: "de:ad:be:ef:16:10"
         provider: "{{ provider }}"
-        customproperties:
-          - name: location
-            value: London
       delegate_to: localhost
 
     - name: Set properties on IP
@@ -65,6 +62,15 @@
         dnszone: testzone
         name: testhost
         data: "{{ freeips[0] }}"
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Set a PTR DNS record for the claimed IP
+      mm_dnsrecord:
+        dnszone: testzone
+        name: testhost
+        data: "{{ freeips[0] }}"
+        rrtype: PTR
         provider: "{{ provider }}"
       delegate_to: localhost
 
