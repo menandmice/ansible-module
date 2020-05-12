@@ -230,7 +230,7 @@ class LookupModule(LookupBase):
                 for i in range(len(res['dhcpReservations'])):
                     dhcp.append({
                         'name': res['dhcpReservations'][i]['name'],
-                        'dnsref': res['dhcpReservations'][i]['ref'],
+                        'dhcpresref': res['dhcpReservations'][i]['ref'],
                         'clientidentifier': res['dhcpReservations'][i]['clientIdentifier'],
                         'addresses': res['dhcpReservations'][i]['addresses'],
                         'ddnshostname': res['dhcpReservations'][i]['ddnsHostName'],
