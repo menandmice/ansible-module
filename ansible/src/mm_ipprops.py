@@ -200,6 +200,9 @@ def run_module():
                 if curstat['customProperties'].get(k) != v:
                     change = True
                     break
+            else:
+                # This property does not exist, yet. Make sure it's created
+                change = True
 
         # If 'deleteunspecified' is set, assume an 'change always'
         if module.params.get('deleteunspecified'):

@@ -73,3 +73,66 @@
         var: freeipinfo
       vars:
         freeipinfo: "{{ query('mm_ipinfo', provider, freeips[0]) | to_nice_json }}"
+
+    - name: Renew properties on IP
+      mm_ipprops:
+        state: present
+        ipaddress: "{{ freeips }}"
+        properties:
+          - claimed: false
+          - location: Madrid
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Get all info for this IP address
+      debug:
+        var: freeipinfo
+      vars:
+        freeipinfo: "{{ query('mm_ipinfo', provider, freeips[0]) | to_nice_json }}"
+
+    - name: Remove properties off IP
+      mm_ipprops:
+        state: present
+        ipaddress: "{{ freeips }}"
+        deleteunspecified: true
+        properties:
+          - claimed: false
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Get all info for this IP address
+      debug:
+        var: freeipinfo
+      vars:
+        freeipinfo: "{{ query('mm_ipinfo', provider, freeips[0]) | to_nice_json }}"
+
+    - name: Remove reservation on IP address
+      mm_dhcp:
+        state: absent
+        name: testhost
+        ipaddress: "{{ freeips }}"
+        macaddress: "de:ad:be:ef:16:10"
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Get all info for this IP address
+      debug:
+        var: freeipinfo
+      vars:
+        freeipinfo: "{{ query('mm_ipinfo', provider, freeips[0]) | to_nice_json }}"
+
+    - name: Remove DNS record for the claimed IP
+      mm_dnsrecord:
+        state: absent
+        dnszone: testzone
+        name: testhost
+        data: "{{ freeips[0] }}"
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Get all info for this IP address
+      debug:
+        var: freeipinfo
+      vars:
+        freeipinfo: "{{ query('mm_ipinfo', provider, freeips[0]) | to_nice_json }}"
+
