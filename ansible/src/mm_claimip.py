@@ -48,7 +48,7 @@ DOCUMENTATION = r'''
       required: True
     customproperties:
       description:
-        - Custom properties for the zone
+        - Custom properties for the IP address
         - These properties must already exist
         - See also C(mm_props)
       type: list

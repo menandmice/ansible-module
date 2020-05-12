@@ -161,6 +161,7 @@ def run_module():
             result['warnings'] = resp.get('warnings', None)
             result['changed'] = False
             break
+        curstat = resp['ipamRecord']
 
         # Get the IP address reference
         ipaddr_ref = resp['ipamRecord']['addrRef']
@@ -179,8 +180,37 @@ def run_module():
             k, v = list(prop.items())[0]
             databody["properties"][k] = v
 
+        # Find out if a change is needed
+        change = False
+        str2bool = {'true': True, 'false': False}
+        for k, v in databody['properties'].items():
+            # The property could be in the standard list or in the
+            # customProperties dict
+            if k in curstat:
+                c = curstat.get(k)
+                # The value from the parameters is always type str
+                # but the API could return bool. So, convert the string
+                # to boolean
+                if isinstance(v, str) and (v.lower() in str2bool) and isinstance(c, bool):
+                    v = str2bool[v.lower()]
+                if c != v:
+                    change = True
+                    break
+            elif k in curstat['customProperties']:
+                c = curstat['customProperties'].get(k)
+                if isinstance(v, str) and (v.lower() in str2bool) and isinstance(c, bool):
+                    v = str2bool[v.lower()]
+                if c != v:
+                    change = True
+                    break
+
+        # If 'deleteunspecified' is set, assume an 'change always'
+        if module.params.get('deleteunspecified'):
+            change = True
+
         # Execute the API
-        result = mm.doapi(url, http_method, provider, databody)
+        if change:
+            result = mm.doapi(url, http_method, provider, databody)
 
     # return collected results
     module.exit_json(**result)
