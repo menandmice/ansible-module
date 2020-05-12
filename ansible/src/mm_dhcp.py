@@ -230,7 +230,8 @@ def run_module():
                     for key in databody['properties']:
                         name = key['name']
                         val  = key['value']
-                        if name == 'addresses' and isinstance(val, str):
+                        if name == 'addresses' and (isinstance(val, str) or
+                                                    isinstance(val, unicode):
                             val = [val]
 
                         # Check if it is in the current values
@@ -254,7 +255,7 @@ def run_module():
             if module.params['state'] == 'present':
                 # If IP address is a string, turn it into a list, as the API
                 # requires that
-                if isinstance(ipaddress, str):
+                if isinstance(ipaddress, str) or isinstance(ipadress, unicode):
                     ipaddress = [ipaddress]
 
                 # No reservation found. Create one. Try this in each scope.
