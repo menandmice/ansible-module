@@ -285,7 +285,11 @@ def run_module():
             val  = key['value']
 
             # Check if it is in the current values
-            if val != iparesp['dnsRecords'][0].get(name, 'unknown'):
+            cur = iparesp['dnsRecords'][0].get(name, 'unknown')
+            if val != cur and not (isinstance(val, type(None)) and cur == ""):
+                # Sometimes the value is empty of type None and the current
+                # value is 'null', type string. This is the same, both mean
+                # an empty field.
                 change = True
                 break
 

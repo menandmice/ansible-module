@@ -1,7 +1,8 @@
 { "ANSIBLE_MODULE_ARGS": {
+    "state": "present",
     "name": "testhost",
     "dnszone": "testzone",
-    "data": "172.16.17.203",
+    "data": "172.16.17.3",
     "comment": "From The API side",
     "provider" : {
         "mmurl": "http://mandm.example.net",
