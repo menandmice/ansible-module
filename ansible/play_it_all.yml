@@ -33,10 +33,27 @@
           - "Free IPs           : {{ freeips }}"
           - "Queried network(s) : {{ network }}"
 
-    - name: Claim IP address
-      mm_claimip:
+    # Make a DHCP reservation for this address
+    # So claim it after DNS setting.
+    - name: Reservation on IP address
+      mm_dhcp:
+        state: present
+        name: testhost
+        ipaddress: "{{ freeips }}"
+        macaddress: "de:ad:be:ef:16:10"
+        provider: "{{ provider }}"
+        customproperties:
+          - name: location
+            value: London
+      delegate_to: localhost
+
+    - name: Set properties on IP
+      mm_ipprops:
         state: present
         ipaddress: "{{ freeips }}"
+        properties:
+          - claimed: false
+          - location: London
         provider: "{{ provider }}"
       delegate_to: localhost
 
@@ -46,8 +63,8 @@
     - name: Set a DNS record for the claimed IP
       mm_dnsrecord:
         dnszone: testzone
-        data: testhost
-        name: "{{ freeips[0] }}"
+        name: testhost
+        data: "{{ freeips[0] }}"
         provider: "{{ provider }}"
       delegate_to: localhost
 

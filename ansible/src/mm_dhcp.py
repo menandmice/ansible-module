@@ -38,7 +38,7 @@ DOCUMENTATION = r'''
     - Manage DHCP reservations on the Men&Mice Suite
   options:
     state:
-      description: The state of the claim
+      description: The state of the reservation
       type: bool
       required: False
       choices: [ absent, present ]
@@ -83,7 +83,7 @@ DOCUMENTATION = r'''
       description:
         - Custom properties for the zone
         - These properties must already exist
-`        - See also C(mm_props)
+        - See also C(mm_props)
       type: list
       required: False
     provider:
@@ -275,13 +275,11 @@ def run_module():
                         }
                     }
                     # Define all custom properties, if needed
-                    if module.params.get('customproperties', None):
-                        props = []
-                        for prop in module.params.get('customproperties'):
-                            k = prop['name']
-                            v = prop['value']
-                            props.append({"name": k, "value": v})
-                        databody["dhcpReservation"]['customProperties'] = props
+                    #if module.params.get('customproperties', None):
+                    #    for prop in module.params.get('customproperties'):
+                    #        k = prop['name']
+                    #        v = prop['value']
+                    #        databody["properties"][k] = v
 
                     # Execute the API
                     result = mm.doapi(url, http_method, provider, databody)

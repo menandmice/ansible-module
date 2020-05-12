@@ -252,6 +252,11 @@ def run_module():
             databody['dnsRecords'][0]['ttl'] = str(module.params.get('ttl'))
 
         result = mm.doapi(url, http_method, provider, databody)
+        # When an IP address has status 'claimed', it cannot be assigned a
+        # DNS record. The 'errors' field shows this.
+        if result['message']['result']['errors']:
+            result['warnings'] = result['message']['result']['errors']
+            result.pop('message', None)
     else:
         # Present, check if an update is needed
         iparef = iparesp['dnsRecords'][0]['ref']

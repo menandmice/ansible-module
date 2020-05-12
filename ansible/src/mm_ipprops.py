@@ -1,8 +1,8 @@
-"""Ansible Claim IP address module.
+"""Ansible IP properties address module.
 
 Part of the Men&Mice Ansible integration
 
-Module to claim IP addresses in DHCP in the Men&Mice Suite
+Module to et properties on an IP addresses in the Men&Mice Suite
 """
 
 from __future__ import absolute_import, division, print_function
@@ -28,16 +28,17 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
                     'supported_by': 'community'}
 
 DOCUMENTATION = r'''
-  module: mm_claimip
-  short_description: Claim IP addresses in DHCP in the Men&Mice Suite
+  module: mm_pprops
+  short_description: Set properties on an IP address in the Men&Mice Suite
   author:
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Claim IP addresses in DHCP in the Men&Mice Suite
+    - Set properties on an IP address in the Men&Mice Suite
+    - This can be properties as custom properties, claim and so on
   options:
     state:
-      description: The state of the claim
+      description: Property present or not
       type: bool
       required: False
       choices: [ absent, present ]
@@ -46,13 +47,18 @@ DOCUMENTATION = r'''
       description: The IP address(es) to work on
       type: list
       required: True
-    customproperties:
+    deleteunspecified:
+      description: Clear properties that are not explicitly set
+      type: bool
+      required: False
+      default: False
+    properties:
       description:
-        - Custom properties for the zone
-        - These properties must already exist
+        - Custom properties for the IP address
+        - These properties must already be defined
         - See also C(mm_props)
       type: list
-      required: False
+      required: True
     provider:
       description: Definition of the Men&Mice suite API provider
       type: dict
@@ -74,23 +80,13 @@ DOCUMENTATION = r'''
 '''
 
 EXAMPLES = r'''
-- name: Claim IP address
-  mm_claimip:
+- name: Set properties on IP
+  mm_ipprops:
     state: present
     ipaddress: 172.16.12.14
-    provider:
-      mmurl: http://mmsuite.example.net
-      user: apiuser
-      password: apipasswd
-  delegate_to: localhost
-
-- name: Release claim on IP addresses
-  mm_claimip:
-    state: present
-    ipaddress:
-      - 172.16.12.14
-      - 172.16.12.15
-      - 172.16.12.16
+    properties:
+      - claimed: false
+      - location: London
     provider:
       mmurl: http://mmsuite.example.net
       user: apiuser
@@ -117,7 +113,8 @@ def run_module():
     module_args = dict(
         state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
         ipaddress=dict(type='list', required=True),
-        customproperties=dict(type='list', required=False),
+        properties=dict(type='list', required=True),
+        deleteunspecified=dict(type='bool', required=False, default=False),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -165,32 +162,25 @@ def run_module():
             result['changed'] = False
             break
 
+        # Get the IP address reference
         ipaddr_ref = resp['ipamRecord']['addrRef']
-        curclaim = resp['ipamRecord']['claimed']
 
-        # Set the claim for the IP address
-        statebool = mm.STATEBOOL[module.params['state']]
-        if curclaim != statebool:
-            http_method = "PUT"
-            url = ipaddr_ref
-            databody = {"ref": ipaddr_ref,
-                        "saveComment": "Ansible API",
-                        "properties": {
-                            "claimed": statebool
-                        }
-                        }
+        # Set the properties for the IP address
+        http_method = "PUT"
+        url = ipaddr_ref
+        databody = {"ref": ipaddr_ref,
+                    "saveComment": "Ansible API",
+                    "deleteUnspecified": module.params.get('deleteunspecified'),
+                    "properties": {}
+                    }
 
-            # Define all custom properties, if needed
-            if module.params.get('customproperties', None):
-                for prop in module.params.get('customproperties'):
-                    k = prop['name']
-                    v = prop['value']
-                    databody["properties"][k] = v
+        # Define all custom properties, if needed
+        for prop in module.params.get('properties'):
+            k, v = list(prop.items())[0]
+            databody["properties"][k] = v
 
-            # Execute the API
-            result = mm.doapi(url, http_method, provider, databody)
-        else:
-            result['message'] = 'No claim change for %s' % ipaddress
+        # Execute the API
+        result = mm.doapi(url, http_method, provider, databody)
 
     # return collected results
     module.exit_json(**result)

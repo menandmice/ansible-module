@@ -1,0 +1,14 @@
+{ "ANSIBLE_MODULE_ARGS": {
+    "ipaddress": "172.16.17.3",
+    "state": "present",
+    "properties": [
+    	{"name": "claimed", "value": "false"},
+    	{"name": "location", "value": "London"}
+    ],
+    "provider" : {
+        "mmurl": "http://mandm.example.net",
+        "user": "apidude",
+        "password": "TheAPIDude"
+    }
+  }
+}
