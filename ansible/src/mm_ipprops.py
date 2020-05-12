@@ -184,23 +184,20 @@ def run_module():
         change = False
         str2bool = {'true': True, 'false': False}
         for k, v in databody['properties'].items():
+            # The value from the parameters is always type str
+            # but the API could return bool. So, convert the string
+            # to boolean
+            if isinstance(v, str) and (v.lower() in str2bool):
+                v = str2bool[v.lower()]
+
             # The property could be in the standard list or in the
             # customProperties dict
             if k in curstat:
-                c = curstat.get(k)
-                # The value from the parameters is always type str
-                # but the API could return bool. So, convert the string
-                # to boolean
-                if isinstance(v, str) and (v.lower() in str2bool) and isinstance(c, bool):
-                    v = str2bool[v.lower()]
-                if c != v:
+                if curstat.get(k) != v:
                     change = True
                     break
             elif k in curstat['customProperties']:
-                c = curstat['customProperties'].get(k)
-                if isinstance(v, str) and (v.lower() in str2bool) and isinstance(c, bool):
-                    v = str2bool[v.lower()]
-                if c != v:
+                if curstat['customProperties'].get(k) != v:
                     change = True
                     break
 
