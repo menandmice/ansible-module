@@ -231,7 +231,7 @@ def run_module():
                         name = key['name']
                         val  = key['value']
                         if name == 'addresses' and (isinstance(val, str) or
-                                                    isinstance(val, unicode):
+                                                    isinstance(val, unicode)):
                             val = [val]
 
                         # Check if it is in the current values
