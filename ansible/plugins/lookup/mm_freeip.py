@@ -4,12 +4,6 @@
 # Copyright: (c) 2020, Men&Mice
 # GNU General Public License v3.0
 # see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-#
-# Copyright: (c) 2020, Men&Mice
-# GNU General Public License v3.0 (see
-# COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 #
 # python 3 headers, required if submitting to Ansible
 """Ansible lookup plugin.

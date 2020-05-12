@@ -4,18 +4,6 @@
 # Copyright: (c) 2020, Men&Mice
 # GNU General Public License v3.0
 # see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-#
-# Copyright: (c) 2020, Men&Mice
-# GNU General Public License v3.0
-# see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-#
-# Copyright: (c) 2020, Men&Mice
-# GNU General Public License v3.0 (see
-# COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 #
 # python 3 headers, required if submitting to Ansible
 """Ansible lookup plugin.
@@ -223,24 +211,42 @@ class LookupModule(LookupBase):
 
             # If defined in DNS
             if res['dnsHosts']:
-                dns = {
-                    'name': res['dnsHosts'][0]['dnsRecord']['name'],
-                    'type': res['dnsHosts'][0]['dnsRecord']['type'],
-                    'ttl': res['dnsHosts'][0]['dnsRecord']['ttl'],
-                    'comment': res['dnsHosts'][0]['dnsRecord']['comment'],
-                    'enabled': res['dnsHosts'][0]['dnsRecord']['enabled']
-                }
+                dns = []
+                for i in range(len(res['dnsHosts'])):
+                    dns.append({
+                        'name': res['dnsHosts'][i]['dnsRecord']['name'],
+                        'dnsref': res['dnsHosts'][i]['dnsRecord']['ref'],
+                        'type': res['dnsHosts'][i]['dnsRecord']['type'],
+                        'ttl': res['dnsHosts'][i]['dnsRecord']['ttl'],
+                        'comment': res['dnsHosts'][i]['dnsRecord']['comment'],
+                        'enabled': res['dnsHosts'][i]['dnsRecord']['enabled'],
+                        'ptrstatus': res['dnsHosts'][i]['ptrStatus']
+                    })
                 ret.append({'dnshosts': dns})
 
             # If defined in DHCP
             if res['dhcpReservations']:
-                dhcp = {
-                    'name': res['dhcpReservations'][0]['name'],
-                    'clientidentifier': res['dhcpReservations'][0]['clientIdentifier'],
-                    'addresses': res['dhcpReservations'][0]['addresses'],
-                    'ddnshostname': res['dhcpReservations'][0]['ddnsHostName'],
-                }
+                dhcp = []
+                for i in range(len(res['dhcpReservations'])):
+                    dhcp.append({
+                        'name': res['dhcpReservations'][i]['name'],
+                        'dnsref': res['dhcpReservations'][i]['ref'],
+                        'clientidentifier': res['dhcpReservations'][i]['clientIdentifier'],
+                        'addresses': res['dhcpReservations'][i]['addresses'],
+                        'ddnshostname': res['dhcpReservations'][i]['ddnsHostName'],
+                        'filename': res['dhcpReservations'][i]['filename'],
+                        'servername': res['dhcpReservations'][i]['serverName'],
+                        'nextserver': res['dhcpReservations'][i]['nextServer'],
+                        'reservationmethod': res['dhcpReservations'][i]['reservationMethod']
+                    })
                 ret.append({'dhcpReservations': dhcp})
+
+            # If defined in leases
+            if res['dhcpLeases']:
+                dhcpleases = []
+                for i in range(len(res['dhcpLeases'])):
+                    pass
+                ret.append({'dhcpLeases': dhcpleases})
 
             # If there are custom properties
             ret.append({'customProperties': res['customProperties']})
