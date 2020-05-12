@@ -76,7 +76,7 @@ DOCUMENTATION = r"""
         description:
           - network zone(s) from which the first free IP address is to be found.
           - This is either a single network or a list of networks
-        type: str
+        type: list
         required: True
       multi:
         description: Get a list of x number of free IP addresses from the
@@ -263,12 +263,12 @@ class LookupModule(LookupBase):
         """
         # Sufficient parameters
         if len(terms) < 2:
-            raise AnsibleError("Insufficient parameters. Need at least: MMURL, User, Password and network(s).")
+            raise AnsibleError("Insufficient parameters. Need at least: provider and network(s).")
 
         # Get the parameters
         provider = terms[0]
-        if isinstance(terms[1], str):
-            networks = [terms[1].strip()]
+        if isinstance(terms[1], str) or isinstance(terms[1], unicode):
+            networks = [str(terms[1]).strip()]
         else:
             networks = list(map(str.strip, terms[1]))
         multi        = kwargs.get('multi', 1)
