@@ -51,7 +51,7 @@ DOCUMENTATION = r'''
         - Custom properties for the IP address
         - These properties must already exist
         - See also C(mm_props)
-      type: list
+      type: dict
       required: False
     provider:
       description: Definition of the Men&Mice suite API provider
@@ -117,7 +117,7 @@ def run_module():
     module_args = dict(
         state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
         ipaddress=dict(type='list', required=True),
-        customproperties=dict(type='list', required=False),
+        customproperties=dict(type='dict', required=False),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -182,9 +182,7 @@ def run_module():
 
             # Define all custom properties, if needed
             if module.params.get('customproperties', None):
-                for prop in module.params.get('customproperties'):
-                    k = prop['name']
-                    v = prop['value']
+                for k, v in module.params.get('customproperties').items():
                     databody["properties"][k] = v
 
             # Execute the API

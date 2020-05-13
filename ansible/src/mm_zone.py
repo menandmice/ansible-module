@@ -101,7 +101,7 @@ DOCUMENTATION = r'''
         - Custom properties for the zone
         - These properties must already exist
         - See also C(mm_props)
-      type: list
+      type: dict
       required: False
     provider:
       description: Definition of the Men&Mice suite API provider
@@ -131,8 +131,7 @@ EXAMPLES = r'''
     nameserver: ns1.example.com
     authority: mmsuite.example.net
     customproperties:
-      - name: location
-        value: Reykjavik
+      location: Reykjavik
     provider:
       mmurl: http://mmsuite.example.net
       user: apiuser
@@ -182,7 +181,7 @@ def run_module():
         adintegrate=dict(type='bool', required=False),
         adreplicationtype=dict(type='str', required=False),
         adpartition=dict(type='str', required=False),
-        customproperties=dict(type='list', required=False),
+        customproperties=dict(type='dict', required=False),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -275,9 +274,7 @@ def run_module():
 
         # Define all custom properties, if needed
         if module.params.get('customproperties', None):
-            for prop in module.params.get('customproperties'):
-                k = prop['name']
-                v = prop['value']
+            for k, v in module.params.get('customproperties').items():
                 databody["properties"].append({"name": k, "value": v})
 
         result = mm.doapi(url, http_method, provider, databody)
@@ -327,9 +324,7 @@ def run_module():
         # Define all custom properties, if needed
         if module.params.get('customproperties', None):
             props = []
-            for prop in module.params.get('customproperties'):
-                k = prop['name']
-                v = prop['value']
+            for k, v in module.params.get('customproperties').items():
                 props.append({"name": k, "value": v})
             databody["dnsZone"]['customProperties'] = props
 

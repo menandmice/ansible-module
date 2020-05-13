@@ -45,10 +45,10 @@ With an Ansible JSON file looking like:
     "dynamic": true,
     "servtype": "Master",
     "authority": "dns1.example.net",
-    "customproperties": [
-      {"name": "owner", "value": "Ton Kersten"},
-      {"name": "place", "value": "Groesbeek"}
-    ],
+    "customproperties": {
+      "owner": "Ton Kersten",
+      "place": "Groesbeek"
+    },
     "provider" : {
         "mmurl": "http://mmsuite.example.net",
         "user": "apidude",
