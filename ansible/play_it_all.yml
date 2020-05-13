@@ -49,8 +49,8 @@
         state: present
         ipaddress: "{{ freeips }}"
         properties:
-          - claimed: false
-          - location: London
+          claimed: false
+          location: London
         provider: "{{ provider }}"
       delegate_to: localhost
 
@@ -85,8 +85,8 @@
         state: present
         ipaddress: "{{ freeips }}"
         properties:
-          - claimed: false
-          - location: Madrid
+          claimed: false
+          location: Madrid
         provider: "{{ provider }}"
       delegate_to: localhost
 
@@ -102,7 +102,7 @@
         ipaddress: "{{ freeips }}"
         deleteunspecified: true
         properties:
-          - claimed: false
+          claimed: false
         provider: "{{ provider }}"
       delegate_to: localhost
 
