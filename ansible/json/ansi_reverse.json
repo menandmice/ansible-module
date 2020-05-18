@@ -1,8 +1,8 @@
 { "ANSIBLE_MODULE_ARGS": {
     "state": "absent",
-    "name": "testhost",
-    "dnszone": "testzone",
-    "data": "172.16.17.3",
+    "data": "esx1.testzone.",
+    "name": "2.17.16.172.in-addr.arpa.",
+    "dnszone": "17.16.172.in-addr.arpa.",
     "rrtype": "PTR",
     "comment": "From The API side",
     "provider" : {

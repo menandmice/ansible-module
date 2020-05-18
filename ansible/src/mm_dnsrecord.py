@@ -212,7 +212,12 @@ def run_module():
     zoneref = zoneresp['dnsZones'][0]['ref']
 
     # And try to get the DNS record with this data
-    refs = "%s/DNSRecords?filter=%s" % (zoneref, module.params.get('name'))
+    if module.params['rrtype'] == 'PTR':
+        # With a PTR record, the search is for the name, not the
+        # .in-addr-arpa address
+        refs = "%s/DNSRecords?filter=%s" % (zoneref, module.params.get('data'))
+    else:
+        refs = "%s/DNSRecords?filter=%s" % (zoneref, module.params.get('name'))
     iparesp = mm.get_single_refs(refs, provider)
 
     # If absent is requested, make a quick delete
@@ -286,6 +291,15 @@ def run_module():
 
             # Check if it is in the current values
             cur = iparesp['dnsRecords'][0].get(name, 'unknown')
+
+            # If it concerns a reverse record, make sure the name contains the
+            # complete reverse record and that data contains the hostname
+            if module.params['rrtype'] == 'PTR':
+                if name == 'name' and 'arpa.' not in cur:
+                    cur = module.params.get('name')
+                if name == 'data':
+                    val = module.params.get('data')
+
             if val != cur and not (isinstance(val, type(None)) and cur == ""):
                 # Sometimes the value is empty of type None and the current
                 # value is 'null', type string. This is the same, both mean
