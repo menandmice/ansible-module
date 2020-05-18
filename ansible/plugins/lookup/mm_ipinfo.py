@@ -202,60 +202,6 @@ class LookupModule(LookupBase):
         databody = {}
         result = doapi(url, http_method, provider, databody)
 
-        # Collect all information
         if isinstance(result, dict):
-            res = result['message']['result']['ipamRecord']
-            ret.append({'addrref': res['addrRef']})
-            ret.append({'address': res['address']})
-            ret.append({'claimed': res['claimed']})
-            ret.append({'state': res['state']})
-            ret.append({'device': res['device']})
-            ret.append({'interface': res['interface']})
-            ret.append({'ptrstatus': res['ptrStatus']})
-            ret.append({'extraneousptr': res['extraneousPTR']})
-            ret.append({'usage': res['usage']})
-
-            # If defined in DNS
-            if res['dnsHosts']:
-                dns = []
-                for i in range(len(res['dnsHosts'])):
-                    dns.append({
-                        'name': res['dnsHosts'][i]['dnsRecord']['name'],
-                        'dnsref': res['dnsHosts'][i]['dnsRecord']['ref'],
-                        'type': res['dnsHosts'][i]['dnsRecord']['type'],
-                        'ttl': res['dnsHosts'][i]['dnsRecord']['ttl'],
-                        'comment': res['dnsHosts'][i]['dnsRecord']['comment'],
-                        'dnszoneref': res['dnsHosts'][i]['dnsRecord']['dnsZoneRef'],
-                        'ptrstatus': res['dnsHosts'][i]['ptrStatus']
-                    })
-                ret.append({'dnshosts': dns})
-
-            # If defined in DHCP
-            if res['dhcpReservations']:
-                dhcp = []
-                for i in range(len(res['dhcpReservations'])):
-                    dhcp.append({
-                        'name': res['dhcpReservations'][i]['name'],
-                        'dhcpresref': res['dhcpReservations'][i]['ref'],
-                        'clientidentifier': res['dhcpReservations'][i]['clientIdentifier'],
-                        'addresses': res['dhcpReservations'][i]['addresses'],
-                        'ddnshostname': res['dhcpReservations'][i]['ddnsHostName'],
-                        'filename': res['dhcpReservations'][i]['filename'],
-                        'servername': res['dhcpReservations'][i]['serverName'],
-                        'nextserver': res['dhcpReservations'][i]['nextServer'],
-                        'reservationmethod': res['dhcpReservations'][i]['reservationMethod'],
-                        'ownerref': res['dhcpReservations'][i]['ownerRef'],
-                    })
-                ret.append({'dhcpReservations': dhcp})
-
-            # If defined in leases
-            if res['dhcpLeases']:
-                dhcpleases = []
-                for i in range(len(res['dhcpLeases'])):
-                    pass
-                ret.append({'dhcpLeases': dhcpleases})
-
-            # If there are custom properties
-            ret.append({'customProperties': res['customProperties']})
-
-        return ret
+            return result['message']['result']['ipamRecord']
+        return result

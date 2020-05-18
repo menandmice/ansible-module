@@ -16,8 +16,8 @@ Ansible control node, let's assume `/tmp/mandm`.
 
 ### Ansible modules
 
-The Ansible modules now can be placed in a number of directories, depending
-on your installation and requirements.
+The Ansible modules can than be placed in a number of directories,
+depending on your installation and requirements.
 
 1. `/usr/share/ansible/plugins/modules/`
    System wide installation, modules available to all users
@@ -27,7 +27,8 @@ on your installation and requirements.
 3. `/etc/ansible/library/`
    Local installation. As most Ansible installations use the
    `/etc/ansible` directory as the Ansible top-directory (as this is the
-   default in an Ansible installation)
+   default in an Ansible installation), this is probably the best
+   installation option.
    When installing the modules in this directory, the Ansible `library`
    path needs to be set in the `/etc/ansible/ansible.cfg` file, pointing
    to the module directory.
@@ -60,7 +61,8 @@ The `lookup` plugins can be installed in:
 3. `/etc/ansible/plugins/lookup`
    Local installation. As most Ansible installations use the
    `/etc/ansible` directory as the Ansible top-directory (as this is the
-   default in an Ansible installation)
+   default in an Ansible installation)this is probably the best
+   installation option.
    When installing the lookup plugins in this directory, the Ansible
    `lookup` path needs to be set in the `/etc/ansible/ansible.cfg` file,
    pointing to the lookup plugin directory.
@@ -94,7 +96,8 @@ The `inventory` plugins can be installed in:
 3. `/etc/ansible/plugins/inventory`
    Local installation. As most Ansible installations use the
    `/etc/ansible` directory as the Ansible top-directory (as this is the
-   default in an Ansible installation)
+   default in an Ansible installation) this is probably the best
+   installation option.
    When installing the inventory plugins in this directory, the Ansible
    `lookup` path needs to be set in the `/etc/ansible/ansible.cfg` file,
    pointing to the lookup plugin directory.
@@ -110,7 +113,7 @@ Ansible, issue the command:
 ansible-doc -t inventory -l
 ```
 
-which should produce a list with all the Men&Mice Suite Ansible
+Which should produce a list with all the Men&Mice Suite Ansible
 inventory plugins.
 
 ## API user
@@ -133,11 +136,11 @@ connection url (`mmurl`) and this provider needs to be defined in the
 Ansible setup, either through Ansible Tower/AWX or in the Ansible
 directory.
 
-As the modules and plugins can be used by for all systems under Ansible
+As the modules and plugins can be used by all systems under Ansible
 control, it is advised to define the API provider for the `all` group.
 Create a file `all` in the `/etc/ansible/group_vars` directory, or the
 `/etc/ansible/inventory/group_vars` directory (if your inventory is
-a directory instead of a file) which contains:
+a directory instead of a file) which contains something similar to:
 
 ```yaml
 ---
@@ -149,6 +152,7 @@ provider:
 
 Where the `apipasswd` should be encrypted with `ansible-vault` to
 prevent plain passwords in the Ansible tree. An example to achieve this
+is
 
 ```bash
 printf "apipasswd"             | \
