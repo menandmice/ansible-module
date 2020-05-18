@@ -117,11 +117,24 @@ DOCUMENTATION = r'''
 EXAMPLES = r'''
 - name: Set DNS record in zone for a defined name
   mm_dnsrecord:
-    name: beatles
     state: present
-    rrtype: CNAME
-    data: johnpaulgeorgeringo
-    dest: zone
+    name: beatles
+    data: 172.16.17.2
+    rrtype: A
+    dnszone: example.net.
+    provider:
+      mmurl: http://mmsuite.example.net
+      user: apiuser
+      password: apipasswd
+  delegate_to: localhost
+
+- name: Set PTR record in zone for a defined name
+  mm_dnsrecord:
+    state: present
+    name: "2.17.16.172.in-addr.arpa."
+    data: beatles.example.net.
+    rrtype: PTR
+    dnszone: "17.16.172.in-addr.arpa."
     provider:
       mmurl: http://mmsuite.example.net
       user: apiuser
