@@ -56,7 +56,7 @@ DOCUMENTATION = r'''
       type: list
       required: True
     macaddress:
-      description: MAC address for this IP address
+      description: MAC address for the IP address
       type: str
       required: True
     ddnshost:

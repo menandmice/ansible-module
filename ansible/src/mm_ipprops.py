@@ -2,7 +2,7 @@
 
 Part of the Men&Mice Ansible integration
 
-Module to et properties on an IP addresses in the Men&Mice Suite
+Module to set properties on an IP addresses in the Men&Mice Suite
 """
 
 from __future__ import absolute_import, division, print_function

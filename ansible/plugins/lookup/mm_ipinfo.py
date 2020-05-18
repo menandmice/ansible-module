@@ -205,9 +205,15 @@ class LookupModule(LookupBase):
         # Collect all information
         if isinstance(result, dict):
             res = result['message']['result']['ipamRecord']
+            ret.append({'addrref': res['addrRef']})
             ret.append({'address': res['address']})
             ret.append({'claimed': res['claimed']})
             ret.append({'state': res['state']})
+            ret.append({'device': res['device']})
+            ret.append({'interface': res['interface']})
+            ret.append({'ptrstatus': res['ptrStatus']})
+            ret.append({'extraneousptr': res['extraneousPTR']})
+            ret.append({'usage': res['usage']})
 
             # If defined in DNS
             if res['dnsHosts']:
@@ -219,7 +225,7 @@ class LookupModule(LookupBase):
                         'type': res['dnsHosts'][i]['dnsRecord']['type'],
                         'ttl': res['dnsHosts'][i]['dnsRecord']['ttl'],
                         'comment': res['dnsHosts'][i]['dnsRecord']['comment'],
-                        'enabled': res['dnsHosts'][i]['dnsRecord']['enabled'],
+                        'dnszoneref': res['dnsHosts'][i]['dnsRecord']['dnsZoneRef'],
                         'ptrstatus': res['dnsHosts'][i]['ptrStatus']
                     })
                 ret.append({'dnshosts': dns})
@@ -237,7 +243,8 @@ class LookupModule(LookupBase):
                         'filename': res['dhcpReservations'][i]['filename'],
                         'servername': res['dhcpReservations'][i]['serverName'],
                         'nextserver': res['dhcpReservations'][i]['nextServer'],
-                        'reservationmethod': res['dhcpReservations'][i]['reservationMethod']
+                        'reservationmethod': res['dhcpReservations'][i]['reservationMethod'],
+                        'ownerref': res['dhcpReservations'][i]['ownerRef'],
                     })
                 ret.append({'dhcpReservations': dhcp})
 
