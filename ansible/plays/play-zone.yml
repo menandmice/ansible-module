@@ -21,7 +21,7 @@
         masters: mandm.example.net
         servtype: master
         customproperties:
-          location: Netherlands
+          place: Netherlands
         provider: "{{ provider }}"
       delegate_to: localhost
 

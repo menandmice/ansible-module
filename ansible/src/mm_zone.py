@@ -246,9 +246,9 @@ def run_module():
         # Zone exists. Update
 
         # Create the API call.
-        # `name`        is read-only, so not in the call
-        # `dynamicname` is read-only, so not in the call
-        # `authority`   is read-only, so not in the call
+        #   `name`        is read-only, so not in the call
+        #   `dynamicname` is read-only, so not in the call
+        #   `authority`   is read-only, so not in the call
         http_method = "PUT"
         url = "%s" % resp['dnsZone']['ref']
         databody = {
@@ -331,7 +331,6 @@ def run_module():
                 props.append({"name": k, "value": v})
             databody["dnsZone"]['customProperties'] = props
 
-        print(databody)
         # Create the zone on the Men&Mice Suite
         result = mm.doapi(url, http_method, provider, databody)
 
