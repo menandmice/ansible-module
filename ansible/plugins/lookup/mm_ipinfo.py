@@ -65,14 +65,24 @@ DOCUMENTATION = r"""
 """
 
 EXAMPLES = r"""
-- name: Find all info for IP 192.168.10.11
+- name: Find all info for IP 172.16.17.2
   debug:
-    msg: "Info for IP: {{ lookup('mm_ipinfo', provider, '192.168.10.11') }}"
+    msg: "Info for IP: {{ lookup('mm_ipinfo', provider, '172.16.17.2') }}"
   vars:
     provider:
       mmurl: http://mmsuite.example.net
       user: apiuser
       password: apipasswd
+
+- name: Get DHCP reservations for 172.16.17.2
+  debug:
+        msg: "{{ ipinfo['dhcpReservations'] }}"
+  vars:
+    provider:
+      mmurl: http://mmsuite.example.net
+      user: apiuser
+      password: apipasswd
+    ipinfo: "{{ query('mm_ipinfo', provider, '172.16.17.2') }}"
 """
 
 RETURN = r"""

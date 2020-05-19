@@ -252,7 +252,7 @@ class LookupModule(LookupBase):
         - provider -> Definition of the Men&Mice suite API provider
         - Network  -> The zone from which the free IP address(es) are found
                       Either: CIDR notation, network notation or network name
-                      e.g. 192.168.63.0/24 or 192.168.63.0 or examplenet
+                      e.g. 172.16.17.0/24 or 172.16.17.0 or examplenet
                       Either string or list
         """
         # Sufficient parameters

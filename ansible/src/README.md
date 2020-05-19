@@ -51,8 +51,8 @@ With an Ansible JSON file looking like:
     },
     "provider" : {
         "mmurl": "http://mmsuite.example.net",
-        "user": "apidude",
-        "password": "TheAPIDude"
+        "user": "apiuser",
+        "password": "apipasswd"
     }
   }
 }
@@ -111,6 +111,7 @@ Not that often then:
 [ ] Ansible plugin installer
 [X] Inline documentation for Ansible user
 [ ] General documentation for Ansible user
+    - In progress
 [ ] Inventory information to Ansible
 [ ] Ansible Playbook
     - Currently a test playbook per module, eventually a playbook
@@ -119,13 +120,13 @@ Not that often then:
 [ ] Support generically available Ansible version and
     support newer than 2.7
     - TonK: Support Ansible 2.[789] with Python[23]
-    - TonK: Create a Molecule test set (lot of work, takes long, not
-      easy, so expensive)
+    - TonK: Create a Molecule test set
+      (lot of work, takes long, not easy, so expensive,
+       currently out of scope)
 
 ## DNS
 
-[ ] Get/Set properties for DNS and IPAM
-    - Can be set, plugin is under way for getting it
+[X] Get/Set properties for DNS and IPAM
 [X] Create a DNS Resource record in Men&Mice
 [X] Modify a DNS Resource record in Men&Mice
 [X] Set hostname for IP address in Men&Mice
@@ -148,4 +149,3 @@ Not that often then:
 [ ] Create/delete DHCP options
     [ ] For a DHCP server
     [ ] For a DHCP scope
-

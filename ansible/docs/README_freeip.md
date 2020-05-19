@@ -3,40 +3,6 @@
 This Men&Mice FreeIP lookup plugin finds one or more free IP addresses
 in a certain network, defined in the Men&Mice suite.
 
-## Installation
-
-### Requirements
-
-The Men&Mice FreeIP plugin needs Ansible to work with Ansible version
-2.7 as the minimum. Either Python version 2 and Python version 3 will
-do.
-
-Of course the Men&Mice Suite is required with an API user with password
-that has full rights in the Men&Mice Suite!
-
-### Plugin installation
-
-In the `ansible` top directory create a directory `plugins/lookups` and
-place the file `mm_freeip.py` in this directory.
-
-Now point Ansible to this directory so ansible can find the plugin.  In
-the `ansible.cfg` set the `lookup_plugins` to search this directory as
-well.
-
-```
-lookup_plugins = /usr/share/ansible_plugins/lookup_plugins:/etc/ansible/plugins/lookup
-```
-
-Of course it is possible to place the plugin in one of the standard
-Ansible plugin directories (`${HOME}/.ansible/plugins/lookup` or
-`/usr/share/ansible/plugins/lookup`)
-
-An easy way to see if the plugin is installed correctly is:
-
-```
-ansible-doc -t lookup mm_freeip
-```
-
 ## Usage
 
 When using the Men&Mice FreeIP plugin something needs to be taken into
@@ -58,7 +24,7 @@ Example usage:
 
   vars:
     provider:
-      mmurl: http://mandm.example.net
+      mmurl: http://mmsuite.example.net
       user: apiuser
       password: apipassword
     network: examplenet
@@ -91,7 +57,6 @@ Example usage:
           - "Next free IP      : {{ item }}"
       loop: "{{ freeips }}"
 ```
-
 
 
 ```
