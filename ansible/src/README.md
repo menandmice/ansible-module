@@ -41,7 +41,7 @@ With an Ansible JSON file looking like:
     "state": "present",
     "name": "testzone",
     "nameserver": "mmsuite.example.net",
-    "masters": "172.16.32.65",
+    "masters": "172.16.17.2",
     "dynamic": true,
     "servtype": "Master",
     "authority": "dns1.example.net",
@@ -69,7 +69,7 @@ With an Ansible JSON file looking like:
           `mm_freeip`
       [X] Claim the IP address and set custom properties
           `mm_claimip`
-[ ] Add/modify/delete a DNS record (A/AAAA record, but also CNAME or
+[X] Add/modify/delete a DNS record (A/AAAA record, but also CNAME or
     PTR. The PTR is usually maintained automatically, so you don't have
     to worry about it when you add an A or AAAA record)
     `mm_dnsrecord`
@@ -96,7 +96,7 @@ Not that often then:
 
 ## Basic
 
-[ ] Run API commands against Men&Mice API
+[X] Run API commands against Men&Mice API
     [X] Generic user authentication
     [X] Handle High availability
         - TonK: If I understood correctly what David said, the HA

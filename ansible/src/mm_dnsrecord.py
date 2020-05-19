@@ -34,7 +34,7 @@ DOCUMENTATION = r'''
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Manage Manage DNS records in the Men&Mice Suite
+    - Manage DNS records in the Men&Mice Suite
   options:
     state:
         description: The state of the properties or properties

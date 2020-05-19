@@ -2,7 +2,7 @@
 
 Part of the Men&Mice Ansible integration
 
-Module to manage DNS-Zone custom properties in the Men&Mice Suite
+Module to manage custom properties in the Men&Mice Suite
 """
 
 from __future__ import absolute_import, division, print_function
@@ -29,12 +29,12 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
 
 DOCUMENTATION = r'''
   module: mm_props
-  short_description: Manage DNS-Zone custom properties in the Men&Mice Suite
+  short_description: Manage custom properties in the Men&Mice Suite
   author:
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Manage DNS-Zone custom properties in the Men&Mice Suite
+    - Manage custom properties in the Men&Mice Suite
   options:
     state:
       description: The state of the properties or properties
