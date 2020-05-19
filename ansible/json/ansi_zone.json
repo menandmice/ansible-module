@@ -1,15 +1,14 @@
 { "ANSIBLE_MODULE_ARGS": {
     "state": "present",
-    "name": "TonsZone",
+    "name": "BepsZone",
     "nameserver": "mandm.example.net",
     "masters": "172.16.32.65",
-    "dynamic": true,
-    "servtype": "Master",
+    "servtype": "master",
     "authority": "dns1.example.net",
-    "customproperties": [
-      {"name": "owner", "value": "Beppie di Klaveri"},
-      {"name": "place", "value": "At Groesbeek"}
-    ],
+    "customproperties": {
+      "owner": "Beppie di Klaveri",
+      "place": "Groesbeek"
+    },
     "provider" : {
         "mmurl": "http://mandm.example.net",
         "user": "apidude",

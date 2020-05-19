@@ -60,6 +60,7 @@ DOCUMENTATION = r'''
       description: Type of the master server, like "master" or "slave"
       type: str
       required: True
+      choices: [ master, slave ]
     dynamic:
       description: Dynamic DNS zone
       type: bool
@@ -214,9 +215,11 @@ def run_module():
     if module.check_mode:
         module.exit_json(**result)
 
+    # Make sure the DNS type is capitalised, as the API requires that
+    module.params['servtype'] = module.params['servtype'].capitalize()
+
     # Get all API settings
     provider = module.params['provider']
-    display.vvv(provider)
 
     # Try to get all zone info
     refs = "DNSZones/%s" % module.params.get('name')
@@ -328,6 +331,7 @@ def run_module():
                 props.append({"name": k, "value": v})
             databody["dnsZone"]['customProperties'] = props
 
+        print(databody)
         # Create the zone on the Men&Mice Suite
         result = mm.doapi(url, http_method, provider, databody)
 
