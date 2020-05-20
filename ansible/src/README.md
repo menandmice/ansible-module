@@ -168,12 +168,12 @@ Not that often then:
           functionality is created by a round-robin DNS entry.
           So, when one server is down, I just wait a little and
           give it a retry. This is what I have implemented in
-          the API call, at the moment.
+          the API call, at the moment. This will be tested by Carsten
     [X] Handle errors reported by Men&Mice Central API
 
 ## Generic
 
-[ ] Ansible plugin installer
+[X] Ansible plugin installer -> In documentation
 [X] Inline documentation for Ansible user
 [ ] General documentation for Ansible user
     - In progress

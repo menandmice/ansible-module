@@ -250,4 +250,5 @@ class InventoryModule(BaseInventoryPlugin,  Constructable, Cacheable):
                 self.inventory.set_variable(hostname, 'ansible_host', address)
 
         # Clean up the inventory.
+        print(self.inventory)
         self.inventory.reconcile_inventory()
