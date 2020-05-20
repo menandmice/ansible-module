@@ -60,7 +60,7 @@ DOCUMENTATION = r'''
       choices: [ dnsserver, dhcpserver, zone, iprange, ipaddress, device, interface, cloudnet, cloudaccount ]
       required: True
       type: str
-    madatory:
+    mandatory:
       description: Is the property mandatory
       required: False
       type: bool
