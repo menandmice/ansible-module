@@ -5,6 +5,8 @@
 # GNU General Public License v3.0
 # see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt
 #
+# https://docs.ansible.com/ansible/latest/dev_guide/developing_inventory.html
+#
 # python 3 headers, required if submitting to Ansible
 """Ansible inventory plugin.
 
@@ -42,11 +44,11 @@ DOCUMENTATION = '''
         env:
           - name: MM_HOST
         required: True
-      username:
+      user:
         description: The user that you plan to use to access inventories on your Men&Mice Suite
         type: string
         env:
-          - name: MM_USERNAME
+          - name: MM_USER
         required: True
       password:
         description: The password for your your Men&Mice Suite user.
@@ -64,7 +66,7 @@ EXAMPLES = '''
 
 plugin: mm_inventory
 host: http://mmsuite.example.net
-username: apiuser
+user: apiuser
 password: apipasswd
 
 # Then you can run the following command.
@@ -77,7 +79,7 @@ password: apipasswd
 
 # Set environment variables:
 # export MM_HOST=YOUR_MM_HOST_ADDRESS
-# export MM_USERNAME=YOUR_MM_USERNAME
+# export MM_USER=YOUR_MM_USER
 # export MM_PASSWORD=YOUR_MM_PASSWORD
 
 # Read the inventory from the Men&Mice Suite, and list them.
@@ -86,6 +88,7 @@ password: apipasswd
 # ansible-inventory -i @mm_inventory --list
 '''
 
+import sys
 import re
 import os
 import json
@@ -93,7 +96,9 @@ from ansible.module_utils import six
 from ansible.module_utils.urls import Request, urllib_error, ConnectionError, socket, httplib
 from ansible.module_utils._text import to_native
 from ansible.errors import AnsibleParserError
-from ansible.plugins.inventory import BaseInventoryPlugin
+from ansible.plugins.inventory import BaseInventoryPlugin, Constructable, Cacheable
+from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
+from ansible.module_utils.urls import open_url, SSLValidationError
 
 # Python 2/3 Compatibility
 try:
@@ -102,29 +107,93 @@ except ImportError:
     from urllib.parse import urljoin
 
 
-class InventoryModule(BaseInventoryPlugin):
+def doapi(url, method, provider, databody):
+    """Run an API call.
+
+    Parameters:
+        - url          -> Relative URL for the API entry point
+        - method       -> The API method (GET, POST, DELETE,...)
+        - provider     -> Needed credentials for the API provider
+        - databody     -> Data needed for the API to perform the task
+
+    Returns:
+        - The response from the API call
+        - The Ansible result dict
+
+    When connection errors arise, there will be a multiple of tries,
+    each a couple of seconds apart, this to handle high-availability
+    """
+    headers = {'Content-Type': 'application/json'}
+    apiurl = "%s/mmws/api/%s" % (provider['mmurl'], url)
+    result = {}
+
+    # Maximum and current number of tries to connect to the Men&Mice API
+    MAXTRIES = 5
+    tries = 0
+
+    while tries <= 4:
+        tries += 1
+        try:
+            resp = open_url(apiurl,
+                            method=method,
+                            url_username=provider['user'],
+                            url_password=provider['password'],
+                            data=json.dumps(databody),
+                            validate_certs=False,
+                            headers=headers)
+
+            # Response codes of the API are:
+            #  - 200 => All OK, data returned in the body
+            #  - 204 => All OK, no data returned in the body
+            #  - *   => Something is wrong, error data in the body
+            # But sometimes there is a situation where the response code
+            # was 201 and with data in the body, so that is picked up as well
+
+            # Get all API data and format return message
+            response = resp.read()
+            if resp.code == 200:
+                # 200 => Data in the body
+                result['message'] = json.loads(response)
+            elif resp.code == 201:
+                # 201 => Sometimes data in the body??
+                try:
+                    result['message'] = json.loads(response)
+                except ValueError:
+                    result['message'] = ""
+            else:
+                # No response from API (204 => No data)
+                try:
+                    result['message'] = resp.reason
+                except AttributeError:
+                    result['message'] = ""
+            result['changed'] = True
+        except HTTPError as err:
+            errbody = json.loads(err.read().decode())
+            result['changed'] = False
+            result['warnings'] = "%s: %s (%s)" % (err.msg,
+                                                  errbody['error']['message'],
+                                                  errbody['error']['code']
+                                                  )
+        except URLError as err:
+            raise AnsibleError("Failed lookup url for %s : %s" % (apiurl, to_native(err)))
+        except SSLValidationError as err:
+            raise AnsibleError("Error validating the server's certificate for %s: %s" % (apiurl, to_native(err)))
+        except ConnectionError as err:
+            if tries == MAXTRIES:
+                raise AnsibleError("Error connecting to %s: %s" % (apiurl, to_native(err)))
+            else:
+                # There was a connection error, wait a little and retry
+                time.sleep(0.25)
+
+        if result.get('message', "") == "No Content":
+            result['message'] = ""
+        return result
+
+
+class InventoryModule(BaseInventoryPlugin,  Constructable, Cacheable):
     NAME = 'mm_inventory'
     # If the user supplies '@mm_inventory' as path, the plugin will read from environment variables.
     no_config_file_supplied = False
-
-    def make_request(self, request_handler, mm_url):
-        """Makes the request to given URL, handles errors, returns JSON
-        """
-        try:
-            response = request_handler.get(mm_url)
-        except (ConnectionError, urllib_error.URLError, socket.error, httplib.HTTPException) as err:
-            error_msg = 'Connection to remote host failed: {err}'.format(err=err)
-            # If the Men&Mice Suite gives a readable error message, display that message to the user.
-            if callable(getattr(err, 'read', None)):
-                error_msg += ' with message: {err_msg}'.format(err_msg=err.read())
-            raise AnsibleParserError(to_native(error_msg))
-
-        # Attempt to parse JSON.
-        try:
-            return json.loads(response.read())
-        except (ValueError, TypeError) as e:
-            # If the JSON parse fails, print the ValueError
-            raise AnsibleParserError(to_native('Failed to parse json from host: {err}'.format(err=e)))
 
     def verify_file(self, path):
         if path.endswith('@mm_inventory'):
@@ -143,46 +212,42 @@ class InventoryModule(BaseInventoryPlugin):
             self._read_config_data(path)
 
         # Read inventory from Men&Mice Suite server.
-        # Note the environment variables will be handled automatically by InventoryManager.
-        mm_host = self.get_option('host')
+        provider = {
+            'mmurl': self.get_option('host'),
+            'user': self.get_option('user'),
+            'password': self.get_option('password'),
+        }
 
-        if not re.match('(?:http|https)://', mm_host):
-            mm_host = 'https://{mm_host}'.format(mm_host=mm_host)
+        # Get all IP ranges
+        http_method = 'GET'
+        url = 'Ranges'
+        databody = {}
+        result = doapi(url, http_method, provider, databody)
 
-        request_handler = Request(url_username=self.get_option('username'),
-                                  url_password=self.get_option('password'),
-                                  force_basic_auth=True)
+        # Find all child ranges, to prevent checking everything
+        children = []
+        for res in result['message']['result']['ranges']:
+            if res['childRanges']:
+                for child in res['childRanges']:
+                    children.append({'ref': child['ref'], 'name': child['name']})
 
-        sys.exit(0)
-        inventory_url = '/api/v2/inventories/{inv_id}/script/?hostvars=1&towervars=1&all=1'.format(inv_id=inventory_id)
-        inventory_url = urljoin(mm_host, inventory_url)
+        # Now that we have all child-ranges, find all active IP's in these
+        # ranges
+        http_method = "GET"
+        url = "command/GetIPAMRecords"
+        for child in children:
+            databody = {'filter': 'state=Assigned', 'rangeRef': child['name']}
+            result = doapi(url, http_method, provider, databody)
 
-        inventory = self.make_request(request_handler, inventory_url)
-        # To start with, create all the groups.
-        for group_name in inventory:
-            if group_name != '_meta':
-                self.inventory.add_group(group_name)
+            # All IPAM records in the range retrieved. Split the out
+            for ipam in result['message']['result']['ipamRecords']:
+                # Ansible only needs one combo, so only take the first one
+                # from the returned result
+                address = ipam['address']
+                hostname = ipam['dnsHosts'][0]['dnsRecord']['name']
 
-        # Then, create all hosts and add the host vars.
-        all_hosts = inventory['_meta']['hostvars']
-        for host_name, host_vars in six.iteritems(all_hosts):
-            self.inventory.add_host(host_name)
-            for var_name, var_value in six.iteritems(host_vars):
-                self.inventory.set_variable(host_name, var_name, var_value)
-
-        # Lastly, create to group-host and group-group relationships, and set group vars.
-        for group_name, group_content in six.iteritems(inventory):
-            if group_name != 'all' and group_name != '_meta':
-                # First add hosts to groups
-                for host_name in group_content.get('hosts', []):
-                    self.inventory.add_host(host_name, group_name)
-                # Then add the parent-children group relationships.
-                for child_group_name in group_content.get('children', []):
-                    self.inventory.add_child(group_name, child_group_name)
-            # Set the group vars. Note we should set group var for 'all', but not '_meta'.
-            if group_name != '_meta':
-                for var_name, var_value in six.iteritems(group_content.get('vars', {})):
-                    self.inventory.set_variable(group_name, var_name, var_value)
+                self.inventory.add_host(hostname)
+                self.inventory.set_variable(hostname, 'ansible_host', address)
 
         # Clean up the inventory.
         self.inventory.reconcile_inventory()
