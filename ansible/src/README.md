@@ -1,12 +1,46 @@
 # Setup the environment to develop modules
 
+## General info
+
+The Ansible modules (not the plugins) are developed in the `src`
+directory, where there are a couple of things to consider:
+
+- The Ansible modules *cannot* be run on their own, as they lack some
+  included modules and other functionality
+
+- As all modules use the same functions to connect to the API and so on,
+  these general functions are placed in the file `include.py`
+  This is to ensure all modules contain the same generic code, without
+  editing a lot of files with every change to the API-call or some other
+  generic function
+
+- The script `doit` combines every `mm_*.py` file with the `header`,
+  `imports` and `include.py` to a runnable module in the `library`
+  directory. After _every_ edit of a module-file (`mm_*.py`) the `doit`
+  script needs to be run
+
+- To ensure you don't forget to run the `doit` script, a script called
+  `trigger` is available and this runs the `doit` when a file in the
+  `src` directory changes. This does need `inotify` to be installed
+
 ## Software
 
-Install Python2 and Python3, this depends on your operating
-system. If you cannot find a suitable Python version for your OS,
-have a look at: https://www.anaconda.com/products/individual
+To develop a module some extra software is needed, e.g. Python and the
+Ansible development tree.
+
+Install Python2 and Python3, this depends on your operating system. If
+you cannot find a suitable Python version for your OS, have a look at:
+https://www.anaconda.com/products/individual
 
 ## Create a set of virtual environments
+
+Note, this requires the _virtualenv_ package:
+
+```
+pip install virtualenv
+```
+
+Then:
 
 ```
 mkdir ~/venv
@@ -18,8 +52,36 @@ virtualenv -p python3 python3
 ## Get the Ansible sources
 
 ```
+cd ~/venv
 git clone https://github.com/ansible/ansible.git
 ```
+
+This gives you the Ansible Development repository with the `devel`
+branch as the default. Currently this is the Ansible 2.10 development
+branch. As the complete development setup for Ansible is under heavy
+revision in version 2.10 (the push forward to Ansible Collections) not
+all needed modules and other bits and pieces are in the 2.10 branch.
+In the development tree a branch from version 2.9 is needed.
+
+So, issue the commands:
+
+```
+cd ansible
+git checkout origin/stable-2.9
+```
+
+After this it needed to make sure all requirements for Ansible are
+installed as well:
+
+```
+. ~/python2/venv/bin/activate
+pip install -r requirements.txt
+deactivate
+. ~/python3/venv/bin/activate
+pip install -r requirements.txt
+deactivate
+```
+
 
 When you start coding, first ensure your environment is setup
 correctly:
@@ -30,11 +92,14 @@ source ~/venv/python3/bin/activate && source ~/venv/ansible/hacking/env-setup
 
 ## Run module in terminal mode
 
+As the Men&Mice modules do not target Ansible nodes, it is possible to
+test the modules from the development machine with:
+
 ```
 python -m ansible.modules.mandm.mm_zone ~/venv/src/json/ansi_zone.json
 ```
 
-With an Ansible JSON file looking like:
+With an Ansible JSON file that contains all @he module parameters, looking like:
 
 ```
 { "ANSIBLE_MODULE_ARGS": {
@@ -113,10 +178,13 @@ Not that often then:
 [ ] General documentation for Ansible user
     - In progress
 [ ] Inventory information to Ansible
+    - In progress
 [ ] Ansible Playbook
+    - In progress
     - Currently a test playbook per module, eventually a playbook
       that does something useful.
 [ ] Ansible roles for Men&Mice
+    - Needs research by Carsten
 [ ] Support generically available Ansible version and
     support newer than 2.7
     - TonK: Support Ansible 2.[789] with Python[23]
