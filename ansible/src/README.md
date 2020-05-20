@@ -159,61 +159,61 @@ Not that often then:
 
 # The Module Map
 
-## Basic
+## Basic (67)
 
-[X] Run API commands against Men&Mice API
-    [X] Generic user authentication
-    [X] Handle High availability
+[X] (62) Run API commands against Men&Mice API
+    [X] (63) Generic user authentication
+    [X] (64) Handle High availability
         - TonK: If I understood correctly what David said, the HA
           functionality is created by a round-robin DNS entry.
           So, when one server is down, I just wait a little and
           give it a retry. This is what I have implemented in
           the API call, at the moment. This will be tested by Carsten
-    [X] Handle errors reported by Men&Mice Central API
+    [X] (65) Handle errors reported by Men&Mice Central API
 
-## Generic
+## Generic (68)
 
-[X] Ansible plugin installer -> In documentation
-[X] Inline documentation for Ansible user
-[ ] General documentation for Ansible user
+[X] (42) Ansible plugin installer -> In documentation
+[X] (43) Inline documentation for Ansible user
+[ ] (44) General documentation for Ansible user
     - In progress
-[ ] Inventory information to Ansible
+[ ] (45) Inventory information to Ansible
     - In progress
-[ ] Ansible Playbook
+[ ] (46) Ansible Playbook
     - In progress
     - Currently a test playbook per module, eventually a playbook
       that does something useful.
-[ ] Ansible roles for Men&Mice
+[ ] (47) Ansible roles for Men&Mice
     - Needs research by Carsten
-[ ] Support generically available Ansible version and
+[ ] (48) Support generically available Ansible version and
     support newer than 2.7
     - TonK: Support Ansible 2.[789] with Python[23]
     - TonK: Create a Molecule test set
       (lot of work, takes long, not easy, so expensive,
        currently out of scope)
 
-## DNS
+## DNS (69)
 
-[X] Get/Set properties for DNS and IPAM
-[X] Create a DNS Resource record in Men&Mice
-[X] Modify a DNS Resource record in Men&Mice
-[X] Set hostname for IP address in Men&Mice
+[X] (49) Get/Set properties for DNS and IPAM
+[X] (50) Create a DNS Resource record in Men&Mice
+[X] (51) Modify a DNS Resource record in Men&Mice
+[X] (52) Set hostname for IP address in Men&Mice
 
-## IPAM
+## IPAM (70)
 
-[X] Get next free IP address of a range
+[X] (53) Get next free IP address of a range
 
-## DHCP
+## DHCP (61)
 
-[X] Create/modify a DHCP reservation
+[X] (61) Create/modify a DHCP reservation
 
 ## Nice to have
 
-[ ] Create/Remove Men&Mice users/groups
-[X] Create/delete a DNS zone
-[ ] Create/delete IP range
-[ ] Create/delete DHCP scope
-[ ] Get/set properties on DHCP scopes
+[ ] (54) Create/Remove Men&Mice users/groups
+[X] (55) Create/delete a DNS zone
+[ ] (56) Create/delete IP range
+[ ] (57) Create/delete DHCP scope
+[ ] (58) Get/set properties on DHCP scopes
 [ ] Create/delete DHCP options
-    [ ] For a DHCP server
-    [ ] For a DHCP scope
+    [ ] (59) For a DHCP server
+    [ ] (60) For a DHCP scope
