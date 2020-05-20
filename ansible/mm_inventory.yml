@@ -1,0 +1,5 @@
+---
+plugin: mm_inventory
+host: mmsuite.example.net
+username: apidude
+password: TheAPIDude
