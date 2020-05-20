@@ -119,6 +119,17 @@
         provider: "{{ provider }}"
       delegate_to: localhost
 
+    - name: Ensure the zone
+      mm_zone:
+        state: present
+        name: thetestzone.com
+        nameserver: mandm.example.com
+        authority: mandm.example.net
+        masters: mandm.example.net
+        servtype: master
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
     # The `mm_freeip` plugin always returns a list, but the request was for just 1
     # IP address. The `mm_dnsrecord` only needs a single IP address. That's why the
     # list-slice `[0]` is used.
@@ -219,4 +230,15 @@
         var: freeipinfo
       vars:
         freeipinfo: "{{ query('mm_ipinfo', provider, freeips[0]) | to_nice_json }}"
+
+    - name: Ensure the zone absent
+      mm_zone:
+        state: absent
+        name: thetestzone.com
+        nameserver: mandm.example.com
+        authority: mandm.example.net
+        masters: mandm.example.net
+        servtype: master
+        provider: "{{ provider }}"
+      delegate_to: localhost
 

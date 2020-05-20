@@ -1,6 +1,6 @@
 { "ANSIBLE_MODULE_ARGS": {
     "state": "present",
-    "name": "tonkersten.com",
+    "name": "prutser.com",
     "nameserver": "mandm.example.net",
     "masters": "172.16.32.65",
     "servtype": "master",

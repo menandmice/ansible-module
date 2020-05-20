@@ -12,15 +12,16 @@
           - "Python version    : {{ ansible_facts['python_version'] }}"
           - "Python executable : {{ ansible_facts['python']['executable'] }}"
 
-    - name: Create a new zone
+    - name: Ensure the zone
       mm_zone:
         state: present
-        name: tonkersten.com
+        name: prutser.com
         nameserver: mandm.example.com
         authority: mandm.example.net
         masters: mandm.example.net
         servtype: master
         customproperties:
+          owner: Me, myself and I
           place: Netherlands
         provider: "{{ provider }}"
       delegate_to: localhost

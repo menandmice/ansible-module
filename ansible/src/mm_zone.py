@@ -242,7 +242,8 @@ def run_module():
     # If the API response to search for the zone contains the `invalid` field,
     # the zone does not exist. So, if the invalid field does not exist, the zone
     # does.
-    if not resp.get('invalid', False):
+    if not (resp.get('invalid', False) and
+            'Object not found for reference' in resp.get('warnings', "")):
         # Zone exists. Update
 
         # Create the API call.
@@ -280,7 +281,27 @@ def run_module():
             for k, v in module.params.get('customproperties').items():
                 databody["properties"].append({"name": k, "value": v})
 
-        result = mm.doapi(url, http_method, provider, databody)
+        # Find out if a change is needed
+        change = False
+        for key in databody['properties']:
+            name = key['name']
+            val  = key['value']
+
+            # Check if it is in the current values, either in the "normal" set or
+            # the custom properties
+            cur = resp['dnsZone'].get(name, None)
+            if not cur:
+                # Not found yet, try custumprops
+                cur = resp['dnsZone']['customProperties'].get(name, None)
+
+            # Check if it is in the current values
+            if val != cur:
+                change = True
+                break
+
+        # Execute the API
+        if change:
+            result = mm.doapi(url, http_method, provider, databody)
     else:
         # Get the existing DNS View for the nameserver
         refs = "DNSViews?dnsServerRef=%s" % module.params.get('nameserver')
