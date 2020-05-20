@@ -59,8 +59,9 @@ DOCUMENTATION = r'''
     servtype:
       description: Type of the master server, like "master" or "slave"
       type: str
-      required: True
-      choices: [ master, slave ]
+      required: False
+      choices: [ master, slave, stub, forward ]
+      default: master
     dynamic:
       description: Dynamic DNS zone
       type: bool
@@ -173,7 +174,8 @@ def run_module():
         name=dict(type='str', required=True),
         nameserver=dict(type='str', required=True),
         authority=dict(type='str', required=False),
-        servtype=dict(type='str', required=False),
+        servtype=dict(type='str', required=False, default='master',
+                      choices=['master', 'slave', 'stub', 'forward'] ),
         dynamic=dict(type='bool', required=False, default=False),
         masters=dict(type='list', required=False),
         dnssecsigned=dict(type='bool', required=False),
