@@ -23,6 +23,8 @@ DOCUMENTATION = '''
     author: Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
     short_description: Ansible dynamic inventory plugin for the Men&Mice Suite.
     version_added: "2.7"
+    extends_documentation_fragment:
+      - inventory_cache
     description:
       - Reads inventories from Men&Mice Suite.
       - Supports reading configuration from both YAML config file and environment variables.
@@ -92,6 +94,8 @@ import sys
 import re
 import os
 import json
+import time
+from ansible.errors import AnsibleError
 from ansible.module_utils import six
 from ansible.module_utils.urls import Request, urllib_error, ConnectionError, socket, httplib
 from ansible.module_utils._text import to_native
@@ -190,9 +194,10 @@ def doapi(url, method, provider, databody):
         return result
 
 
-class InventoryModule(BaseInventoryPlugin,  Constructable, Cacheable):
+class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
     NAME = 'mm_inventory'
-    # If the user supplies '@mm_inventory' as path, the plugin will read from environment variables.
+    # If the user supplies '@mm_inventory' as path, the plugin will read
+    # from environment variables.
     no_config_file_supplied = False
 
     def verify_file(self, path):
@@ -211,44 +216,81 @@ class InventoryModule(BaseInventoryPlugin,  Constructable, Cacheable):
         if not self.no_config_file_supplied and os.path.isfile(path):
             self._read_config_data(path)
 
-        # Read inventory from Men&Mice Suite server.
-        provider = {
-            'mmurl': self.get_option('host'),
-            'user': self.get_option('user'),
-            'password': self.get_option('password'),
-        }
+        # Load cache plugin
+        self.load_cache_plugin()
+        cache_key = self.get_cache_key(path)
 
-        # Get all IP ranges
-        http_method = 'GET'
-        url = 'Ranges'
-        databody = {}
-        result = doapi(url, http_method, provider, databody)
+        # cache may be True or False at this point to indicate if the
+        # inventory is being refreshed. Get the user's cache option to
+        # see if we should save the cache if it is changing
+        user_cache_setting = self.get_option('cache')
 
-        # Find all child ranges, to prevent checking everything
-        children = []
-        for res in result['message']['result']['ranges']:
-            if res['childRanges']:
-                for child in res['childRanges']:
-                    children.append({'ref': child['ref'], 'name': child['name']})
+        # Cache logic
+        if cache:
+            cache = self.get_option('cache')
+            cache_key = self.get_cache_key(path)
+        else:
+            cache_key = None
 
-        # Now that we have all child-ranges, find all active IP's in these
-        # ranges
-        http_method = "GET"
-        url = "command/GetIPAMRecords"
-        for child in children:
-            databody = {'filter': 'state=Assigned', 'rangeRef': child['name']}
+        # Read if caching was enabled and the cache isn't being refreshed
+        attempt_to_read_cache = user_cache_setting and cache
+        # Update if caching is enabled and the cache needs refreshing
+        # update this value to True if the cache has expired below
+        cache_needs_update = user_cache_setting and not cache
+
+        # If cache was read
+        if attempt_to_read_cache:
+            try:
+                results = self._cache[cache_key]
+            except KeyError:
+                # This occurs if the cache_key is not in the cache or if
+                # the cache_key expired, so the cache needs to be updated
+                cache_needs_update = True
+
+        # Update cache if needed
+        if cache_needs_update:
+            # Read inventory from Men&Mice Suite server.
+            provider = {
+                'mmurl': self.get_option('host'),
+                'user': self.get_option('user'),
+                'password': self.get_option('password'),
+            }
+
+            # Get all IP ranges
+            http_method = 'GET'
+            url = 'Ranges'
+            databody = {}
             result = doapi(url, http_method, provider, databody)
 
-            # All IPAM records in the range retrieved. Split the out
-            for ipam in result['message']['result']['ipamRecords']:
-                # Ansible only needs one combo, so only take the first one
-                # from the returned result
-                address = ipam['address']
-                hostname = ipam['dnsHosts'][0]['dnsRecord']['name']
+            # Find all child ranges, to prevent checking everything
+            children = []
+            for res in result['message']['result']['ranges']:
+                if res['childRanges']:
+                    for child in res['childRanges']:
+                        children.append({'ref': child['ref'], 'name': child['name']})
 
-                self.inventory.add_host(hostname)
-                self.inventory.set_variable(hostname, 'ansible_host', address)
+            # Now that we have all child-ranges, find all active IP's in these
+            # ranges
+            http_method = "GET"
+            url = "command/GetIPAMRecords"
+            for child in children:
+                databody = {'filter': 'state=Assigned', 'rangeRef': child['name']}
+                result = doapi(url, http_method, provider, databody)
+
+                # All IPAM records in the range retrieved. Split the out
+                for ipam in result['message']['result']['ipamRecords']:
+                    # Ansible only needs one combo, so only take the first one
+                    # from the returned result
+                    address = ipam['address']
+                    hostname = ipam['dnsHosts'][0]['dnsRecord']['name']
+
+                    # Add to inventory
+                    self.inventory.add_host(hostname)
+                    self.inventory.set_variable(hostname, 'ansible_host', address)
+
+        # If cache was updated
+        if cache_needs_update:
+            self._cache[cache_key] = self.get_inventory()
 
         # Clean up the inventory.
-        print(self.inventory)
         self.inventory.reconcile_inventory()

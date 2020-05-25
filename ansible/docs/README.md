@@ -189,7 +189,6 @@ can be performed on the Ansible control node. So, it is possible to
 protect the Men&Mice Suite API to only accept commands from the Ansible
 control node and not from everywhere.
 
-
 ## Ansible modules
 
 ### mm_claimip

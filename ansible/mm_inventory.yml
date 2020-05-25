@@ -3,3 +3,6 @@ plugin: mm_inventory
 host: "http://mmsuite.example.net"
 user: apidude
 password: TheAPIDude
+cache: True
+#cache_plugin: pickle
+cache_plugin: jsonfile
