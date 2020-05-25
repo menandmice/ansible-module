@@ -4,6 +4,8 @@ host: "http://mmsuite.example.net"
 user: apidude
 password: TheAPIDude
 
-#filters:
-#  - location: there
-#  - owner: bep
+filters:
+  - location: home
+
+ranges:
+  - 172.16.17.0/24

@@ -25,6 +25,7 @@ DOCUMENTATION = '''
     version_added: "2.7"
     extends_documentation_fragment:
       - inventory_cache
+      - constructed
     description:
       - Reads inventories from Men&Mice Suite.
       - Supports reading configuration from both YAML config file and environment variables.
@@ -58,6 +59,12 @@ DOCUMENTATION = '''
         env:
           - name: MM_PASSWORD
         required: True
+      ranges:
+        description: Ranges to get the inventory from (e.g. 172.16.17.0/24)
+        type: list
+        env:
+          - name: MM_RANGES
+        required: False
       filters:
         description:
           - A list of filter value pairs.
@@ -66,6 +73,8 @@ DOCUMENTATION = '''
             are both sanitized, so both are converted to lowercase and
             all special characters are translated to "_"
         type: list
+        env:
+          - name: MM_FILTERS
         required: False
 '''
 
@@ -73,7 +82,7 @@ EXAMPLES = '''
 # Before you execute the following commands, you should make sure this file is
 # in your plugin path, and you enabled this plugin.
 
-# Example for using mm_inventory.yml file
+# Examples using mm_inventory.yml file
 
 plugin: mm_inventory
 host: http://mmsuite.example.net
@@ -83,7 +92,22 @@ filters:
   - location: London
 
 
-# And in the ansible.cfg
+plugin: mm_inventory
+host: http://mmsuite.example.net
+user: apiuser
+password: apipasswd
+ranges:
+  - 172.16.17.0/24
+
+
+The "filters" are an "and" function, a host is only available in the inventory
+when all filter-conditions are met.
+
+The "ranges" are an "or" function, a host is available in the inventory
+when either ranges-conditions are met.
+
+
+# With in the ansible.cfg
 [inventory]
 enable_plugins = mm_inventory, host_list, auto
 cache = yes
@@ -98,13 +122,17 @@ cache_connection = /tmp/inv_cache
 # environment variables.
 
 # ansible-inventory -i /path/to/mm_inventory.yml --list
+# or "inventory = mm_inventory.yml" in the ansible.cfg file
 
 # Example for reading from environment variables:
 
 # Set environment variables:
+#
 # export MM_HOST=YOUR_MM_HOST_ADDRESS
 # export MM_USER=YOUR_MM_USER
 # export MM_PASSWORD=YOUR_MM_PASSWORD
+# export MM_FILTERS=YOUR_MM_FILTERS
+# export MM_RANGES=YOUR_MM_RANGES
 
 # Read the inventory from the Men&Mice Suite, and list them.
 # The inventory path must always be @mm_inventory if you are reading
@@ -125,6 +153,7 @@ from ansible.errors import AnsibleParserError
 from ansible.plugins.inventory import BaseInventoryPlugin, Constructable, Cacheable
 from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
 from ansible.module_utils.urls import open_url, SSLValidationError
+from ansible.plugins.loader import inventory_loader
 
 # Python 2/3 Compatibility
 try:
@@ -245,7 +274,6 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
             return False
 
 
-
     def parse(self, inventory, loader, path, cache=True):
         super(InventoryModule, self).parse(inventory, loader, path)
         if not self.no_config_file_supplied and os.path.isfile(path):
@@ -282,8 +310,8 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                 # the cache_key expired, so the cache needs to be updated
                 cache_needs_update = True
 
-        # Update cache if needed
-        if cache_needs_update:
+        # Update cache if needed. If user did not define cache, always run
+        if cache_needs_update or not user_cache_setting:
             # Read inventory from Men&Mice Suite server.
             provider = {
                 'mmurl': self.get_option('host'),
@@ -297,6 +325,12 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
             except KeyError as err:
                 filters = []
 
+            # Check if ranges are supplied
+            try:
+                ranges = self.get_option('ranges')
+            except KeyError as err:
+                ranges = []
+
             # Get all IP ranges
             http_method = 'GET'
             url = 'Ranges'
@@ -308,7 +342,12 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
             for res in result['message']['result']['ranges']:
                 if res['childRanges']:
                     for child in res['childRanges']:
-                        children.append({'ref': child['ref'], 'name': child['name']})
+                        # Check if it's a wanted range
+                        if ranges:
+                            if child['name'] in ranges:
+                                children.append({'ref': child['ref'], 'name': child['name']})
+                        else:
+                            children.append({'ref': child['ref'], 'name': child['name']})
 
             # Create a Men&Mice group
             self.inventory.add_group("mm_hosts")
@@ -331,7 +370,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                     # Create all custom property groups. These groups are all
                     # called mm_<cp_name>_<cp_value> and to prevent case mixup
                     # the names are converted to lowercase and sanitized
-                    add_host = False
+                    add_host = True
                     for custprop in ipam['customProperties']:
                         custval = ipam['customProperties'][custprop]
 
@@ -343,15 +382,11 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                         custprop = _sanitize(custprop)
                         custval = _sanitize(custval)
 
-                        # Apply filters (if requested)
+                        # Apply filters, if requested. No filter means filters == None
                         if filters:
                             for f in filters:
                                 # Is the property in the filter and a wanted value
-                                if f.get(custprop, None) == custval:
-                                    add_host = True
-                                    break
-                        else:
-                            add_host = True
+                                add_host = f.get(custprop, None) == custval
 
                         # If filter wants this host, add the custom group
                         if add_host:
@@ -366,8 +401,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                         self.inventory.set_variable(hostname, 'ansible_host', address)
 
         # If cache was updated
-        #if cache_needs_update:
-        #    self._cache[cache_key] = {}
+        self.update_cache_if_changed()
+        #if cache_needs_update and user_cache_setting:
+        #    self._cache[cache_key] = dict(results)
 
-        # Clean up the inventory and return it
+        # Clean up the inventory
         self.inventory.reconcile_inventory()
