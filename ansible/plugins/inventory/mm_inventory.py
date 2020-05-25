@@ -58,6 +58,15 @@ DOCUMENTATION = '''
         env:
           - name: MM_PASSWORD
         required: True
+      filters:
+        description:
+          - A list of filter value pairs.
+          - This a combination of a custom property and the value, e.g. "location: home"
+          - To avoid parsing errors, the custom-key and custom-value
+            are both sanitized, so both are converted to lowercase and
+            all special characters are translated to "_"
+        type: list
+        required: False
 '''
 
 EXAMPLES = '''
@@ -70,6 +79,19 @@ plugin: mm_inventory
 host: http://mmsuite.example.net
 user: apiuser
 password: apipasswd
+filters:
+  - location: London
+
+
+# And in the ansible.cfg
+[inventory]
+enable_plugins = mm_inventory, host_list, auto
+cache = yes
+cache_plugin = jsonfile
+cache_prefix = mm_inv
+cache_timeout = 3600
+cache_connection = /tmp/inv_cache
+
 
 # Then you can run the following command.
 # If some of the arguments are missing, Ansible will attempt to read them from
@@ -194,8 +216,19 @@ def doapi(url, method, provider, databody):
         return result
 
 
+def _sanitize(data):
+    """Clean and sanitize a string."""
+    data = data.lower()
+    data = re.sub(' -/\\&*^%$#@!+=`~:;<>?,."\'()\[\]\{\}', '_', data)
+
+    return data
+
+
 class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
+    # used internally by Ansible, it should match the file name
+    # Is not required
     NAME = 'mm_inventory'
+
     # If the user supplies '@mm_inventory' as path, the plugin will read
     # from environment variables.
     no_config_file_supplied = False
@@ -210,6 +243,8 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                                   'mmsuite.yaml', 'mandm.yaml', 'mandmsuite.yaml'))
         else:
             return False
+
+
 
     def parse(self, inventory, loader, path, cache=True):
         super(InventoryModule, self).parse(inventory, loader, path)
@@ -256,6 +291,12 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                 'password': self.get_option('password'),
             }
 
+            # Check if filters are supplied
+            try:
+                filters = self.get_option('filters')
+            except KeyError as err:
+                filters = []
+
             # Get all IP ranges
             http_method = 'GET'
             url = 'Ranges'
@@ -268,6 +309,9 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                 if res['childRanges']:
                     for child in res['childRanges']:
                         children.append({'ref': child['ref'], 'name': child['name']})
+
+            # Create a Men&Mice group
+            self.inventory.add_group("mm_hosts")
 
             # Now that we have all child-ranges, find all active IP's in these
             # ranges
@@ -284,13 +328,46 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
                     address = ipam['address']
                     hostname = ipam['dnsHosts'][0]['dnsRecord']['name']
 
-                    # Add to inventory
-                    self.inventory.add_host(hostname)
-                    self.inventory.set_variable(hostname, 'ansible_host', address)
+                    # Create all custom property groups. These groups are all
+                    # called mm_<cp_name>_<cp_value> and to prevent case mixup
+                    # the names are converted to lowercase and sanitized
+                    add_host = False
+                    for custprop in ipam['customProperties']:
+                        custval = ipam['customProperties'][custprop]
+
+                        # Create and clean custom property group
+                        custgroup = "mm_%s_%s" % (custprop, custval)
+                        custgroup = _sanitize(custgroup)
+
+                        # Clean custom properties
+                        custprop = _sanitize(custprop)
+                        custval = _sanitize(custval)
+
+                        # Apply filters (if requested)
+                        if filters:
+                            for f in filters:
+                                # Is the property in the filter and a wanted value
+                                if f.get(custprop, None) == custval:
+                                    add_host = True
+                                    break
+                        else:
+                            add_host = True
+
+                        # If filter wants this host, add the custom group
+                        if add_host:
+                            self.inventory.add_group(custgroup)
+                            self.inventory.add_host(hostname, group=custgroup)
+
+                    # If filter wants this host, add the host
+                    if add_host:
+                        # Add to inventory (The group "all" is always present)
+                        self.inventory.add_host(hostname, group="all")
+                        self.inventory.add_host(hostname, group="mm_hosts")
+                        self.inventory.set_variable(hostname, 'ansible_host', address)
 
         # If cache was updated
-        if cache_needs_update:
-            self._cache[cache_key] = self.get_inventory()
+        #if cache_needs_update:
+        #    self._cache[cache_key] = {}
 
-        # Clean up the inventory.
+        # Clean up the inventory and return it
         self.inventory.reconcile_inventory()
