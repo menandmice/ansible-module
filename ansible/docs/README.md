@@ -12,7 +12,7 @@ so that the modules and plugins can be found by Ansible.
 
 Installing the Ansible modules and plugins is a straight forward
 process.  Copy the Ansible modules and plugins to a directory on the
-Ansible control node, let's assume `/tmp/mandm`.
+Ansible control node, let us assume `/tmp/mandm`.
 
 ### Ansible modules
 
@@ -44,7 +44,7 @@ the modules are installed correctly, by running the command:
 ansible-doc -l | grep '^mm_'
 ```
 
-which should produce a list with all the Men&Mice Suite Ansible modules.
+This should produce a list with all the Men&Mice Suite Ansible modules.
 
 ### Ansible lookup plugins
 
@@ -116,6 +116,9 @@ ansible-doc -t inventory -l
 Which should produce a list with all the Men&Mice Suite Ansible
 inventory plugins.
 
+The `mm_inventory` plugin also needs some extra configuration, read the
+`README_inventory.md` for more information.
+
 ## API user
 
 As the Ansible modules and plugins connect to a Men&Mice Suite
@@ -173,7 +176,7 @@ password: !vault |
   6138
 ```
 
-The defined provider can be used in Ansible playlooks like:
+The defined provider can be used in Ansible playbooks like:
 
 ```yaml
 - name: Claim IP address
@@ -187,7 +190,24 @@ The defined provider can be used in Ansible playlooks like:
 The reason for the `delegate_to: localhost` option, is that all commands
 can be performed on the Ansible control node. So, it is possible to
 protect the Men&Mice Suite API to only accept commands from the Ansible
-control node and not from everywhere.
+control node and not from everywhere. This can also be achieved by
+creating a playbook that has a connection with `localhost` and is
+specific for the interaction with the Men&Mice Suite.
+
+```yaml
+---
+- name: host connection example
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Claim IP address
+      mm_claimip:
+        state: present
+        ipaddress: 172.16.12.14
+        provider: "{{ provider }"
+```
 
 ## Ansible modules
 
@@ -214,3 +234,52 @@ Manage custom properties
 ### mm_zone
 
 Manage DNS zones
+
+
+## Ansible configuration example
+
+Beneath the is an example Ansible configuration file (`ansible.cfg`)
+with the assumption that all Men&Mice plugins and modules are installed
+in the `/etc/ansible` directory.
+
+```bash
+# ==============================================
+[defaults]
+remote_tmp              = $HOME/.ansible/tmp
+inventory               = inventory
+pattern                 = *
+forks                   = 5
+poll_interval           = 15
+ask_pass                = False
+remote_port             = 22
+remote_user             = ansible
+gathering               = implicit
+host_key_checking       = False
+interpreter_python      = auto_silent
+force_valid_group_names = true
+retry_files_enabled     = False
+library                 = /etc/ansible/library
+action_plugins          = /usr/share/ansible_plugins/action_plugins
+callback_plugins        = /etc/ansible/plugins/callback_plugins
+connection_plugins      = /usr/share/ansible_plugins/connection_plugins
+filter_plugins          = /usr/share/ansible_plugins/filter_plugins
+inventory_plugins       = /usr/share/ansible_plugins/inventory_plugins:/etc/ansible/plugins/inventory
+lookup_plugins          = /usr/share/ansible_plugins/lookup_plugins:/etc/ansible/plugins/lookup
+vars_plugins            = /usr/share/ansible_plugins/vars_plugins
+callback_whitelist      = minimal, dense, oneline
+stdout_callback         = default
+
+[inventory]
+enable_plugins   = mm_inventory, host_list, auto
+cache            = no
+cache_plugin     = pickle
+cache_prefix     = mm_inv
+cache_timeout    = 60
+cache_connection = /tmp/mm_inventory_cache
+
+[privilege_escalation]
+become          = False
+become_method   = sudo
+become_user     = root
+become_ask_pass = False
+```

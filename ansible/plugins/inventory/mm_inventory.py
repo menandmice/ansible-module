@@ -68,7 +68,7 @@ DOCUMENTATION = '''
       filters:
         description:
           - A list of filter value pairs.
-          - This a combination of a custom property and the value, e.g. "location: home"
+          - This a combination of a custom property and the value
           - To avoid parsing errors, the custom-key and custom-value
             are both sanitized, so both are converted to lowercase and
             all special characters are translated to "_"
@@ -85,7 +85,7 @@ EXAMPLES = '''
 # Examples using mm_inventory.yml file
 
 plugin: mm_inventory
-host: http://mmsuite.example.net
+host: "http://mmsuite.example.net"
 user: apiuser
 password: apipasswd
 filters:
@@ -93,7 +93,7 @@ filters:
 
 
 plugin: mm_inventory
-host: http://mmsuite.example.net
+host: "http://mmsuite.example.net"
 user: apiuser
 password: apipasswd
 ranges:
@@ -111,11 +111,10 @@ when either ranges-conditions are met.
 [inventory]
 enable_plugins = mm_inventory, host_list, auto
 cache = yes
-cache_plugin = jsonfile
+cache_plugin = pickle
 cache_prefix = mm_inv
 cache_timeout = 3600
 cache_connection = /tmp/inv_cache
-
 
 # Then you can run the following command.
 # If some of the arguments are missing, Ansible will attempt to read them from
