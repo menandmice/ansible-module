@@ -25,7 +25,6 @@ DOCUMENTATION = '''
     version_added: "2.7"
     extends_documentation_fragment:
       - inventory_cache
-      - constructed
     description:
       - Reads inventories from Men&Mice Suite.
       - Supports reading configuration from both YAML config file and environment variables.
@@ -144,6 +143,7 @@ import re
 import os
 import json
 import time
+from ansible import constants as C
 from ansible.errors import AnsibleError
 from ansible.module_utils import six
 from ansible.module_utils.urls import Request, urllib_error, ConnectionError, socket, httplib
@@ -159,6 +159,13 @@ try:
     from urlparse import urljoin
 except ImportError:
     from urllib.parse import urljoin
+
+# Debugging stuff
+try:
+    from __main__ import display
+except ImportError:
+    from ansible.utils.display import Display
+    display = Display()
 
 
 def doapi(url, method, provider, databody):
@@ -247,12 +254,13 @@ def doapi(url, method, provider, databody):
 def _sanitize(data):
     """Clean and sanitize a string."""
     data = data.lower()
-    data = re.sub(' -/\\&*^%$#@!+=`~:;<>?,."\'()\[\]\{\}', '_', data)
+    data = re.sub('[ -/\\&*^%$#@!+=`~:;<>?,\."\'()\[\]\{\}]', '_', data)
+    data = data
 
     return data
 
 
-class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
+class InventoryModule(BaseInventoryPlugin, Cacheable):
     # used internally by Ansible, it should match the file name
     # Is not required
     NAME = 'mm_inventory'
@@ -262,16 +270,141 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
     no_config_file_supplied = False
 
     def verify_file(self, path):
+        """Verify if the configuration file is valid."""
+        valid_names = ['mm_inventory', 'mmsuite', 'mandm', 'menandmice',
+                       'mandmsuite', 'mm_suite', 'mandm_suite']
+
+        valid = False
         if path.endswith('@mm_inventory'):
             self.no_config_file_supplied = True
-            return True
+            valid = True
         elif super(InventoryModule, self).verify_file(path):
-            return path.endswith(('mm_inventory.yml', 'mm_inventory.yaml',
-                                  'mmsuite.yml', 'mandm.yml', 'mandmsuite.yml',
-                                  'mmsuite.yaml', 'mandm.yaml', 'mandmsuite.yaml'))
-        else:
-            return False
+            fname, ext = os.path.splitext(os.path.basename(path))
+            if fname in valid_names and ext in C.YAML_FILENAME_EXTENSIONS:
+                valid = True
 
+        return valid
+
+    def get_inventory(self):
+        """Create a dictionairy with all host and group information.
+
+           Return a dictionary that contains (this dict is cached if requested):
+                invent = {
+                    'hosts': [{'name': hostname, 'address': ipaddress}, ...],
+                    'groups': {
+                        "all": [hostname1, hostname2, ...],
+                        "mm_hosts": [hostname1, hostname2, ...],
+                        "custgrp1":  [hostname1, hostname5, ...],
+                        "custgrp3":  [hostname4, hostname7, ...],
+                        .
+                        .
+                        .
+                    }
+                }
+        """
+        # Read inventory from Men&Mice Suite server. Provider is needed
+        provider = {
+            'mmurl': self.get_option('host'),
+            'user': self.get_option('user'),
+            'password': self.get_option('password'),
+        }
+
+        # Check if filters are supplied
+        try:
+            filters = self.get_option('filters')
+        except KeyError as err:
+            filters = []
+
+        # Check if ranges are supplied
+        try:
+            ranges = self.get_option('ranges')
+        except KeyError as err:
+            ranges = []
+
+        # Start with an (almost) empty inventory
+        invent = {
+            'hosts': [],
+            'groups': {
+                "all": [],
+                "mm_hosts": []
+            }
+        }
+
+        # Get all IP ranges
+        http_method = 'GET'
+        url = 'Ranges'
+        databody = {}
+        result = doapi(url, http_method, provider, databody)
+
+        # Find all child ranges, to prevent checking everything
+        children = []
+        for res in result['message']['result']['ranges']:
+            if res['childRanges']:
+                for child in res['childRanges']:
+                    # Check if it's a wanted range
+                    if ranges:
+                        if child['name'] in ranges:
+                            children.append({'ref': child['ref'], 'name': child['name']})
+                    else:
+                        children.append({'ref': child['ref'], 'name': child['name']})
+
+        # Now that we have all child-ranges, find all active IP's in these
+        # ranges
+        http_method = "GET"
+        url = "command/GetIPAMRecords"
+        for child in children:
+            databody = {'filter': 'state=Assigned', 'rangeRef': child['name']}
+            result = doapi(url, http_method, provider, databody)
+
+            # All IPAM records in the range retrieved. Split the out
+            for ipam in result['message']['result']['ipamRecords']:
+                # Ansible only needs one combo, so only take the first one
+                # from the returned result
+                address = ipam['address']
+                hostname = ipam['dnsHosts'][0]['dnsRecord']['name']
+
+                # Create all custom property groups. These groups are all
+                # called mm_<cp_name>_<cp_value> and to prevent case mixup
+                # the names are converted to lowercase and sanitized
+                add_host = True
+                for custprop in ipam['customProperties']:
+                    custval = ipam['customProperties'][custprop]
+
+                    # Create and clean custom property group
+                    custgroup = "mm_%s_%s" % (custprop, custval)
+                    custgroup = _sanitize(custgroup)
+
+                    # Clean custom properties
+                    custprop = _sanitize(custprop)
+                    custval = _sanitize(custval)
+
+                    # Also create a group per range
+                    rangegrp = 'range_' + _sanitize(child['name'])
+
+                    # Apply filters, if requested. No filter means filters == None
+                    if filters:
+                        for f in filters:
+                            # Is the property in the filter and a wanted value
+                            add_host = f.get(custprop, None) == custval
+
+                    # If filter wants this host, add the custom group
+                    if add_host:
+                        invent['hosts'].append({'name': hostname, 'address': address})
+                        if custgroup not in invent['groups']:
+                            invent['groups'][custgroup] = []
+                        invent['groups'][custgroup].append(hostname)
+
+                        if rangegrp not in invent['groups']:
+                            invent['groups'][rangegrp] = []
+                        invent['groups'][rangegrp].append(hostname)
+
+                # If filter wants this host, add the host
+                if add_host:
+                    invent['groups']['all'].append(hostname)
+                    invent['groups']['mm_hosts'].append(hostname)
+
+        # Return collected results
+        return invent
 
     def parse(self, inventory, loader, path, cache=True):
         super(InventoryModule, self).parse(inventory, loader, path)
@@ -303,7 +436,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
         # If cache was read
         if attempt_to_read_cache:
             try:
-                results = self._cache[cache_key]
+                invent = self._cache[cache_key]
             except KeyError:
                 # This occurs if the cache_key is not in the cache or if
                 # the cache_key expired, so the cache needs to be updated
@@ -311,98 +444,22 @@ class InventoryModule(BaseInventoryPlugin, Constructable, Cacheable):
 
         # Update cache if needed. If user did not define cache, always run
         if cache_needs_update or not user_cache_setting:
-            # Read inventory from Men&Mice Suite server.
-            provider = {
-                'mmurl': self.get_option('host'),
-                'user': self.get_option('user'),
-                'password': self.get_option('password'),
-            }
+            invent = self.get_inventory()
 
-            # Check if filters are supplied
-            try:
-                filters = self.get_option('filters')
-            except KeyError as err:
-                filters = []
-
-            # Check if ranges are supplied
-            try:
-                ranges = self.get_option('ranges')
-            except KeyError as err:
-                ranges = []
-
-            # Get all IP ranges
-            http_method = 'GET'
-            url = 'Ranges'
-            databody = {}
-            result = doapi(url, http_method, provider, databody)
-
-            # Find all child ranges, to prevent checking everything
-            children = []
-            for res in result['message']['result']['ranges']:
-                if res['childRanges']:
-                    for child in res['childRanges']:
-                        # Check if it's a wanted range
-                        if ranges:
-                            if child['name'] in ranges:
-                                children.append({'ref': child['ref'], 'name': child['name']})
-                        else:
-                            children.append({'ref': child['ref'], 'name': child['name']})
-
-            # Create a Men&Mice group
-            self.inventory.add_group("mm_hosts")
-
-            # Now that we have all child-ranges, find all active IP's in these
-            # ranges
-            http_method = "GET"
-            url = "command/GetIPAMRecords"
-            for child in children:
-                databody = {'filter': 'state=Assigned', 'rangeRef': child['name']}
-                result = doapi(url, http_method, provider, databody)
-
-                # All IPAM records in the range retrieved. Split the out
-                for ipam in result['message']['result']['ipamRecords']:
-                    # Ansible only needs one combo, so only take the first one
-                    # from the returned result
-                    address = ipam['address']
-                    hostname = ipam['dnsHosts'][0]['dnsRecord']['name']
-
-                    # Create all custom property groups. These groups are all
-                    # called mm_<cp_name>_<cp_value> and to prevent case mixup
-                    # the names are converted to lowercase and sanitized
-                    add_host = True
-                    for custprop in ipam['customProperties']:
-                        custval = ipam['customProperties'][custprop]
-
-                        # Create and clean custom property group
-                        custgroup = "mm_%s_%s" % (custprop, custval)
-                        custgroup = _sanitize(custgroup)
-
-                        # Clean custom properties
-                        custprop = _sanitize(custprop)
-                        custval = _sanitize(custval)
-
-                        # Apply filters, if requested. No filter means filters == None
-                        if filters:
-                            for f in filters:
-                                # Is the property in the filter and a wanted value
-                                add_host = f.get(custprop, None) == custval
-
-                        # If filter wants this host, add the custom group
-                        if add_host:
-                            self.inventory.add_group(custgroup)
-                            self.inventory.add_host(hostname, group=custgroup)
-
-                    # If filter wants this host, add the host
-                    if add_host:
-                        # Add to inventory (The group "all" is always present)
-                        self.inventory.add_host(hostname, group="all")
-                        self.inventory.add_host(hostname, group="mm_hosts")
-                        self.inventory.set_variable(hostname, 'ansible_host', address)
+        # Inventory blob is in. Create a complete inventory
+        for host in invent['hosts']:
+            # Host is a dict with hostname and IP
+            self.inventory.add_host(host['name'])
+            self.inventory.set_variable(host['name'], 'ansible_host', host['address'])
+        for grp in invent['groups']:
+            self.inventory.add_group(grp)
+            for host in invent['groups'][grp]:
+                self.inventory.add_host(host, group=grp)
 
         # If cache was updated
         self.update_cache_if_changed()
-        #if cache_needs_update and user_cache_setting:
-        #    self._cache[cache_key] = dict(results)
+        if cache_needs_update and user_cache_setting:
+            self._cache[cache_key] = invent
 
         # Clean up the inventory
         self.inventory.reconcile_inventory()
