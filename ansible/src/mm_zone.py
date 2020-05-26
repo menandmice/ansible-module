@@ -47,17 +47,19 @@ DOCUMENTATION = r'''
       type: str
       required: True
     nameserver:
-      description: Namserver to define the zone on
+      description: Nameserver to define the zone on
       type: str
       required: True
     authority:
       description: Name of the DNS server that contains the zone or
-                   the string "[Active Directory]" if the zone
+                   the string C([Active Directory]) if the zone
                    is AD integrated
       type: str
       required: False
     servtype:
-      description: Type of the master server, like "master" or "slave"
+      description:
+         - Type of the master server.
+         - C(master), C(slave), C(stub) or C(forward).
       type: str
       required: False
       choices: [ master, slave, stub, forward ]
@@ -68,8 +70,8 @@ DOCUMENTATION = r'''
       required: False
       default: False
     masters:
-      description: The IP addresses of the master servers if the new zone is
-                   not a master zone.
+      description: The IP addresses of the master servers if the
+                   new zone is not a master zone.
       type: list
       required: False
     dnssecsigned:
@@ -100,9 +102,9 @@ DOCUMENTATION = r'''
       required: False
     customproperties:
       description:
-        - Custom properties for the zone
-        - These properties must already exist
-        - See also C(mm_props)
+        - Custom properties for the zone.
+        - These properties must already exist.
+        - See also C(mm_props).
       type: dict
       required: False
     provider:

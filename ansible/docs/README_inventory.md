@@ -1,15 +1,24 @@
 # Ansible mm_inventory plugin
 
-This plugin inventories from Men&Mice Suite. It supports reading
-configuration from both YAML configuration file and environment
-variables. If reading from the YAML file, the file name must end with
-`mm_inv.(yml|yaml)` or `mm_inventory.(yml|yaml)`, the path in the
-command would be `/path/to/mm_inventory.(yml|yaml)`. If some arguments
-in the configuration file are missing, this plugin will try to fill in
+This plugin generates the inventory from the Men&Mice Suite. It
+supports reading configuration from both a YAML configuration file and
+environment variables. If reading from the YAML file, the filename must
+end with `mm_inventory.(yml|yaml)`, the path in the command would be
+`/path/to/mm_inventory.(yml|yaml)`. If some arguments in the
+configuration file are missing, this plugin will try to fill in the
 missing arguments by reading from environment variables. If reading
 configurations from environment variables, the path in the command must
 be `@mm_inventory`.
 
+Valid configuration filenames are:
+
+- `mm_inventory`
+- `mmsuite`
+- `mandm`
+- `menandmice`
+- `mandmsuite`
+- `mm_suite`
+- `mandm_suite`
 
 ## Options
 
@@ -40,7 +49,7 @@ Example:
 filters:
   - location: home
   - owner: tonk
-range:
+ranges:
   - 192.168.4.0/24
   - 172.16.17.0/24
 ```
@@ -90,12 +99,26 @@ section in the `ansible.cfg` file.
 ```
 [inventory]
 enable_plugins   = mm_inventory, host_list, auto
-cache            = no
-cache_plugin     = pickle
+cache            = yes
+cache_plugin     = jsonfile
 cache_prefix     = mm_inv
 cache_timeout    = 3600
 cache_connection = /tmp/mm_inventory_cache
 ```
+
+With the following meaning:
+
+- `cache`: Switch caching on and off
+- `cache_plugin`: Which caching plugin to use
+    - `jsonfile`
+    - `yaml`
+    - `pickle`
+    - ...
+- `cache_prefix`: User defined prefix to use when creating the cache files
+- `cache_connection`: Path in which the cache plugin will save the cache
+  files
+- `cache_timeout`: Timeout for the cache
+
 
 Now the inventory plugin can be used with Ansible, like:
 
@@ -103,7 +126,8 @@ Now the inventory plugin can be used with Ansible, like:
 ansible-inventory -i /path/to/mm_inventory.yml --list
 ```
 
-Or set the `mm_inventory.yml` as the Ansible inventory
+Or set the `mm_inventory.yml` as the Ansible inventory in the
+`ansible.cfg` file.
 
 ```bash
 inventory = mm_inventory.yml

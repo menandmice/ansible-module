@@ -50,9 +50,9 @@ DOCUMENTATION = r'''
       required: True
     ipaddress:
       description:
-        - The IP address(es) to make a reservation on
-        - When the IP address is changed a new reservation is made
-        - It is not allowed to make reservations in DHCP blocks
+        - The IP address(es) to make a reservation on.
+        - When the IP address is changed a new reservation is made.
+        - It is not allowed to make reservations in DHCP blocks.
       type: list
       required: True
     macaddress:

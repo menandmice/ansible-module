@@ -48,16 +48,19 @@ DOCUMENTATION = r'''
       type: str
     proptype:
       description:
-        - Type of the property
+        - Type of the property.
         - These are not the types as described in the API, but the types
-          as you can see them in the Men&Mice Management Console
+          as you can see them in the Men&Mice Management Console.
       choices: [ text, yesno, ipaddress, number ]
       required: False
       type: str
       default: text
     dest:
       description: Where to define the custom property
-      choices: [ dnsserver, dhcpserver, zone, iprange, ipaddress, device, interface, cloudnet, cloudaccount ]
+      choices: [
+                dnsserver, dhcpserver, zone, iprange, ipaddress,
+                device, interface, cloudnet, cloudaccount
+      ]
       required: True
       type: str
     mandatory:
@@ -94,8 +97,8 @@ DOCUMENTATION = r'''
       type: list
     updateexisting:
       description:
-        - Should objects be updated with the new values
-        - Only valid when updating a property, otherwise ignored
+        - Should objects be updated with the new values.
+        - Only valid when updating a property, otherwise ignored.
       required: False
       type: bool
       default: False

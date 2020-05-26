@@ -44,8 +44,8 @@ DOCUMENTATION = r'''
         default: present
     name:
       description:
-        - The name of the DNS record
-        - Can either be partially or fully qualified
+        - The name of the DNS record.
+        - Can either be partially or fully qualified.
       type: str
       required: True
     data:
@@ -90,7 +90,7 @@ DOCUMENTATION = r'''
       description:
         - The aging timestamp of dynamic records in AD integrated zones.
         - Hours since January 1, 1601, UTC.
-        - Providing a non-zero value creates a dynamic record
+        - Providing a non-zero value creates a dynamic record.
       type: int
       required: False
       default: 0

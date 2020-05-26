@@ -209,33 +209,6 @@ specific for the interaction with the Men&Mice Suite.
         provider: "{{ provider }"
 ```
 
-## Ansible modules
-
-### mm_claimip
-
-Claim IP addresses in DHCP
-
-### mm_dhcp
-
-Manage DHCP reservations
-
-### mm_dnsrecord
-
-Manage DNS records
-
-### mm_ipprops
-
-Set properties on an IP address
-
-### mm_props
-
-Manage custom properties
-
-### mm_zone
-
-Manage DNS zones
-
-
 ## Ansible configuration example
 
 Beneath the is an example Ansible configuration file (`ansible.cfg`)

@@ -54,9 +54,9 @@ DOCUMENTATION = r'''
       default: False
     properties:
       description:
-        - Custom properties for the IP address
-        - These properties must already be defined
-        - See also C(mm_props)
+        - Custom properties for the IP address.
+        - These properties must already be defined.
+        - See also C(mm_props).
       type: dict
       required: True
     provider:

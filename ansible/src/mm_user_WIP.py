@@ -39,7 +39,8 @@ DOCUMENTATION = r'''
   options:
     state:
       description:
-        - Whether the account should exist or not, taking action if the state is different from what is stated.
+        - Whether the account should exist or not, taking action if the state
+          is different from what is stated.
       type: str
       required: False
       choices: [ absent, present ]

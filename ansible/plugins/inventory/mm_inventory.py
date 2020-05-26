@@ -288,7 +288,7 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
     def get_inventory(self):
         """Create a dictionairy with all host and group information.
 
-           Return a dictionary that contains (this dict is cached if requested):
+           Return a dictionary that contains:
                 invent = {
                     'hosts': [{'name': hostname, 'address': ipaddress}, ...],
                     'groups': {
@@ -301,6 +301,8 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
                         .
                     }
                 }
+
+             This is the dictionairy that will cached, if requested
         """
         # Read inventory from Men&Mice Suite server. Provider is needed
         provider = {
