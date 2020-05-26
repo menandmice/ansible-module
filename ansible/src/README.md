@@ -177,8 +177,7 @@ Not that often then:
 [X] (43) Inline documentation for Ansible user
 [ ] (44) General documentation for Ansible user
     - In progress
-[ ] (45) Inventory information to Ansible
-    - In progress
+[X] (45) Inventory information to Ansible
 [ ] (46) Ansible Playbook
     - In progress
     - Currently a test playbook per module, eventually a playbook
