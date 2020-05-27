@@ -1,10 +1,7 @@
 # All imports
-import sys
-import os
-import urllib
 import time
 from ansible.errors import AnsibleError
-from ansible.module_utils._text import to_text, to_native
+from ansible.module_utils._text import to_native
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.connection import ConnectionError
 from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError

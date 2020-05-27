@@ -182,8 +182,8 @@ def run_module():
 
             # Define all custom properties, if needed
             if module.params.get('customproperties', None):
-                for k, v in module.params.get('customproperties').items():
-                    databody["properties"][k] = v
+                for key, val in module.params.get('customproperties').items():
+                    databody["properties"][key] = val
 
             # Execute the API
             result = mm.doapi(url, http_method, provider, databody)

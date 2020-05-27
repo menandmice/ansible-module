@@ -15,13 +15,11 @@ in the Men&Mice Suite.
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 import time
-from ansible.errors import AnsibleError, AnsibleModuleError
+from ansible.errors import AnsibleError
 from ansible.plugins.lookup import LookupBase
-from ansible.utils.display import Display
-from ansible.module_utils._text import to_text
+from ansible.module_utils._text import to_native
 from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
 from ansible.module_utils.urls import open_url, SSLValidationError
-from ansible.utils.display import Display
 try:
     from ansible.utils_utils.common import json
 except ImportError:
@@ -91,8 +89,6 @@ _list:
   fields:
     0: IP address(es)
 """
-
-display = Display()
 
 # The API has another concept of true and false than Python does,
 # so 0 is true and 1 is false.
@@ -198,9 +194,6 @@ class LookupModule(LookupBase):
         # Sufficient parameters
         if len(terms) < 2:
             raise AnsibleError("Insufficient parameters. Need at least: MMURL, User, Password and IPAddress.")
-
-        # Build the result list
-        ret = []
 
         # Get the parameters
         provider = terms[0]

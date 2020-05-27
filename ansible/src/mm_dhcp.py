@@ -23,6 +23,7 @@ try:
 except ImportError:
     import json
 #IMPORTS_END
+from ansible.utils import unicode
 
 ANSIBLE_METADATA = {'metadata_version': '0.1',
                     'status': ['preview'],
@@ -222,8 +223,7 @@ def run_module():
                     for key in databody['properties']:
                         name = key['name']
                         val = key['value']
-                        if name == 'addresses' and (isinstance(val, str) or
-                                                    isinstance(val, unicode)):
+                        if name == 'addresses' and isinstance(val, (str, unicode)):
                             val = [val]
 
                         # Check if it is in the current values
@@ -247,7 +247,7 @@ def run_module():
             if module.params['state'] == 'present':
                 # If IP address is a string, turn it into a list, as the API
                 # requires that
-                if isinstance(ipaddress, str) or isinstance(ipadress, unicode):
+                if isinstance(ipaddress, (str, unicode)):
                     ipaddress = [ipaddress]
 
                 # No reservation found. Create one. Try this in each scope.

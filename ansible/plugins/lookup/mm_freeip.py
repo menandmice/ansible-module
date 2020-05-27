@@ -18,10 +18,9 @@ import time
 from ansible.errors import AnsibleError, AnsibleModuleError
 from ansible.plugins.lookup import LookupBase
 from ansible.utils.display import Display
-from ansible.module_utils._text import to_text
+from ansible.module_utils._text import to_text, to_native
 from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
 from ansible.module_utils.urls import open_url, SSLValidationError
-from ansible.utils.display import Display
 try:
     from ansible.utils_utils.common import json
 except ImportError:

@@ -282,8 +282,8 @@ def run_module():
 
         # Define all custom properties, if needed
         if module.params.get('customproperties', None):
-            for k, v in module.params.get('customproperties').items():
-                databody["properties"].append({"name": k, "value": v})
+            for key, val in module.params.get('customproperties').items():
+                databody["properties"].append({"name": key, "value": val})
 
         # Find out if a change is needed
         change = False
@@ -352,8 +352,8 @@ def run_module():
         # Define all custom properties, if needed
         if module.params.get('customproperties', None):
             props = []
-            for k, v in module.params.get('customproperties').items():
-                props.append({"name": k, "value": v})
+            for key, val in module.params.get('customproperties').items():
+                props.append({"name": key, "value": val})
             databody["dnsZone"]['customProperties'] = props
 
         # Create the zone on the Men&Mice Suite

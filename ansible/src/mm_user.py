@@ -242,13 +242,13 @@ def run_module():
             databody = {"ref": user_ref,
                         "saveComment": "Ansible API",
                         "properties": [
-                             {"name": 'name', "value": module.params['username']},
-                             {"name": 'password', "value": module.params['password']},
-                             {"name": 'fullName', "value": module.params['full_name']},
-                             {"name": 'authenticationType', "value": module.params['authentication_type']},
-                             {"name": 'groups', "value": wanted_groups},
-                             {"name": 'roles', "value": wanted_roles}
-                             ],
+                            {"name": 'name', "value": module.params['username']},
+                            {"name": 'password', "value": module.params['password']},
+                            {"name": 'fullName', "value": module.params['full_name']},
+                            {"name": 'authenticationType', "value": module.params['authentication_type']},
+                            {"name": 'groups', "value": wanted_groups},
+                            {"name": 'roles', "value": wanted_roles}
+                        ],
                         }
         else:
             # User not present, create

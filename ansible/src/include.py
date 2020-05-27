@@ -32,7 +32,7 @@ def doapi(url, method, provider, databody):
     result = {}
 
     # Maximum and current number of tries to connect to the Men&Mice API
-    MAXTRIES = 5
+    maxtries = 5
     tries = 0
 
     while tries <= 4:
@@ -83,11 +83,10 @@ def doapi(url, method, provider, databody):
         except SSLValidationError as err:
             raise AnsibleError("Error validating the server's certificate for %s: %s" % (apiurl, to_native(err)))
         except ConnectionError as err:
-            if tries == MAXTRIES:
+            if tries == maxtries:
                 raise AnsibleError("Error connecting to %s: %s" % (apiurl, to_native(err)))
-            else:
-                # There was a connection error, wait a little and retry
-                time.sleep(0.25)
+            # There was a connection error, wait a little and retry
+            time.sleep(0.25)
 
         if result.get('message', "") == "No Content":
             result['message'] = ""

@@ -134,8 +134,8 @@ Python 3.6.8                  Python 3.6.8
 
 ## Linting
 
-All modules and plugins have been checked with `pycodestyle` to ensure
-valid code that adheres to the Python style-guide.
+All modules and plugins have been checked with `pycodestyle` and
+`flake8` to ensure valid code that adheres to the Python style-guide.
 
 To install `pycodestyle` run
 
@@ -152,7 +152,44 @@ max-line-length = 160
 statistics = True
 ```
 
+The configuration for `flake8` goes into `~/.config/flake8` and contains
+
+```
+[flake8]
+exclude = .venv*,@*,.git
+max-line-length = 160
+```
+
 The only override on the PEP8 standard is the maximum line-length.
+
+A third check is done with `pylint`, but (as expected) this needs to be
+tweaked a little. The `pylint` command nags about a couple of things,
+that need to be taken into account:
+
+- The default maximum line-length of 80. This needs to be overridden
+  `max-line-length=160`
+- Ansible requires a `__metaclass__ = type` line at the top of the
+  module, but the `__metaclass__` name is not a valid classname, so
+  override with
+  `class-rgx=[A-Z_][a-zA-Z0-9]+$|__metaclass__`
+- During development not the complete Ansible environment is available
+  (at least not for linting), so _pylint_ is *not* able to find the
+  `ansible.module_utils.six.moves.urllib.error` module.
+  Ignore this message in the `disable` rule
+- The second issue is a direct result of the first one, as _pylint_ is
+  not able to import Ansibles `urllib.error`, `pylint` is not capable of
+  finding the `urllib` function
+  Ignore this message in the `disable` rule
+- A third issue is the `ConnectionError`. This is already available in
+  the standard Python environment, but for Ansible this is overruled
+  through the `ansible.module_utils.connection` module
+  Ignore this message in the `disable` rule
+
+This results in a `disable` rule of
+
+```
+disable= W0622,E0611,E0401
+```
 
 ## Route
 
