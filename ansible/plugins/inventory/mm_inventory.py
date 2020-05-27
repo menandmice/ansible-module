@@ -251,7 +251,7 @@ def doapi(url, method, provider, databody):
 def _sanitize(data):
     """Clean and sanitize a string."""
     data = data.lower()
-    data = re.sub('[ -/\\&*^%$#@!+=`~:;<>?,."\'()[]{}]', '_', data)
+    data = re.sub('[ -\/\\&*^%$#@!+=`~:;<>?,\."\'()\[\]\{\}]', '_', data)
 
     return data
 

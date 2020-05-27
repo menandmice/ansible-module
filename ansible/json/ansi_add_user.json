@@ -5,7 +5,7 @@
     "full_name": "John Doe",
     "email": "jd@example.net",
     "authentication_type": "Internal",
-    "roles": [ "Administrators (built-in)" ],
+    "roles": [ "Administrators (built-in)", "DNS Administrators (built-in)", "DHCP Administrators (built-in)", "IPAM Administrators (built-in)", "User Administrators (built-in)", "Approvers (built-in)", "Requesters (built-in)" ],
     "provider" : {
         "mmurl": "http://mandm.example.net",
         "user": "apidude",

@@ -97,11 +97,20 @@ DOCUMENTATION = r'''
 
 EXAMPLES = r'''
 - name: Add the user 'johnd' as an admin
-  mm_user:
+    mm_user:
     username: johnd
     password: password
     full_name: John Doe
     state: present
+    authentication_type: internal
+    roles:
+        - Administrators (built-in)
+        - DNS Administrators (built-in)
+        - DHCP Administrators (built-in)
+        - IPAM Administrators (built-in)
+        - User Administrators (built-in)
+        - Approvers (built-in)
+        - Requesters (built-in)
     provider:
       mmurl: http://mmsuite.example.net
       user: apiuser
@@ -120,14 +129,6 @@ message:
 display = Display()
 
 #IMPORT_INCLUDE
-
-
-def get_dhcp_zone(provider, ipaddress):
-    """Given an IP Address, find the DHCP Zones."""
-    url = "Ranges?filter=%s" % ipaddress
-
-    result = mm.doapi(url, 'GET', provider, {})
-    print("DHCP ->", resp)
 
 
 def run_module():
@@ -184,20 +185,20 @@ def run_module():
     display.vvv("State:", state)
 
     # Get list of all users in the system
-    resp, result = mm.getrefs("Users", provider)
-    users = resp['users']
+    resp = mm.getrefs("Users", provider)
+    users = resp['message']['result']['users']
     display.vvv("Users:", users)
 
     # If groups are requested, get all groups
     if module.params['groups']:
-        resp, result = mm.getrefs("Groups", provider)
-        groups = resp['groups']
+        resp = mm.getrefs("Groups", provider)
+        groups = resp['message']['result']['groups']
         display.vvv("Groups:", groups)
 
     # If roles are requested, get all roles
     if module.params['roles']:
-        resp, result = mm.getrefs("Roles", provider)
-        roles = resp['roles']
+        resp = mm.getrefs("Roles", provider)
+        roles = resp['message']['result']['roles']
         display.vvv("Roles:", roles)
 
     # Setup loop vars

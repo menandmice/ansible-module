@@ -123,6 +123,15 @@ With an Ansible JSON file that contains all @he module parameters, looking like:
 }
 ```
 
+## Tested environments
+
+All modules and plugins where tested on a CentOS7 and CentOS8 machine,
+using Ansible 2.7, 2.8 and 2.9.
+
+CentOS7                       CentOS8
+Python 2.7.5                  Python 2.7.16
+Python 3.6.8                  Python 3.6.8
+
 ## Route
 
 [X] Allocate an IP address (meaning claim it/find the next free one, set
