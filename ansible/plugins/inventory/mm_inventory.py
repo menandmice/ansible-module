@@ -106,7 +106,7 @@ The "ranges" are an "or" function, a host is available in the inventory
 when either ranges-conditions are met.
 
 
-# With in the ansible.cfg (Caching is enabled for Ansible 2.8+)
+# With in the ansible.cfg
 [inventory]
 enable_plugins = mm_inventory, host_list, auto
 cache = yes
@@ -145,7 +145,6 @@ import json
 import time
 from ansible import constants as C
 from ansible.errors import AnsibleError
-from ansible.module_utils.ansible_release import __version__ as ANSIBLE_VERSION
 from ansible.module_utils import six
 from ansible.module_utils.urls import Request, urllib_error, ConnectionError, socket, httplib
 from ansible.module_utils._text import to_native
@@ -162,11 +161,8 @@ except ImportError:
     from urllib.parse import urljoin
 
 # Debugging stuff
-try:
-    from __main__ import display
-except ImportError:
-    from ansible.utils.display import Display
-    display = Display()
+from ansible.utils.display import Display
+display = Display()
 
 
 def doapi(url, method, provider, databody):
@@ -255,8 +251,7 @@ def doapi(url, method, provider, databody):
 def _sanitize(data):
     """Clean and sanitize a string."""
     data = data.lower()
-    data = re.sub('[ -/\\&*^%$#@!+=`~:;<>?,\."\'()\[\]\{\}]', '_', data)
-    data = data
+    data = re.sub('[ -/\\&*^%$#@!+=`~:;<>?,."\'()[]{}]', '_', data)
 
     return data
 
@@ -266,8 +261,8 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
     # Is not required
     NAME = 'mm_inventory'
 
-    # If the user supplies '@mm_inventory' as path, the plugin will read
-    # from environment variables.
+    # If the user supplies '@mm_inventory' as the inventory path, the plugin
+    # will read all settings from environment variables.
     no_config_file_supplied = False
 
     def verify_file(self, path):
@@ -287,7 +282,7 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
         return valid
 
     def get_inventory(self):
-        """Create a dictionairy with all host and group information.
+        """Create a inventory dictionairy with all host and group information.
 
            Return a dictionary that contains:
                 invent = {
@@ -305,11 +300,24 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
 
              This is the dictionairy that will cached, if requested (2.8+)
         """
-        # Read inventory from Men&Mice Suite server. Provider is needed
+        # Read inventory from Men&Mice Suite server
+
+        # Get the needed connection information
+        mmurl = self.get_option('host')
+        user = self.get_option('user')
+        password = self.get_option('password')
+
+        # If provider information is not present, quit
+        if not (mmurl and user and password):
+            raise AnsibleParserError(
+                "Missing connection provider (mmurl, ",
+                "username, password) in configuration file")
+
+        # Construct connection provider
         provider = {
-            'mmurl': self.get_option('host'),
-            'user': self.get_option('user'),
-            'password': self.get_option('password'),
+            'mmurl': mmurl,
+            'user': user,
+            'password': password
         }
 
         # Check if filters are supplied
@@ -356,10 +364,11 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
         http_method = "GET"
         url = "command/GetIPAMRecords"
         for child in children:
+            # Construct the JSON databody
             databody = {'filter': 'state=Assigned', 'rangeRef': child['name']}
             result = doapi(url, http_method, provider, databody)
 
-            # All IPAM records in the range retrieved. Split the out
+            # All IPAM records in the range are retrieved. Split it out
             for ipam in result['message']['result']['ipamRecords']:
                 # Ansible only needs one combo, so only take the first one
                 # from the returned result
@@ -415,47 +424,40 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
             self._read_config_data(path)
 
         # Load cache plugin (Ansible 2.8+)
-        # Unfortunately a lot changed from Ansible 2.7 to 2.8.
-        # In Ansible 2.8 the automatic cache handling was introduced and that
-        # is the current standard, which this plugin uses. As this is incompatible
-        # with version 2.7 and below (and no valid documentation for caching in
-        # 2.7- is available), caching for 2.7 is switched off.
-        ansiversion = int(".".join(ANSIBLE_VERSION.split('.')[0:1]))
-        if ansiversion > 2.7:
+        # Ansible 2.7- uses a slightly different approach, so that is
+        # taken into account.
+        try:
             self.load_cache_plugin()
-            use_cache = cache
-        else:
-            use_cache = False
-        cache_key = self.get_cache_key(path)
+            old_cache = False
+        except AttributeError as err:
+            old_cache = True
 
-        # cache may be True or False at this point to indicate if the
-        # inventory is being refreshed. Get the user's cache option to
-        # see if we should save the cache if it is changing
-        if use_cache:
-            user_cache_setting = self.get_option('cache')
-            cache = self.get_option('cache')
-            cache_key = self.get_cache_key(path)
-        else:
-            user_cache_setting = False
-            cache_key = None
-
-        # Read if caching was enabled and the cache isn't being refreshed
-        attempt_to_read_cache = user_cache_setting and use_cache
         # Update if caching is enabled and the cache needs refreshing
-        # update this value to True if the cache has expired below
-        cache_needs_update = user_cache_setting and not use_cache
-
-        # If cache was read
-        if attempt_to_read_cache:
+        use_cache = self.get_option('cache') and cache
+        update_cache = False
+        if use_cache:
             try:
+                # Get the unique cache key
+                cache_key = self.get_cache_key(path)
+            except KeyError:
+                # This occurs if the cache_key is not in the cache or if
+                # the cache_key expired, so the cache needs to be updated
+                update_cache = True
+
+        # If cache_key was read
+        if use_cache:
+            try:
+                # Read the current inventory from the cache.
+                # If this fails, that is either because of a non-existing
+                # or an expired cache
                 invent = self._cache[cache_key]
             except KeyError:
                 # This occurs if the cache_key is not in the cache or if
                 # the cache_key expired, so the cache needs to be updated
-                cache_needs_update = True
+                update_cache = True
 
         # Update cache if needed. If user did not define cache, always run
-        if cache_needs_update or not user_cache_setting:
+        if update_cache or not use_cache:
             invent = self.get_inventory()
 
         # Inventory blob is in. Create a complete inventory
@@ -468,11 +470,19 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
             for host in invent['groups'][grp]:
                 self.inventory.add_host(host, group=grp)
 
-        # If cache was updated
+        # Update cache if needed and requested
         if use_cache:
-            self.update_cache_if_changed()
-            if cache_needs_update and user_cache_setting:
-                self._cache[cache_key] = invent
+            if not old_cache:
+                self.update_cache_if_changed()
 
-        # Clean up the inventory
+            # When the cache needs updating
+            if update_cache:
+                if not old_cache:
+                    self._cache[cache_key] = invent
+                else:
+                    # This feature will be removed in version 2.12, but
+                    # is needed for the older style cache handling.
+                    self.cache.set(cache_key, invent)
+
+        # Clean up the inventory before returning
         self.inventory.reconcile_inventory()
