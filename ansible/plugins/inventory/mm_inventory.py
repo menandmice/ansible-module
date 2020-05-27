@@ -106,7 +106,7 @@ The "ranges" are an "or" function, a host is available in the inventory
 when either ranges-conditions are met.
 
 
-# With in the ansible.cfg
+# With in the ansible.cfg (Caching is enabled for Ansible 2.8+)
 [inventory]
 enable_plugins = mm_inventory, host_list, auto
 cache = yes
@@ -145,6 +145,7 @@ import json
 import time
 from ansible import constants as C
 from ansible.errors import AnsibleError
+from ansible.module_utils.ansible_release import __version__ as ANSIBLE_VERSION
 from ansible.module_utils import six
 from ansible.module_utils.urls import Request, urllib_error, ConnectionError, socket, httplib
 from ansible.module_utils._text import to_native
@@ -302,7 +303,7 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
                     }
                 }
 
-             This is the dictionairy that will cached, if requested
+             This is the dictionairy that will cached, if requested (2.8+)
         """
         # Read inventory from Men&Mice Suite server. Provider is needed
         provider = {
@@ -409,31 +410,40 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
         return invent
 
     def parse(self, inventory, loader, path, cache=True):
-        super(InventoryModule, self).parse(inventory, loader, path)
+        super(InventoryModule, self).parse(inventory, loader, path, cache)
         if not self.no_config_file_supplied and os.path.isfile(path):
             self._read_config_data(path)
 
-        # Load cache plugin
-        self.load_cache_plugin()
+        # Load cache plugin (Ansible 2.8+)
+        # Unfortunately a lot changed from Ansible 2.7 to 2.8.
+        # In Ansible 2.8 the automatic cache handling was introduced and that
+        # is the current standard, which this plugin uses. As this is incompatible
+        # with version 2.7 and below (and no valid documentation for caching in
+        # 2.7- is available), caching for 2.7 is switched off.
+        ansiversion = int(".".join(ANSIBLE_VERSION.split('.')[0:1]))
+        if ansiversion > 2.7:
+            self.load_cache_plugin()
+            use_cache = cache
+        else:
+            use_cache = False
         cache_key = self.get_cache_key(path)
 
         # cache may be True or False at this point to indicate if the
         # inventory is being refreshed. Get the user's cache option to
         # see if we should save the cache if it is changing
-        user_cache_setting = self.get_option('cache')
-
-        # Cache logic
-        if cache:
+        if use_cache:
+            user_cache_setting = self.get_option('cache')
             cache = self.get_option('cache')
             cache_key = self.get_cache_key(path)
         else:
+            user_cache_setting = False
             cache_key = None
 
         # Read if caching was enabled and the cache isn't being refreshed
-        attempt_to_read_cache = user_cache_setting and cache
+        attempt_to_read_cache = user_cache_setting and use_cache
         # Update if caching is enabled and the cache needs refreshing
         # update this value to True if the cache has expired below
-        cache_needs_update = user_cache_setting and not cache
+        cache_needs_update = user_cache_setting and not use_cache
 
         # If cache was read
         if attempt_to_read_cache:
@@ -459,9 +469,10 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
                 self.inventory.add_host(host, group=grp)
 
         # If cache was updated
-        self.update_cache_if_changed()
-        if cache_needs_update and user_cache_setting:
-            self._cache[cache_key] = invent
+        if use_cache:
+            self.update_cache_if_changed()
+            if cache_needs_update and user_cache_setting:
+                self._cache[cache_key] = invent
 
         # Clean up the inventory
         self.inventory.reconcile_inventory()
