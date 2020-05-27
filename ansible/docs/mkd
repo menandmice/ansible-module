@@ -6,19 +6,21 @@ PLUGINS='
 	mm_dnsrecord
 	mm_ipprops
 	mm_props
+	mm_user
 	mm_zone
 '
 
-for p in ${PLUGINS}
+export PYTHONPATH=$(pwd)/../library:${PYTHONPATH}
+for p in $(${PLUGINS} | sort)
 do
 	echo
-	echo "### ${p}"
+	echo "## ${p}"
 	echo
 	ansible-doc -s ${p}						| \
 		sed -n '/^- name:/ {s/- name: //; p}'
 
 	echo
-	echo "#### Options"
+	echo "### Options"
 	echo
 
 	ansible-doc -s ${p}						| \
@@ -28,4 +30,10 @@ do
 			-e "s/'/\`/g"					\
 			-e 's/^- \([^ ]*\):/- `\1`:/'
 
+	echo
+	echo "### Examples"
+	echo
+	echo '```yaml'
+	echo "import ${p}; print(${p}.EXAMPLES)" | python3
+	echo '```'
 done

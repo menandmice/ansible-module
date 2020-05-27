@@ -76,11 +76,13 @@ ranges:
 The `mm_inventory` plugin can also be configured through environment
 variables
 
-- export MM_HOST=YOUR_MM_HOST_ADDRESS
-- export MM_USER=YOUR_MM_USER
-- export MM_PASSWORD=YOUR_MM_PASSWORD
-- export MM_FILTERS=YOUR_MM_FILTERS
-- export MM_RANGES=YOUR_MM_RANGES
+```
+export MM_HOST=YOUR_MM_HOST_ADDRESS
+export MM_USER=YOUR_MM_USER
+export MM_PASSWORD=YOUR_MM_PASSWORD
+export MM_FILTERS=YOUR_MM_FILTERS
+export MM_RANGES=YOUR_MM_RANGES
+```
 
 When reading configuration from the environment, the inventory path must
 always be `@mm_inventory`.
