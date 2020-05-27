@@ -265,12 +265,12 @@ class LookupModule(LookupBase):
             networks = [str(terms[1]).strip()]
         else:
             networks = list(map(str.strip, terms[1]))
-        multi        = kwargs.get('multi', 1)
-        claim        = kwargs.get('claim', 0)
-        ping         = TRUEFALSE[kwargs.get('ping', True)]
-        excludedhcp  = TRUEFALSE[kwargs.get('excludedhcp', False)]
+        multi = kwargs.get('multi', 1)
+        claim = kwargs.get('claim', 0)
+        ping = TRUEFALSE[kwargs.get('ping', True)]
+        excludedhcp = TRUEFALSE[kwargs.get('excludedhcp', False)]
         startaddress = kwargs.get('startaddress', "")
-        ipfilter     = kwargs.get('filter', "")
+        ipfilter = kwargs.get('filter', "")
 
         # Loop over all networks
         ret = []
@@ -292,8 +292,8 @@ class LookupModule(LookupBase):
             # Build parameter list
             databody = {}
             databody['temporaryClaimTime'] = claim
-            databody['ping']               = ping
-            databody['excludeDHCP']        = excludedhcp
+            databody['ping'] = ping
+            databody['excludeDHCP'] = excludedhcp
             if startaddress:
                 databody['startAddress'] = startaddress
             url = '%s/NextFreeAddress' % ref

@@ -90,7 +90,7 @@ correctly:
 source ~/venv/python3/bin/activate && source ~/venv/ansible/hacking/env-setup
 ```
 
-## Run module in terminal mode
+## Running the module in terminal mode
 
 As the Men&Mice modules do not target Ansible nodes, it is possible to
 test the modules from the development machine with:
@@ -131,6 +131,28 @@ using Ansible 2.7, 2.8 and 2.9.
 CentOS7                       CentOS8
 Python 2.7.5                  Python 2.7.16
 Python 3.6.8                  Python 3.6.8
+
+## Linting
+
+All modules and plugins have been checked with `pycodestyle` to ensure
+valid code that adheres to the Python style-guide.
+
+To install `pycodestyle` run
+
+```
+pip3 install pycodestyle
+```
+
+And create a configuration file in `~/.config/pycodestyle`, containing
+
+```
+[pycodestyle]
+count = False
+max-line-length = 160
+statistics = True
+```
+
+The only override on the PEP8 standard is the maximum line-length.
 
 ## Route
 

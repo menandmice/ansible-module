@@ -267,6 +267,7 @@ def run_module():
                         }
                         }
 
+        print('databody = ', json.dumps(databody, indent=4))
         # Show some debugging
         display.vvv('databody:', databody)
 
@@ -297,6 +298,7 @@ def run_module():
 def main():
     """Start here."""
     run_module()
+
 
 if __name__ == '__main__':
     main()

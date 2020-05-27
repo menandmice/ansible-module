@@ -203,7 +203,7 @@ class LookupModule(LookupBase):
         ret = []
 
         # Get the parameters
-        provider  = terms[0]
+        provider = terms[0]
         ipaddress = terms[1].strip()
 
         # Call the API to find info

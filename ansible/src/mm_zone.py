@@ -177,7 +177,7 @@ def run_module():
         nameserver=dict(type='str', required=True),
         authority=dict(type='str', required=False),
         servtype=dict(type='str', required=False, default='master',
-                      choices=['master', 'slave', 'stub', 'forward'] ),
+                      choices=['master', 'slave', 'stub', 'forward']),
         dynamic=dict(type='bool', required=False, default=False),
         masters=dict(type='list', required=False),
         dnssecsigned=dict(type='bool', required=False),
@@ -289,7 +289,7 @@ def run_module():
         change = False
         for key in databody['properties']:
             name = key['name']
-            val  = key['value']
+            val = key['value']
 
             # Check if it is in the current values, either in the "normal" set or
             # the custom properties

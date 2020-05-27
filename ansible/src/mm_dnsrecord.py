@@ -300,7 +300,7 @@ def run_module():
         change = False
         for key in databody['properties']:
             name = key['name']
-            val  = key['value']
+            val = key['value']
 
             # Check if it is in the current values
             cur = iparesp['dnsRecords'][0].get(name, 'unknown')

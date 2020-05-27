@@ -17,6 +17,32 @@ As this could a lot, use the 'filter' option to tune it down.
 from __future__ import (absolute_import, division, print_function)
 __metaclass__ = type
 
+import sys
+import re
+import os
+import json
+import time
+from ansible import constants as C
+from ansible.errors import AnsibleError
+from ansible.module_utils import six
+from ansible.module_utils.urls import Request, urllib_error, ConnectionError, socket, httplib
+from ansible.module_utils._text import to_native
+from ansible.errors import AnsibleParserError
+from ansible.plugins.inventory import BaseInventoryPlugin, Constructable, Cacheable
+from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
+from ansible.module_utils.urls import open_url, SSLValidationError
+from ansible.plugins.loader import inventory_loader
+
+# Python 2/3 Compatibility
+try:
+    from urlparse import urljoin
+except ImportError:
+    from urllib.parse import urljoin
+
+# Debugging stuff
+from ansible.utils.display import Display
+display = Display()
+
 DOCUMENTATION = '''
     name: mm_inventory
     plugin_type: inventory
@@ -138,32 +164,6 @@ cache_connection = /tmp/inv_cache
 # ansible-inventory -i @mm_inventory --list
 '''
 
-import sys
-import re
-import os
-import json
-import time
-from ansible import constants as C
-from ansible.errors import AnsibleError
-from ansible.module_utils import six
-from ansible.module_utils.urls import Request, urllib_error, ConnectionError, socket, httplib
-from ansible.module_utils._text import to_native
-from ansible.errors import AnsibleParserError
-from ansible.plugins.inventory import BaseInventoryPlugin, Constructable, Cacheable
-from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
-from ansible.module_utils.urls import open_url, SSLValidationError
-from ansible.plugins.loader import inventory_loader
-
-# Python 2/3 Compatibility
-try:
-    from urlparse import urljoin
-except ImportError:
-    from urllib.parse import urljoin
-
-# Debugging stuff
-from ansible.utils.display import Display
-display = Display()
-
 
 def doapi(url, method, provider, databody):
     """Run an API call.
@@ -251,7 +251,7 @@ def doapi(url, method, provider, databody):
 def _sanitize(data):
     """Clean and sanitize a string."""
     data = data.lower()
-    data = re.sub('[ -\/\\&*^%$#@!+=`~:;<>?,\."\'()\[\]\{\}]', '_', data)
+    data = re.sub(r'[ -\/\\&*^%$#@!+=`~:;<>?,\."\'()\[\]\{\}]', '_', data)
 
     return data
 

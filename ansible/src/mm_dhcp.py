@@ -221,7 +221,7 @@ def run_module():
                     change = False
                     for key in databody['properties']:
                         name = key['name']
-                        val  = key['value']
+                        val = key['value']
                         if name == 'addresses' and (isinstance(val, str) or
                                                     isinstance(val, unicode)):
                             val = [val]
