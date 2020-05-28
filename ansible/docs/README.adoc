@@ -3,9 +3,9 @@ include::resources/adocs/includes.adoc[]
 :doctype: book
 :toc: right
 :toclevels: 3
-:organization: AT Computing
+:organization: Men&Mice
 :revnumber: 0.9
-:revdate: 2020-05-26
+:revdate: 2020-05-28
 :reproducible:
 :figure-caption: Table
 :figure-caption: Figure
@@ -36,7 +36,6 @@ include::resources/adocs/includes.adoc[]
 :uri-at: https://atcomputing.nl
 
 = Men&Mice Suite Ansible Integration
-// AT Computing
 Ton Kersten <t.kersten@atcomputing.nl>
 :title-page:
 
