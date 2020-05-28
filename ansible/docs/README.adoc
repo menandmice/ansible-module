@@ -1,0 +1,48 @@
+include::resources/adocs/includes.adoc[]
+//
+:doctype: book
+:toc: right
+:toclevels: 3
+:organization: AT Computing
+:revnumber: 0.9
+:revdate: 2020-05-26
+:reproducible:
+:figure-caption: Table
+:figure-caption: Figure
+:listing-caption: Listing
+:source-highlighter: rouge
+:rouge-linenums-mode: inline
+:rouge-style: github
+:version-label!:
+:media: prepress
+:optimize: prepress
+:compress:
+:xrefstyle: full
+:experimental:
+:icons: font
+:icon-set: fi
+
+// Define standard stuff
+:sldnum: 0
+:sectnums:
+:sourcedir: ./src
+:imagesdir: ./resources/images
+:iconsdir: ./resources/icons
+:pdf-themesdir: ./resources/themes
+:pdf-fontsdir: ./resources/fonts
+:pdf-theme: atcomp.yml
+
+// URLs
+:uri-at: https://atcomputing.nl
+
+= Men&Mice Suite Ansible Integration
+// AT Computing
+Ton Kersten <t.kersten@atcomputing.nl>
+:title-page:
+
+include::README_general.adoc[]
+include::README_freeip.adoc[]
+include::README_inventory.adoc[]
+include::README_ipinfo.adoc[]
+include::README_modules.adoc[]
+

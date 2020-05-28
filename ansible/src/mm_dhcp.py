@@ -37,9 +37,12 @@ DOCUMENTATION = r'''
   version_added: "2.7"
   description:
     - Manage DHCP reservations on the Men&Mice Suite
+  notes:
+    - When in check mode, this module pretends to have done things
+      and returns C(changed = True).
   options:
     state:
-      description: The state of the reservation
+      description: The state of the reservation.
       type: bool
       required: False
       choices: [ absent, present ]
@@ -58,44 +61,44 @@ DOCUMENTATION = r'''
       elements: str
       required: True
     macaddress:
-      description: MAC address for the IP address
+      description: MAC address for the IP address.
       type: str
       required: True
     ddnshost:
-      description: The dynamic DNS host to place the entry in
+      description: The dynamic DNS host to place the entry in.
       type: str
       required: False
     filename:
-      description: Filename to place the entry in
+      description: Filename to place the entry in.
       type: str
       required: False
     servername:
-      description: Server to place the entry in
+      description: Server to place the entry in.
       type: str
       required: False
     nextserver:
-      description: Next server as DHCP option (bootp)
+      description: Next server as DHCP option (bootp).
       type: str
       required: False
     deleteunspecified:
-      description: Clear properties that are not explicitly set
+      description: Clear properties that are not explicitly set.
       type: bool
       required: False
     provider:
-      description: Definition of the Men&Mice suite API provider
+      description: Definition of the Men&Mice suite API provider.
       type: dict
       required: True
       suboptions:
         mmurl:
-          description: Men&Mice API server to connect to
+          description: Men&Mice API server to connect to.
           required: True
           type: str
         user:
-          description: userid to login with into the API
+          description: userid to login with into the API.
           required: True
           type: str
         password:
-          description: password to login with into the API
+          description: password to login with into the API.
           required: True
           type: str
           no_log: True
@@ -117,7 +120,7 @@ EXAMPLES = r'''
 
 RETURN = r'''
 message:
-    description: The output message from the Men&Mice System
+    description: The output message from the Men&Mice System.
     type: str
     returned: always
 '''

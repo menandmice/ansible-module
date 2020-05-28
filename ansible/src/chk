@@ -1,0 +1,12 @@
+#!/bin/bash
+
+for f in "${@}"
+do
+	echo "Running pycodestyle on ${f}"
+	pycodestyle --show-source "${f}"
+	echo "Running flake8 on ${f}"
+	flake8 "${f}"
+	echo "Running pylint on ${f}"
+	pylint "${f}"
+	echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="
+done

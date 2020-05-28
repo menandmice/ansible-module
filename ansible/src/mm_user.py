@@ -36,11 +36,13 @@ DOCUMENTATION = r'''
   version_added: "2.7"
   description:
     - Manage user accounts and user attributes on a Men&Mice Suite installation
+  notes:
+    - When in check mode, this module pretends to have done things
+      and returns C(changed = True).
   options:
     state:
       description:
-        - Whether the account should exist or not, taking action if the state
-          is different from what is stated.
+        - Should the users account exist or not.
       type: str
       required: False
       choices: [ absent, present ]
@@ -53,49 +55,49 @@ DOCUMENTATION = r'''
       aliases: [ user ]
     password:
       description:
-        - Users password (plaintext)
-        - Required if I(state=present)
+        - Users password (plaintext).
+        - Required if I(state=present).
       type: str
       required: False
     descr:
-      description: Description of the user
+      description: Description of the user.
       required: False
       type: str
     email:
-      description: The users email address
+      description: The users email address.
       required: False
       type: str
     authentication_type:
       description:
-        - Authentication type to use. e.g. Internal, AD
-        - Required if I(state=present)
+        - Authentication type to use. e.g. Internal, AD.
+        - Required if I(state=present).
       required: False
       type: str
     groups:
-      description: Make the user a member of these groups
+      description: Make the user a member of these groups.
       required: False
       type:
       elements: str
     roles:
-      description: Make the user a member of these roles
+      description: Make the user a member of these roles.
       required: False
       type: list
       elements: str
     provider:
-      description: Definition of the Men&Mice suite API provider
+      description: Definition of the Men&Mice suite API provider.
       type: dict
       required: True
       suboptions:
         mmurl:
-          description: Men&Mice API server to connect to
+          description: Men&Mice API server to connect to.
           required: True
           type: str
         user:
-          description: userid to login with into the API
+          description: userid to login with into the API.
           required: True
           type: str
         password:
-          description: password to login with into the API
+          description: password to login with into the API.
           required: True
           type: str
           no_log: True
@@ -136,7 +138,7 @@ EXAMPLES = r'''
 
 RETURN = r'''
 message:
-    description: The output message from the Men&Mice Suite
+    description: The output message from the Men&Mice Suite.
     type: str
     returned: always
 '''

@@ -35,9 +35,12 @@ DOCUMENTATION = r'''
   version_added: "2.7"
   description:
     - Manage DNS records in the Men&Mice Suite
+  notes:
+    - When in check mode, this module pretends to have done things
+      and returns C(changed = True).
   options:
     state:
-        description: The state of the properties
+        description: The state of the properties.
         type: bool
         required: False
         choices: [ absent, present ]
@@ -49,15 +52,15 @@ DOCUMENTATION = r'''
       type: str
       required: True
     data:
-      description: The record data in a tab-separated list
+      description: The record data in a tab-separated list.
       type: str
       required: True
     dnszone:
-      description: The DNS zone where the action should take place
+      description: The DNS zone where the action should take place.
       type: str
       required: True
     rrtype:
-      description: Resource Record Type for the IP address
+      description: Resource Record Type for the IP address.
       type: str
       required: False
       default: A
@@ -69,7 +72,7 @@ DOCUMENTATION = r'''
                 SPF, SRV, SSHFP, TLSA, TXT
       ]
     ttl:
-      description: The Time-To-Live of the DNS record
+      description: The Time-To-Live of the DNS record.
       type: int
       required: False
       default: 0 (Same as zone)
@@ -95,20 +98,20 @@ DOCUMENTATION = r'''
       required: False
       default: 0
     provider:
-      description: Definition of the Men&Mice suite API provider
+      description: Definition of the Men&Mice suite API provider.
       type: dict
       required: True
       suboptions:
         mmurl:
-          description: Men&Mice API server to connect to
+          description: Men&Mice API server to connect to.
           required: True
           type: str
         user:
-          description: userid to login with into the API
+          description: userid to login with into the API.
           required: True
           type: str
         password:
-          description: password to login with into the API
+          description: password to login with into the API.
           required: True
           type: str
           no_log: True
@@ -144,7 +147,7 @@ EXAMPLES = r'''
 
 RETURN = r'''
 message:
-    description: The output message from the Men&Mice System
+    description: The output message from the Men&Mice System.
     type: str
     returned: always
 '''

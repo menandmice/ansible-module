@@ -23,6 +23,11 @@ directory, where there are a couple of things to consider:
   `trigger` is available and this runs the `doit` when a file in the
   `src` directory changes. This does need `inotify` to be installed
 
+- I would have loved to use Ansible to use _documentation fragments_ as
+  some parts of the documentation are valid for all modules, but as the
+  configuration for these fragments changed from 2.7 to 2.9, I skipped
+  this.
+
 ## Software
 
 To develop a module some extra software is needed, e.g. Python and the

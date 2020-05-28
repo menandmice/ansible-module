@@ -36,20 +36,23 @@ DOCUMENTATION = r'''
   description:
     - Set properties on an IP address in the Men&Mice Suite
     - This can be properties as custom properties, claim and so on
+  notes:
+    - When in check mode, this module pretends to have done things
+      and returns C(changed = True).
   options:
     state:
-      description: Property present or not
+      description: Property present or not.
       type: bool
       required: False
       choices: [ absent, present ]
       default: present
     ipaddress:
-      description: The IP address(es) to work on
+      description: The IP address(es) to work on.
       type: list
       elements: str
       required: True
     deleteunspecified:
-      description: Clear properties that are not explicitly set
+      description: Clear properties that are not explicitly set.
       type: bool
       required: False
       default: False
@@ -61,20 +64,20 @@ DOCUMENTATION = r'''
       type: dict
       required: True
     provider:
-      description: Definition of the Men&Mice suite API provider
+      description: Definition of the Men&Mice suite API provider.
       type: dict
       required: True
       suboptions:
         mmurl:
-          description: Men&Mice API server to connect to
+          description: Men&Mice API server to connect to.
           required: True
           type: str
         user:
-          description: userid to login with into the API
+          description: userid to login with into the API.
           required: True
           type: str
         password:
-          description: password to login with into the API
+          description: password to login with into the API.
           required: True
           type: str
           no_log: True
@@ -97,7 +100,7 @@ EXAMPLES = r'''
 
 RETURN = r'''
 message:
-    description: The output message from the Men&Mice System
+    description: The output message from the Men&Mice System.
     type: str
     returned: always
 '''

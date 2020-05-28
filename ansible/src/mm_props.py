@@ -35,15 +35,18 @@ DOCUMENTATION = r'''
   version_added: "2.7"
   description:
     - Manage custom properties in the Men&Mice Suite
+  notes:
+    - When in check mode, this module pretends to have done things
+      and returns C(changed = True).
   options:
     state:
-      description: The state of the properties or properties
+      description: The state of the properties or properties.
       type: bool
       required: False
       choices: [ absent, present ]
       default: present
     name:
-      description: Name of the property
+      description: Name of the property.
       required: True
       type: str
     proptype:
@@ -56,7 +59,8 @@ DOCUMENTATION = r'''
       type: str
       default: text
     dest:
-      description: Where to define the custom property
+      description:
+        - The section where to define the custom property.
       choices: [
                 dnsserver, dhcpserver, zone, iprange, ipaddress,
                 device, interface, cloudnet, cloudaccount
@@ -64,27 +68,27 @@ DOCUMENTATION = r'''
       required: True
       type: str
     mandatory:
-      description: Is the property mandatory
+      description: Is the property mandatory.
       required: False
       type: bool
       default: False
     system:
-      description: Is the property system defined
+      description: Is the property system defined.
       required: False
       type: bool
       default: False
     readonly:
-      description: Is the property read only
+      description: Is the property read only.
       required: False
       type: bool
       default: False
     multiline:
-      description: Is the property multiline
+      description: Is the property multiline.
       required: False
       type: bool
       default: False
     defaultvalue:
-      description: Default value of the property
+      description: Default value of the property.
       required: False
       type: str
     listitems:
@@ -93,7 +97,7 @@ DOCUMENTATION = r'''
       type: list
       elements: str
     cloudtags:
-      description: Associated cloud tags
+      description: Associated cloud tags.
       required: False
       type: list
       elements: str
@@ -105,20 +109,20 @@ DOCUMENTATION = r'''
       type: bool
       default: False
     provider:
-      description: Definition of the Men&Mice suite API provider
+      description: Definition of the Men&Mice suite API provider.
       type: dict
       required: True
       suboptions:
         mmurl:
-          description: Men&Mice API server to connect to
+          description: Men&Mice API server to connect to.
           required: True
           type: str
         user:
-          description: userid to login with into the API
+          description: userid to login with into the API.
           required: True
           type: str
         password:
-          description: password to login with into the API
+          description: password to login with into the API.
           required: True
           type: str
           no_log: True
@@ -140,7 +144,7 @@ EXAMPLES = r'''
 
 RETURN = r'''
 message:
-    description: The output message from the Men&Mice System
+    description: The output message from the Men&Mice System.
     type: str
     returned: always
 '''

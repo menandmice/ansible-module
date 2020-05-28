@@ -35,37 +35,39 @@ DOCUMENTATION = r'''
   version_added: "2.7"
   description:
     - Manage DNS zones in the Men&Mice Suite
+  notes:
+    - When in check mode, this module pretends to have done things
+      and returns C(changed = True).
   options:
     state:
-      description: The state of the zone
+      description: The state of the zone.
       type: bool
       required: False
       choices: [ absent, present ]
       default: present
     name:
-      description: Name of the zone
+      description: Name of the zone.
       type: str
       required: True
     nameserver:
-      description: Nameserver to define the zone on
+      description: Nameserver to define the zone on.
       type: str
       required: True
     authority:
       description: Name of the DNS server that contains the zone or
                    the string C([Active Directory]) if the zone
-                   is AD integrated
+                   is integrated in the Active Directory.
       type: str
       required: False
     servtype:
       description:
          - Type of the master server.
-         - C(master), C(slave), C(stub) or C(forward).
       type: str
       required: False
       choices: [ master, slave, stub, forward ]
       default: master
     dynamic:
-      description: Dynamic DNS zone
+      description: Dynamic DNS zone.
       type: bool
       required: False
       default: False
@@ -76,7 +78,7 @@ DOCUMENTATION = r'''
       elements: str
       required: False
     dnssecsigned:
-      description: True if the zone is a DNSSEC signed zone
+      description: True if the zone is a DNSSEC signed zone.
       type: bool
       required: False
     kskids:
@@ -90,40 +92,40 @@ DOCUMENTATION = r'''
       type: str
       required: False
     adintegrated:
-      description: True if the zone is Active Directory integrated
+      description: True if the zone is Active Directory integrated.
       type: bool
       required: False
     adreplicationtype:
-      description: Type of the AD replication
+      description: Type of the AD replication.
       type: str
       required: False
     adpartition:
-      description: The AD partition if the zone is Active Directory integrated
+      description: The AD partition if the zone is Active Directory integrated.
       type: str
       required: False
     customproperties:
       description:
         - Custom properties for the zone.
         - These properties must already exist.
-        - See also M(mm_props)
+        - See also M(mm_props).
       seealso: See also M(mm_props)
       type: dict
       required: False
     provider:
-      description: Definition of the Men&Mice suite API provider
+      description: Definition of the Men&Mice suite API provider.
       type: dict
       required: True
       suboptions:
         mmurl:
-          description: Men&Mice API server to connect to
+          description: Men&Mice API server to connect to.
           required: True
           type: str
         user:
-          description: userid to login with into the API
+          description: userid to login with into the API.
           required: True
           type: str
         password:
-          description: password to login with into the API
+          description: password to login with into the API.
           required: True
           type: str
           no_log: True
@@ -159,7 +161,7 @@ EXAMPLES = r'''
 
 RETURN = r'''
 message:
-    description: The output message from the Men&Mice System
+    description: The output message from the Men&Mice System.
     type: str
     returned: always
 '''

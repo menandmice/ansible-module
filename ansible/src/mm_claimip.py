@@ -34,16 +34,20 @@ DOCUMENTATION = r'''
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Claim IP addresses in DHCP in the Men&Mice Suite
+    - Claim IP addresses in DHCP in the Men&Mice Suite.
+    - These addresses can not be in a DHCP range.
+  notes:
+    - When in check mode, this module pretends to have done things
+      and returns C(changed = True).
   options:
     state:
-      description: The state of the claim
+      description: The state of the claim.
       type: bool
       required: False
       choices: [ absent, present ]
       default: present
     ipaddress:
-      description: The IP address(es) to work on
+      description: The IP address(es) to work on.
       type: list
       required: True
       elements: str
@@ -56,20 +60,20 @@ DOCUMENTATION = r'''
       type: dict
       required: False
     provider:
-      description: Definition of the Men&Mice suite API provider
+      description: Definition of the Men&Mice suite API provider.
       type: dict
       required: True
       suboptions:
         mmurl:
-          description: Men&Mice API server to connect to
+          description: Men&Mice API server to connect to.
           required: True
           type: str
         user:
-          description: userid to login with into the API
+          description: userid to login with into the API.
           required: True
           type: str
         password:
-          description: password to login with into the API
+          description: password to login with into the API.
           required: True
           type: str
           no_log: True
@@ -102,7 +106,7 @@ EXAMPLES = r'''
 
 RETURN = r'''
 message:
-    description: The output message from the Men&Mice System
+    description: The output message from the Men&Mice System.
     type: str
     returned: always
 '''

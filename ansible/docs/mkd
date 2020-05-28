@@ -53,24 +53,15 @@ stty columns ${COLUMNS}
 export PYTHONPATH=${CRD}/../library:${PYTHONPATH}
 
 cat <<- @EOF
-# Ansible modules
+=== Ansible modules
 
-Effectively and efficiently manage DNS, DHCP, IPAM and Users with the Men&Mice
-Suite through a set of Ansible modules, inventory and lookup plugins.
-
-All available modules are documented below. The plugins each have their
-own documentation.
-
-- [\`freeip\`](README_freeip.md)
-- [\`inventory\`](README_inventory.md)
-- [\`ipinfo\`](README_ipinfo.md)
 @EOF
 
 # Now process all modules
 for p in $(echo "${PLUGINS}" | sort)
 do
 	echo
-	echo "## ${p}"
+	echo "=== ${p}"
 	echo
 	ansible-doc -s ${p}									| \
 		sed -n '/^- name:/ {s/- name: //; p}'			| \
@@ -80,7 +71,7 @@ do
 			done
 
 	echo
-	echo "### Options"
+	echo "==== Options"
 	echo
 
 	ansible-doc -s ${p}									| \
@@ -94,10 +85,11 @@ do
 				fmt "${line}"
 			done
 	echo
-	echo "### Examples"
+	echo "==== Examples"
 	echo
-	echo '```yaml'
+	echo "[source,yaml]"
+	echo '----'
 	echo "import ${p}; print(${p}.EXAMPLES)" | python3 | sed '1d;$d'
-	echo '```'
+	echo '----'
 done
 stty ${COLS}
