@@ -57,7 +57,7 @@ DOCUMENTATION = r'''
       description:
         - Custom properties for the IP address.
         - These properties must already be defined.
-        - See also C(mm_props).
+      seealso: See also M(mm_props)
       type: dict
       required: True
     provider:

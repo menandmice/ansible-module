@@ -105,7 +105,8 @@ DOCUMENTATION = r'''
       description:
         - Custom properties for the zone.
         - These properties must already exist.
-        - See also C(mm_props).
+        - See also M(mm_props)
+      seealso: See also M(mm_props)
       type: dict
       required: False
     provider:

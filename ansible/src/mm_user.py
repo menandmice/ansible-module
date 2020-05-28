@@ -54,7 +54,7 @@ DOCUMENTATION = r'''
     password:
       description:
         - Users password (plaintext)
-        - Required when state is C(present)
+        - Required if I(state=present)
       type: str
       required: False
     descr:
@@ -68,7 +68,7 @@ DOCUMENTATION = r'''
     authentication_type:
       description:
         - Authentication type to use. e.g. Internal, AD
-        - Required when state is C(present)
+        - Required if I(state=present)
       required: False
       type: str
     groups:
