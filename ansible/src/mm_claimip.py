@@ -46,6 +46,7 @@ DOCUMENTATION = r'''
       description: The IP address(es) to work on
       type: list
       required: True
+      elements: str
     customproperties:
       description:
         - Custom properties for the IP address.

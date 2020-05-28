@@ -37,7 +37,7 @@ DOCUMENTATION = r'''
     - Manage DNS records in the Men&Mice Suite
   options:
     state:
-        description: The state of the properties or properties
+        description: The state of the properties
         type: bool
         required: False
         choices: [ absent, present ]
@@ -57,7 +57,7 @@ DOCUMENTATION = r'''
       type: str
       required: True
     rrtype:
-      description: RR Type for the IP address
+      description: Resource Record Type for the IP address
       type: str
       required: False
       default: A
@@ -69,7 +69,7 @@ DOCUMENTATION = r'''
                 SPF, SRV, SSHFP, TLSA, TXT
       ]
     ttl:
-      description: Specifies the Time-To-Live of the DNS record
+      description: The Time-To-Live of the DNS record
       type: int
       required: False
       default: 0 (Same as zone)

@@ -46,6 +46,7 @@ DOCUMENTATION = r'''
     ipaddress:
       description: The IP address(es) to work on
       type: list
+      elements: str
       required: True
     deleteunspecified:
       description: Clear properties that are not explicitly set

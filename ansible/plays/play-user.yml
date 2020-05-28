@@ -28,3 +28,9 @@
           - Approvers (built-in)
           - Requesters (built-in)
         provider: "{{ provider }}"
+
+    - name: Remove the user again
+      mm_user:
+        username: johnd
+        state: absent
+        provider: "{{ provider }}"

@@ -79,12 +79,12 @@ def doapi(url, method, provider, databody):
                                                   errbody['error']['code']
                                                   )
         except URLError as err:
-            raise AnsibleError("Failed lookup url for %s : %s" % (apiurl, to_native(err)))
+            module.fail_json(msg="Failed lookup url for %s : %s" % (apiurl, to_native(err)))
         except SSLValidationError as err:
-            raise AnsibleError("Error validating the server's certificate for %s: %s" % (apiurl, to_native(err)))
+            module.fail_json(msg="Error validating the server's certificate for %s: %s" % (apiurl, to_native(err)))
         except ConnectionError as err:
             if tries == maxtries:
-                raise AnsibleError("Error connecting to %s: %s" % (apiurl, to_native(err)))
+                module.fail_json(msg="Error connecting to %s: %s" % (apiurl, to_native(err)))
             # There was a connection error, wait a little and retry
             time.sleep(0.25)
 

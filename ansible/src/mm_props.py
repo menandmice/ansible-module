@@ -91,10 +91,12 @@ DOCUMENTATION = r'''
       description: The items in the selection list.
       required: False
       type: list
+      elements: str
     cloudtags:
       description: Associated cloud tags
       required: False
       type: list
+      elements: str
     updateexisting:
       description:
         - Should objects be updated with the new values.

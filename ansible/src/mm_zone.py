@@ -73,6 +73,7 @@ DOCUMENTATION = r'''
       description: The IP addresses of the master servers if the
                    new zone is not a master zone.
       type: list
+      elements: str
       required: False
     dnssecsigned:
       description: True if the zone is a DNSSEC signed zone

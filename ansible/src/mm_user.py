@@ -52,9 +52,11 @@ DOCUMENTATION = r'''
       required: True
       aliases: [ user ]
     password:
-      description: Users password (plaintext)
+      description:
+        - Users password (plaintext)
+        - Required when state is C(present)
       type: str
-      required: True
+      required: False
     descr:
       description: Description of the user
       required: False
@@ -64,17 +66,21 @@ DOCUMENTATION = r'''
       required: False
       type: str
     authentication_type:
-      description: Authentication type to use. e.g. internal, AD
-      required: True
+      description:
+        - Authentication type to use. e.g. Internal, AD
+        - Required when state is C(present)
+      required: False
       type: str
     groups:
       description: Make the user a member of these groups
       required: False
-      type: list
+      type:
+      elements: str
     roles:
       description: Make the user a member of these roles
       required: False
       type: list
+      elements: str
     provider:
       description: Definition of the Men&Mice suite API provider
       type: dict
@@ -116,6 +122,16 @@ EXAMPLES = r'''
       user: apiuser
       password: apipasswd
   delegate_to: localhost
+
+- name: Remove user 'johnd'
+  mm_user:
+    username: johnd
+    state: absent
+    provider:
+      mmurl: http://mmsuite.example.net
+      user: apiuser
+      password: apipasswd
+  delegate_to: localhost
 '''
 
 RETURN = r'''
@@ -137,11 +153,11 @@ def run_module():
     module_args = dict(
         state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
         username=dict(type='str', required=True, aliases=['user']),
-        password=dict(type='str', required=True, no_log=True),
+        password=dict(type='str', required=False, no_log=True),
         full_name=dict(type='str', required=False),
         desc=dict(type='str', required=False),
         email=dict(type='str', required=False),
-        authentication_type=dict(type='str', required=True),
+        authentication_type=dict(type='str', required=False),
         groups=dict(type='list', required=False),
         roles=dict(type='list', required=False),
         provider=dict(
@@ -187,34 +203,71 @@ def run_module():
     # Get list of all users in the system
     resp = mm.getrefs("Users", provider)
     users = resp['message']['result']['users']
+    if resp.get('warnings', None):
+        module.fail_json(msg="Collecting users: %s" % resp.get('warnings'))
     display.vvv("Users:", users)
 
     # If groups are requested, get all groups
     if module.params['groups']:
         resp = mm.getrefs("Groups", provider)
+        if resp.get('warnings', None):
+            module.fail_json(msg="Collecting groups: %s" % resp.get('warnings'))
         groups = resp['message']['result']['groups']
         display.vvv("Groups:", groups)
 
     # If roles are requested, get all roles
     if module.params['roles']:
         resp = mm.getrefs("Roles", provider)
+        if resp.get('warnings', None):
+            module.fail_json(msg="Collecting roles: %s" % resp.get('warnings'))
         roles = resp['message']['result']['roles']
         display.vvv("Roles:", roles)
 
     # Setup loop vars
     user_exists = False
     user_ref = ""
-    skip = False
 
     # Check if the user already exists
     for user in users:
         if user['name'] == module.params['username']:
             user_exists = True
             user_ref = user['ref']
+            user_data = user
             break
 
     # If requested state is "present"
     if state == "present":
+        # If the users needs to be present, a password is required
+        if not module.params['password']:
+            module.fail_json(msg='missing required arguments: password')
+
+        if not module.params['authentication_type']:
+            module.fail_json(msg='missing required arguments: authentication_type')
+
+        # Check if all requested groups exist
+        if module.params['groups']:
+            # Create a list with all names, for easy checking
+            names = []
+            for grp in groups:
+                names.append(grp['name'])
+
+            # Check all requested names against the names list
+            for name in module.params['groups']:
+                if name not in names:
+                    module.fail_json(msg="Requested a non existing group: %s" % name)
+
+        # Check if all requested roles exist
+        if module.params['roles']:
+            # Create a list with all names, for easy checking
+            names = []
+            for role in roles:
+                names.append(role['name'])
+
+            # Check all requested names against the names list
+            for name in module.params['roles']:
+                if name not in names:
+                    module.fail_json(msg="Requested a non existing role: %s" % name)
+
         # Create a list of wanted groups
         wanted_groups = []
         if module.params['groups']:
@@ -235,8 +288,16 @@ def run_module():
                                          "objType": "Roles",
                                          "name": role['name']})
 
+        # Fix capitalization for the authenticationType
+        if module.params['authentication_type'].lower() == 'internal':
+            module.params['authentication_type'] = 'Internal'
+        else:
+            module.params['authentication_type'] = module.params['authentication_type'].upper()
+
         if user_exists:
-            # User already present, just update
+            # User already present, just update. As it is not possible to
+            # determine the current password, this will always be executed
+            # and we pretend not to be changed.
             http_method = "PUT"
             url = "Users/%s" % user_ref
             databody = {"ref": user_ref,
@@ -246,10 +307,58 @@ def run_module():
                             {"name": 'password', "value": module.params['password']},
                             {"name": 'fullName', "value": module.params['full_name']},
                             {"name": 'authenticationType', "value": module.params['authentication_type']},
-                            {"name": 'groups', "value": wanted_groups},
-                            {"name": 'roles', "value": wanted_roles}
                         ],
                         }
+            result = mm.doapi(url, http_method, provider, databody)
+            result['changed'] = False
+
+            # Now figure out if groups need to be added or deleted
+            # The ones in the playbook are in `wanted_(roles|groups)`
+            # and the users ref is in `user_ref` and all users data is
+            # in `user_data`
+            display.vvv("wanted  groups =", wanted_groups)
+            display.vvv("current groups =", user_data['groups'])
+            display.vvv("wanted  roles  =", wanted_roles)
+            display.vvv("current roles  =", user_data['roles'])
+
+            # Add or delete a user to or from a group
+            # API call with PUT or DELETE
+            # http://mandm.example.net/mmws/api/Groups/6/Users/31
+            databody = {"saveComment": "Ansible API"}
+            for thisgrp in wanted_groups + user_data['groups']:
+                http_method = ""
+                if (thisgrp in wanted_groups) and (thisgrp not in user_data['groups']):
+                    # Wanted but not yet present.
+                    http_method = "PUT"
+                elif (thisgrp not in wanted_groups) and (thisgrp in user_data['groups']):
+                    # Present, but not wanted
+                    http_method = "DELETE"
+
+                # Execute wanted action
+                if http_method:
+                    display.vvv("Executing %s on %s for %s" % (http_method, thisgrp['ref'], user_ref))
+                    url = "%s/%s" % (thisgrp['ref'], user_ref)
+                    result = mm.doapi(url, http_method, provider, databody)
+                    result['changed'] = True
+
+            # Be aware. Calling adding and deleting roles and groups is just the
+            # otherway around!
+            # http://mandm.example.net/mmws/api/Users/31/Roles/2
+            for thisrole in wanted_roles + user_data['roles']:
+                http_method = ""
+                if (thisrole in wanted_roles) and (thisrole not in user_data['roles']):
+                    # Wanted but not yet present.
+                    http_method = "PUT"
+                elif (thisrole not in wanted_roles) and (thisrole in user_data['roles']):
+                    # Present, but not wanted
+                    http_method = "DELETE"
+
+                # Execute wanted action
+                if http_method:
+                    display.vvv("Executing %s on %s for %s" % (http_method, thisrole['ref'], user_ref))
+                    url = "%s/%s" % (user_ref, thisrole['ref'])
+                    result = mm.doapi(url, http_method, provider, databody)
+                    result['changed'] = True
         else:
             # User not present, create
             http_method = "POST"
@@ -266,8 +375,27 @@ def run_module():
                             "roles": wanted_roles
                         }
                         }
+            result = mm.doapi(url, http_method, provider, databody)
+            if result.get('warnings', None):
+                module.fail_json(msg=result.get('warnings'))
+            user_ref = result['message']['result']['ref']
 
-        print('databody = ', json.dumps(databody, indent=4))
+            # For some reason the Groups are not accepted, so just loop over it
+            databody = {"saveComment": "Ansible API"}
+            for grp in wanted_groups:
+                http_method = "PUT"
+                url = "%s/%s" % (grp['ref'], user_ref)
+                print(url)
+                result = mm.doapi(url, http_method, provider, databody)
+
+            # For some reason the Roles are not accepted, so just loop over it
+            databody = {"saveComment": "Ansible API"}
+            for role in wanted_roles:
+                http_method = "PUT"
+                url = "%s/%s" % (user_ref, role['ref'])
+                print(url)
+                result = mm.doapi(url, http_method, provider, databody)
+
         # Show some debugging
         display.vvv('databody:', databody)
 
@@ -280,16 +408,13 @@ def run_module():
             http_method = "DELETE"
             url = "Users/%s" % user_ref
             databody = {"saveComment": "Ansible API"}
+            result = mm.doapi(url, http_method, provider, databody)
         else:
             # User not present, done
             result = {
                 'changed': False,
                 'message': "User '%s' doesn't exist" % module.params['username']
             }
-            skip = True
-
-    if not skip:
-        result = mm.doapi(url, http_method, provider, databody)
 
     # return collected results
     module.exit_json(**result)

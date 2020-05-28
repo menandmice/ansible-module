@@ -55,6 +55,7 @@ DOCUMENTATION = r'''
         - When the IP address is changed a new reservation is made.
         - It is not allowed to make reservations in DHCP blocks.
       type: list
+      elements: str
       required: True
     macaddress:
       description: MAC address for the IP address
@@ -190,7 +191,7 @@ def run_module():
         scopes = mm.get_dhcp_scopes(provider, ipaddress)
         if not scopes:
             errormsg = 'No DHCP scope for IP address %s', ipaddress
-            raise AnsibleError(errormsg)
+            module.fail_json(msg=errormsg)
 
         if resp['ipamRecord']['dhcpReservations']:
             # A reservation for this IP address was found
