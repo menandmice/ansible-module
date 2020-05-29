@@ -109,7 +109,7 @@ done) > docs/README_modules.adoc
 	All these playbooks are available in the \`examples\` directory.
 @EOF
 
-for f in plays/*yml
+for f in docs/examples/*yml
 do
 	play=$(basename ${f} .yml)
 	echo

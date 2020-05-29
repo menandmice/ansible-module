@@ -1,0 +1,11 @@
+== Ansible Men&Mice Suite development environment
+
+See the `docs` directory for the complete documentation.
+
+And also see the `src` directory for all sources
+and the development information.
+
+- The script `maketree` creates a `mandm_suite` directory
+  which contains the distribution files.
+  This directory can be shared with everyone who wants
+  to use Ansible with the Men&Mice Suite.

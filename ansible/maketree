@@ -1,0 +1,41 @@
+#!/bin/bash
+# vi: set sw=4 ts=4 ai:
+#
+# This script creates a directory where all modules,
+# plugins and config files a placed. This for easy
+# porting to other OSes
+#
+CRD="$( [[ "${0:0:2}" = "./" ]] &&
+	{	printf "${PWD}/${0#./}"
+	} || {
+		printf "${0}"
+	})"
+CRD="${CRD%/*}"
+
+TOPDIR="${CRD}/mand_suite"
+rm -rf ${TOPDIR}
+mkdir -p ${TOPDIR}
+
+# Copy everything
+cp -rp README.adoc ${TOPDIR}
+cp -rp library ${TOPDIR}
+cp -rp plugins ${TOPDIR}
+cp -rp docs ${TOPDIR}
+cp -rp ansible.cfg ${TOPDIR}/ansible.cfg_example
+cp -rp mm_inventory.yml ${TOPDIR}
+cp -rp inventory ${TOPDIR}/inventory_example
+
+# Cleanup the docs directory
+rm -rf ${TOPDIR}/docs/{resources,Makefile,README_asciidoctor.adoc}
+mv ${TOPDIR}/docs/README_general.adoc ${TOPDIR}/docs/README.adoc
+
+# Fix Ansible config file
+sed -i													\
+	-e 's/\(^inventory *= *\).*/\1inventory/'			\
+	-e 's@\(^library *= *\).*@\1/etc/ansible/library@'	\
+	-e 's@\(^lookup_plugins *= *\).*@\1/etc/ansible/plugins/lookup:/usr/share/ansible_plugins/lookup_plugins@'				\
+	-e 's@\(^inventory_plugins *= *\).*@\1/etc/ansible/plugins/inventory:/usr/share/ansible_plugins/inventory_plugins@'		\
+	${TOPDIR}/ansible.cfg_example
+
+# Fix the inventory file
+sed -i -e 's/apidude/apiuser/' -e 's/TheAPIDude/apipasswd/' ${TOPDIR}/mm_inventory.yml
