@@ -370,6 +370,14 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
 
             # All IPAM records in the range are retrieved. Split it out
             for ipam in result['message']['result']['ipamRecords']:
+                # In Ansible 2.9 with Python3 the loop goes one further
+                # as with the rest of the combinations. :-( ?????
+                # This ends up with an empty `ipam['dnsHosts']` and that
+                # results in a `list index out of range`.
+                # So, I added an extra check for that.
+                if not ipam['dnsHosts']:
+                    continue
+
                 # Ansible only needs one combo, so only take the first one
                 # from the returned result
                 address = ipam['address']
