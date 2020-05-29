@@ -152,8 +152,6 @@ EXAMPLES = r'''
   mm_zone:
     state: absent
     name: example.com
-    nameserver: ns1.example.com
-    authority: mmsuite.example.net
     provider:
       mmurl: http://mmsuite.example.net
       user: apiuser
@@ -313,6 +311,10 @@ def run_module():
         if change:
             result = mm.doapi(url, http_method, provider, databody)
     else:
+        # Nameserver is required if state==present
+        if not module.params['nameserver']:
+            module.fail_json(msg='missing required argument: nameserver')
+
         # Get the existing DNS View for the nameserver
         refs = "DNSViews?dnsServerRef=%s" % module.params.get('nameserver')
         resp = mm.get_single_refs(refs, provider)
