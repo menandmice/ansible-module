@@ -30,7 +30,7 @@ include::resources/adocs/includes.adoc[]
 :iconsdir: ./resources/icons
 :pdf-themesdir: ./resources/themes
 :pdf-fontsdir: ./resources/fonts
-:pdf-theme: atcomp.yml
+:pdf-theme: mandm.yml
 
 // URLs
 :uri-at: https://atcomputing.nl
@@ -44,4 +44,4 @@ include::README_freeip.adoc[]
 include::README_inventory.adoc[]
 include::README_ipinfo.adoc[]
 include::README_modules.adoc[]
-
+include::README_playbooks.adoc[]

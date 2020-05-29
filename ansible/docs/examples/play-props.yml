@@ -1,0 +1,98 @@
+---
+#
+# Set, delete and change custom properties on the Men&Mice Suite example
+#
+# The file <ansible_topdir>/group_vars/localhost contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+- name: Men&Mice Custom Properties test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Ansible information
+      debug:
+        msg:
+          - "Ansible version   : {{ ansible_version.full }}"
+          - "Python version    : {{ ansible_facts['python_version'] }}"
+          - "Python executable : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Set text property
+      mm_props:
+        state: present
+        name: MyProperty
+        proptype: text
+        dest: dnsserver
+        listitems:
+          - John
+          - Paul
+          - Ringo
+          - George
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Check idempotentie
+      mm_props:
+        state: present
+        name: MyProperty
+        proptype: text
+        dest: dnsserver
+        listitems:
+          - John
+          - Paul
+          - Ringo
+          - George
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Change type - not allowed
+      mm_props:
+        state: present
+        name: MyProperty
+        proptype: yesno
+        dest: dnsserver
+        listitems:
+          - John
+          - Paul
+          - Ringo
+          - George
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Change list around
+      mm_props:
+        state: present
+        name: MyProperty
+        proptype: text
+        dest: dnsserver
+        listitems:
+          - George
+          - John
+          - Paul
+          - Ringo
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Remove property
+      mm_props:
+        state: absent
+        name: MyProperty
+        proptype: text
+        dest: dnsserver
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Remove property - again
+      mm_props:
+        state: absent
+        name: MyProperty
+        proptype: yesno
+        dest: dnsserver
+        provider: "{{ provider }}"
+      delegate_to: localhost

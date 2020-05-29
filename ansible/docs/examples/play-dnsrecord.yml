@@ -1,0 +1,114 @@
+---
+#
+# Set and change a DNS record on the Men&Mice Suite example
+#
+# The file <ansible_topdir>/group_vars/localhost contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+- name: Men&Mice DNSRecord test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Ansible information
+      debug:
+        msg:
+          - "Ansible version   : {{ ansible_version.full }}"
+          - "Python version    : {{ ansible_facts['python_version'] }}"
+          - "Python executable : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Set DNS record
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: A
+        dnszone: testzone
+        data: 192.168.10.12
+        comment: From The API side
+        ttl: 86400
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Check idempotentie
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: A
+        dnszone: testzone
+        data: 192.168.10.12
+        comment: From The API side
+        ttl: 86400
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Set DNS record with erroneous values
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: AAAA
+        dnszone: testzone
+        data: 192.168.10.127
+        comment: From The API side
+        ttl: apple
+        provider: "{{ provider }}"
+      delegate_to: localhost
+      ignore_errors: true
+
+    - name: Change record
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: A
+        dnszone: testzone
+        data: 192.168.10.14
+        comment: From The API side
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Do something stupid
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: A
+        dnszone: notthetestzone
+        data: 192.168.90.14
+        comment: Welcome to the error
+        provider: "{{ provider }}"
+      delegate_to: localhost
+      ignore_errors: true
+
+    - name: Do more something stupid things
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: A
+        dnszone: testzone
+        data: 192.168.390.14
+        comment: Welcome to the error
+        provider: "{{ provider }}"
+      delegate_to: localhost
+      ignore_errors: true
+
+    - name: Remove record
+      mm_dnsrecord:
+        state: absent
+        name: beatles
+        dnszone: notthetestzone
+        data: 192.168.90.14
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Remove record - again
+      mm_dnsrecord:
+        state: absent
+        name: beatles
+        dnszone: notthetestzone
+        data: 192.168.90.14
+        provider: "{{ provider }}"
+      delegate_to: localhost

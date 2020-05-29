@@ -1,0 +1,643 @@
+== Example playbooks
+
+To use the Men&Mice Suite Ansible Integration you need to create
+playbooks that utilize the functionality of the Men&Mice Suite.
+
+Following are a couple of example playbooks for inspiration.
+
+These playbooks have been tested on CentOS7 and CentOS8, with
+Ansible 2.7, 2.8 and 2.9, all using Python2 and Python3.
+
+All these playbooks are available in the  directory.
+
+=== play-claimip
+
+[source,yaml]
+----
+---
+#
+# Claim and release an IP address on the Men&Mice Suite example
+#
+# The file <ansible_topdir>/group_vars/localhost contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+#
+- name: Men&Mice ClaimIP test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Ansible information
+      debug:
+        msg:
+          - "Ansible version   : {{ ansible_version.full }}"
+          - "Python version    : {{ ansible_facts['python_version'] }}"
+          - "Python executable : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Claim IP address
+      mm_claimip:
+        state: present
+        ipaddress: 172.16.12.14
+        provider: "{{ provider }}"
+
+    - name: Check idempotentie
+      mm_claimip:
+        state: present
+        ipaddress: 172.16.12.14
+        provider: "{{ provider }}"
+
+    - name: Unclaim IP address
+      mm_claimip:
+        state: present
+        ipaddress: 172.16.12.14
+        provider: "{{ provider }}"
+
+    # This task claims an IP address that cannot exit
+    # and returns a warning because of that
+    - name: Claim erroneous IP address
+      mm_claimip:
+        state: present
+        ipaddress: 456.978.12.14
+        provider: "{{ provider }}"
+
+----
+
+=== play-dhcp
+
+[source,yaml]
+----
+---
+#
+# Make a DHCP reservation and release it on the Men&Mice Suite example
+#
+# The file <ansible_topdir>/group_vars/localhost contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+- name: Men&Mice DHCP test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Ansible information
+      debug:
+        msg:
+          - "Ansible version   : {{ ansible_version.full }}"
+          - "Python version    : {{ ansible_facts['python_version'] }}"
+          - "Python executable : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Add a reservation for an IP address
+      mm_dhcp:
+        state: present
+        name: myreservation
+        ipaddress: 172.16.17.8
+        macaddress: 44:55:66:77:88:00
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: check idempotentie
+      mm_dhcp:
+        state: present
+        name: myreservation
+        ipaddress: 172.16.17.8
+        macaddress: 44:55:66:77:88:00
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    # Changing the MAC address of a reservation is not allowed, as this
+    # would alter the reservation. To achieve this, release the reservation
+    # and reclaim it.
+    - name: change mac
+      mm_dhcp:
+        state: present
+        name: myreservation
+        ipaddress: 172.16.17.8
+        macaddress: 44:55:66:77:88:99
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: change ip
+      mm_dhcp:
+        state: present
+        name: myreservation
+        ipaddress: 172.16.17.9
+        macaddress: 44:55:66:77:88:99
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: change name
+      mm_dhcp:
+        state: present
+        name: movemyreservation
+        ipaddress: 172.16.17.9
+        macaddress: 44:55:66:77:88:99
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: delete reservation (wrong one)
+      mm_dhcp:
+        state: absent
+        name: movemyreservation
+        ipaddress: 172.16.17.9
+        macaddress: 44:55:66:77:88:99
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: delete reservation (correct one)
+      mm_dhcp:
+        state: absent
+        name: myreservation
+        ipaddress: 172.16.17.8
+        macaddress: 44:55:66:77:88:99
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: create reservation in invalid range
+      mm_dhcp:
+        state: present
+        name: reservationnonet
+        ipaddress: 172.16.17.58
+        macaddress: 44:55:66:77:88:99
+        provider: "{{ provider }}"
+      delegate_to: localhost
+----
+
+=== play-dnsrecord
+
+[source,yaml]
+----
+---
+#
+# Set and change a DNS record on the Men&Mice Suite example
+#
+# The file <ansible_topdir>/group_vars/localhost contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+- name: Men&Mice DNSRecord test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Ansible information
+      debug:
+        msg:
+          - "Ansible version   : {{ ansible_version.full }}"
+          - "Python version    : {{ ansible_facts['python_version'] }}"
+          - "Python executable : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Set DNS record
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: A
+        dnszone: testzone
+        data: 192.168.10.12
+        comment: From The API side
+        ttl: 86400
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Check idempotentie
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: A
+        dnszone: testzone
+        data: 192.168.10.12
+        comment: From The API side
+        ttl: 86400
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Set DNS record with erroneous values
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: AAAA
+        dnszone: testzone
+        data: 192.168.10.127
+        comment: From The API side
+        ttl: apple
+        provider: "{{ provider }}"
+      delegate_to: localhost
+      ignore_errors: true
+
+    - name: Change record
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: A
+        dnszone: testzone
+        data: 192.168.10.14
+        comment: From The API side
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Do something stupid
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: A
+        dnszone: notthetestzone
+        data: 192.168.90.14
+        comment: Welcome to the error
+        provider: "{{ provider }}"
+      delegate_to: localhost
+      ignore_errors: true
+
+    - name: Do more something stupid things
+      mm_dnsrecord:
+        state: present
+        name: beatles
+        rrtype: A
+        dnszone: testzone
+        data: 192.168.390.14
+        comment: Welcome to the error
+        provider: "{{ provider }}"
+      delegate_to: localhost
+      ignore_errors: true
+
+    - name: Remove record
+      mm_dnsrecord:
+        state: absent
+        name: beatles
+        dnszone: notthetestzone
+        data: 192.168.90.14
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Remove record - again
+      mm_dnsrecord:
+        state: absent
+        name: beatles
+        dnszone: notthetestzone
+        data: 192.168.90.14
+        provider: "{{ provider }}"
+      delegate_to: localhost
+----
+
+=== play-freeip
+
+[source,yaml]
+----
+---
+#
+# Find a set of free IP addresses in a range on the Men&Mice Suite example
+#
+# The file <ansible_topdir>/group_vars/localhost contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+- name: Men&Mice FreeIP test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  vars:
+    network:
+      - nononet
+
+  tasks:
+    - name: Set free IP addresses as a fact
+      set_fact:
+        freeips: "{{ query('mm_freeip',
+                         provider,
+                         network,
+                         multi=25,
+                         claim=60,
+                         excludedhcp=True,
+                         ping=True)
+               }}"
+
+    - name: Get the free IP address and show info
+      debug:
+        msg:
+          - "Free IPs           : {{ freeips }}"
+          - "Queried network(s) : {{ network }}"
+          - "Ansible version    : {{ ansible_version.full }}"
+          - "Python version     : {{ ansible_facts['python_version'] }}"
+          - "Python executable  : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Loop over IP addresses
+      debug:
+        msg:
+          - "Next free IP       : {{ item }}"
+      loop: "{{ freeips }}"
+
+----
+
+=== play-ipinfo
+
+[source,yaml]
+----
+---
+#
+# Get all info for an IP address on the Men&Mice Suite example
+#
+# The file <ansible_topdir>/group_vars/localhost contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+- name: Men&Mice IP Info test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Get get IP info
+      set_fact:
+        ipinfo: "{{ query('mm_ipinfo', provider, '172.16.17.2') | to_nice_json }}"
+
+    - name: Show Ansible and Python information
+      debug:
+        msg:
+          - "Ansible version    : {{ ansible_version.full }}"
+          - "Python version     : {{ ansible_facts['python_version'] }}"
+          - "Python executable  : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Show all infor for this IP address
+      debug:
+        var: ipinfo
+
+    # This task tries to get the information for a non-existing IP address
+    # which results in a fatal `Object not found for reference` error
+    - name: Get get IP info for a non existing IP address
+      set_fact:
+        ipinfo: "{{ query('mm_ipinfo', provider, '390.916.17.2') | to_nice_json }}"
+----
+
+=== play-props
+
+[source,yaml]
+----
+---
+#
+# Set, delete and change custom properties on the Men&Mice Suite example
+#
+# The file <ansible_topdir>/group_vars/localhost contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+- name: Men&Mice Custom Properties test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Ansible information
+      debug:
+        msg:
+          - "Ansible version   : {{ ansible_version.full }}"
+          - "Python version    : {{ ansible_facts['python_version'] }}"
+          - "Python executable : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Set text property
+      mm_props:
+        state: present
+        name: MyProperty
+        proptype: text
+        dest: dnsserver
+        listitems:
+          - John
+          - Paul
+          - Ringo
+          - George
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Check idempotentie
+      mm_props:
+        state: present
+        name: MyProperty
+        proptype: text
+        dest: dnsserver
+        listitems:
+          - John
+          - Paul
+          - Ringo
+          - George
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Change type - not allowed
+      mm_props:
+        state: present
+        name: MyProperty
+        proptype: yesno
+        dest: dnsserver
+        listitems:
+          - John
+          - Paul
+          - Ringo
+          - George
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Change list around
+      mm_props:
+        state: present
+        name: MyProperty
+        proptype: text
+        dest: dnsserver
+        listitems:
+          - George
+          - John
+          - Paul
+          - Ringo
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Remove property
+      mm_props:
+        state: absent
+        name: MyProperty
+        proptype: text
+        dest: dnsserver
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Remove property - again
+      mm_props:
+        state: absent
+        name: MyProperty
+        proptype: yesno
+        dest: dnsserver
+        provider: "{{ provider }}"
+      delegate_to: localhost
+----
+
+=== play-user
+
+[source,yaml]
+----
+---
+#
+# Add, delete and change users on the Men&Mice Suite example
+#
+# The file <ansible_topdir>/group_vars/localhost contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+- name: Men&Mice users test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Get the free IP address and show info
+      debug:
+        msg:
+          - "Ansible version    : {{ ansible_version.full }}"
+          - "Python version     : {{ ansible_facts['python_version'] }}"
+          - "Python executable  : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Add the user 'johnd' as an admin
+      mm_user:
+        username: johnd
+        password: password
+        full_name: John Doe
+        state: present
+        authentication_type: internal
+        roles:
+          - Administrators (built-in)
+          - DNS Administrators (built-in)
+          - DHCP Administrators (built-in)
+          - IPAM Administrators (built-in)
+          - User Administrators (built-in)
+          - Approvers (built-in)
+          - Requesters (built-in)
+        provider: "{{ provider }}"
+
+    - name: Check idempotency
+      mm_user:
+        username: johnd
+        password: password
+        full_name: John Doe
+        state: present
+        authentication_type: internal
+        roles:
+          - Administrators (built-in)
+          - DNS Administrators (built-in)
+          - DHCP Administrators (built-in)
+          - IPAM Administrators (built-in)
+          - User Administrators (built-in)
+          - Approvers (built-in)
+          - Requesters (built-in)
+        provider: "{{ provider }}"
+
+    - name: Change the groups
+      mm_user:
+        username: johnd
+        password: password
+        full_name: John Doe
+        state: present
+        authentication_type: internal
+        roles:
+          - Administrators (built-in)
+          - User Administrators (built-in)
+          - Approvers (built-in)
+          - Requesters (built-in)
+        provider: "{{ provider }}"
+
+    - name: Check idempotency again
+      mm_user:
+        username: johnd
+        password: password
+        full_name: John Doe
+        state: present
+        authentication_type: internal
+        roles:
+          - Administrators (built-in)
+          - User Administrators (built-in)
+          - Approvers (built-in)
+          - Requesters (built-in)
+        provider: "{{ provider }}"
+
+    - name: Remove the user again
+      mm_user:
+        username: johnd
+        state: absent
+        provider: "{{ provider }}"
+----
+
+=== play-zone
+
+[source,yaml]
+----
+---
+#
+# The file <ansible_topdir>/group_vars/localhost contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+- name: Men&Mice DHCP test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Ansible information
+      debug:
+        msg:
+          - "Ansible version   : {{ ansible_version.full }}"
+          - "Python version    : {{ ansible_facts['python_version'] }}"
+          - "Python executable : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Ensure the zone
+      mm_zone:
+        state: present
+        name: example.com
+        nameserver: mandm.example.com
+        authority: mandm.example.net
+        masters: mandm.example.net
+        servtype: master
+        customproperties:
+          owner: Me, myself and I
+          place: Netherlands
+        provider: "{{ provider }}"
+      delegate_to: localhost
+
+    - name: Remove the zone
+      mm_zone:
+        state: absent
+        name: example.com
+        provider: "{{ provider }}"
+      delegate_to: localhost
+----

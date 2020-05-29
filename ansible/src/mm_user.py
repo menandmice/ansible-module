@@ -241,10 +241,10 @@ def run_module():
     if state == "present":
         # If the users needs to be present, a password is required
         if not module.params['password']:
-            module.fail_json(msg='missing required arguments: password')
+            module.fail_json(msg='missing required argument: password')
 
         if not module.params['authentication_type']:
-            module.fail_json(msg='missing required arguments: authentication_type')
+            module.fail_json(msg='missing required argument: authentication_type')
 
         # Check if all requested groups exist
         if module.params['groups']:

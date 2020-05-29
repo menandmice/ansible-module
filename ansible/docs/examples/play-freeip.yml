@@ -1,0 +1,48 @@
+---
+#
+# Find a set of free IP addresses in a range on the Men&Mice Suite example
+#
+# The file <ansible_topdir>/group_vars/localhost contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+- name: Men&Mice FreeIP test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  vars:
+    network:
+      - nononet
+
+  tasks:
+    - name: Set free IP addresses as a fact
+      set_fact:
+        freeips: "{{ query('mm_freeip',
+                         provider,
+                         network,
+                         multi=25,
+                         claim=60,
+                         excludedhcp=True,
+                         ping=True)
+               }}"
+
+    - name: Get the free IP address and show info
+      debug:
+        msg:
+          - "Free IPs           : {{ freeips }}"
+          - "Queried network(s) : {{ network }}"
+          - "Ansible version    : {{ ansible_version.full }}"
+          - "Python version     : {{ ansible_facts['python_version'] }}"
+          - "Python executable  : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Loop over IP addresses
+      debug:
+        msg:
+          - "Next free IP       : {{ item }}"
+      loop: "{{ freeips }}"
+
