@@ -71,7 +71,7 @@ cd ansible
 git checkout origin/stable-2.9
 ....
 
-After this it needed to make sure all requirements for Ansible are
+After this it is needed to make sure all requirements for Ansible are
 installed as well:
 
 ....
@@ -164,7 +164,7 @@ test the modules from the development machine with:
 python -m ansible.modules.mandm.mm_zone ~/venv/src/json/ansi_zone.json
 ....
 
-With an Ansible JSON file that contains all @he module parameters,
+With an Ansible JSON file that contains all the module parameters,
 looking like:
 
 ....
@@ -191,10 +191,12 @@ looking like:
 
 === Tested environments
 
-All modules and plugins where tested on a CentOS7 and CentOS8 machine,
-using Ansible 2.7, 2.8 and 2.9.
+All modules and plugins have been tested on CentOS7, CentOS8 and Ubuntu
+18.04 with Ansible 2.7, 2.8 and 2.9, all using Python2 and Python3.
 
-CentOS7 CentOS8 Python 2.7.5 Python 2.7.16 Python 3.6.8 Python 3.6.8
+Caveat: As the operating systems do not have all these combinations of
+Ansible and Python available, the tests where done in Python virtual
+environments.
 
 === Linting
 

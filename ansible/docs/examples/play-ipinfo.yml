@@ -36,3 +36,4 @@
     - name: Get get IP info for a non existing IP address
       set_fact:
         ipinfo: "{{ query('mm_ipinfo', provider, '390.916.17.2') | to_nice_json }}"
+      ignore_errors: true

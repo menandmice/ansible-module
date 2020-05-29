@@ -103,8 +103,12 @@ done) > docs/README_modules.adoc
 
 	Following are a couple of example playbooks for inspiration.
 
-	These playbooks have been tested on CentOS7 and CentOS8, with
+	These playbooks have been tested on CentOS7, CentOS8 and Ubuntu 18.04  with
 	Ansible 2.7, 2.8 and 2.9, all using Python2 and Python3.
+
+	Caveat: As the operating systems do not have all these combinations of
+	Ansible and Python available, the tests where done in Python virtual
+	environments.
 
 	All these playbooks are available in the \`examples\` directory.
 @EOF
