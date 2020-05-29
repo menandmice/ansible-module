@@ -205,6 +205,10 @@ class LookupModule(LookupBase):
         databody = {}
         result = doapi(url, http_method, provider, databody)
 
+        # An error occured?
+        if result.get('warnings', None):
+            raise AnsibleError(result.get('warnings'))
+
         if isinstance(result, dict):
             return result['message']['result']['ipamRecord']
         return result
