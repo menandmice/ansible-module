@@ -2,7 +2,7 @@
 #
 # Add, delete and change users on the Men&Mice Suite example
 #
-# The file <ansible_topdir>/group_vars/localhost contains:
+# The file <ansible_topdir>/group_vars/all contains:
 #
 #    ---
 #    provider:

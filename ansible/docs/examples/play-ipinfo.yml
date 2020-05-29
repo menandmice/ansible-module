@@ -2,7 +2,7 @@
 #
 # Get all info for an IP address on the Men&Mice Suite example
 #
-# The file <ansible_topdir>/group_vars/localhost contains:
+# The file <ansible_topdir>/group_vars/all contains:
 #
 #    ---
 #    provider:

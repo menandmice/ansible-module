@@ -1,6 +1,6 @@
 ---
 #
-# The file <ansible_topdir>/group_vars/localhost contains:
+# The file <ansible_topdir>/group_vars/all contains:
 #
 #    ---
 #    provider:

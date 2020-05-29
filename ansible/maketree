@@ -29,6 +29,16 @@ cp -rp inventory ${TOPDIR}/inventory_example
 rm -rf ${TOPDIR}/docs/{resources,Makefile,README_asciidoctor.adoc}
 mv ${TOPDIR}/docs/README_general.adoc ${TOPDIR}/docs/README.adoc
 
+# Create localhost group_vars
+mkdir -p ${TOPDIR}/group_vars
+cat <<- @EOF > /${TOPDIR}/group_vars/localhost_example
+	---
+	provider:
+	  mmurl: http://mmsuite.example.net
+	  user: apiuser
+	  password: apipasswd
+@EOF
+
 # Fix Ansible config file
 sed -i													\
 	-e 's/\(^inventory *= *\).*/\1inventory/'			\

@@ -89,6 +89,72 @@ When you start coding, first ensure your environment is setup correctly:
 source ~/venv/python3/bin/activate && source ~/venv/ansible/hacking/env-setup
 ....
 
+=== Setup a develop and test environment
+
+To quickly setup a develop and test environment, a simple script
+is available.
+
+[source,bash]
+----
+#/bin/bash
+
+# Setup the test and development environment
+# The directory ~/develop/virtualenv/ansible
+# contains a complete Ansible development tree
+# for version 2.9 (as that is the current stable
+# version)
+
+virtualenv -p python2 p2_ans27
+virtualenv -p python2 p2_ans28
+virtualenv -p python2 p2_ans29
+
+virtualenv -p python3 p3_ans27
+virtualenv -p python3 p3_ans28
+virtualenv -p python3 p3_ans29
+
+(. p2_ans27/bin/activate
+pip install requests ansible==2.7.17
+pip install --upgrade pip
+pip install -r ~/develop/virtualenv/ansible/requirements.txt
+pip install -r ~/develop/virtualenv/ansible/docs/docsite/requirements.txt
+)
+
+(. p2_ans28/bin/activate
+pip install requests ansible==2.8.11
+pip install --upgrade pip
+pip install -r ~/develop/virtualenv/ansible/requirements.txt
+pip install -r ~/develop/virtualenv/ansible/docs/docsite/requirements.txt
+)
+
+(. p2_ans29/bin/activate
+pip install requests ansible==2.9.7
+pip install --upgrade pip
+pip install -r ~/develop/virtualenv/ansible/requirements.txt
+pip install -r ~/develop/virtualenv/ansible/docs/docsite/requirements.txt
+)
+
+(. p3_ans27/bin/activate
+pip install requests ansible==2.7.17
+pip install --upgrade pip
+pip install -r ~/develop/virtualenv/ansible/requirements.txt
+pip install -r ~/develop/virtualenv/ansible/docs/docsite/requirements.txt
+)
+
+(. p3_ans28/bin/activate
+pip install requests ansible==2.8.11
+pip install --upgrade pip
+pip install -r ~/develop/virtualenv/ansible/requirements.txt
+pip install -r ~/develop/virtualenv/ansible/docs/docsite/requirements.txt
+)
+
+(. p3_ans29/bin/activate
+pip install requests ansible==2.9.7
+pip install --upgrade pip
+pip install -r ~/develop/virtualenv/ansible/requirements.txt
+pip install -r ~/develop/virtualenv/ansible/docs/docsite/requirements.txt
+)
+----
+
 === Running the module in terminal mode
 
 As the Men&Mice modules do not target Ansible nodes, it is possible to
@@ -106,7 +172,7 @@ looking like:
     "state": "present",
     "name": "testzone",
     "nameserver": "mmsuite.example.net",
-    "masters": "172.16.17.2",
+     masters": "172.16.17.2",
     "dynamic": true,
     "servtype": "Master",
     "authority": "dns1.example.net",

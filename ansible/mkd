@@ -50,7 +50,7 @@ COLS="$(stty -a | awk -F';' '/columns/ { print $3 }')"
 export COLUMNS=4096
 stty columns ${COLUMNS}
 
-export PYTHONPATH=${CRD}/../library:${PYTHONPATH}
+export PYTHONPATH=${CRD}/library:${PYTHONPATH}
 
 (cat <<- @EOF
 === Ansible modules
