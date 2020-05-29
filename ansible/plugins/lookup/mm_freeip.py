@@ -17,6 +17,7 @@ __metaclass__ = type
 import time
 from ansible.errors import AnsibleError, AnsibleModuleError
 from ansible.plugins.lookup import LookupBase
+from ansible.utils import unicode
 from ansible.utils.display import Display
 from ansible.module_utils._text import to_text, to_native
 from ansible.module_utils.six.moves.urllib.error import HTTPError, URLError
@@ -260,9 +261,12 @@ class LookupModule(LookupBase):
 
         # Get the parameters
         provider = terms[0]
-        if isinstance(terms[1], str) or isinstance(terms[1], unicode):
+        if isinstance(terms[1], str):
             networks = [str(terms[1]).strip()]
         else:
+            # First make sure all elements are string (Sometimes it's
+            # AnsibleUnicode, depending on Ansible and Python version)
+            terms[1] = list(map(str, terms[1]))
             networks = list(map(str.strip, terms[1]))
         multi = kwargs.get('multi', 1)
         claim = kwargs.get('claim', 0)
