@@ -50,9 +50,11 @@ DOCUMENTATION = r'''
       type: str
       required: True
     nameserver:
-      description: Nameserver to define the zone on.
+      description:
+        - Nameserver to define the zone on.
+        - Required if I(state=present).
       type: str
-      required: True
+      required: False
     authority:
       description: Name of the DNS server that contains the zone or
                    the string C([Active Directory]) if the zone
@@ -178,7 +180,7 @@ def run_module():
     module_args = dict(
         state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
         name=dict(type='str', required=True),
-        nameserver=dict(type='str', required=True),
+        nameserver=dict(type='str', required=False),
         authority=dict(type='str', required=False),
         servtype=dict(type='str', required=False, default='master',
                       choices=['master', 'slave', 'stub', 'forward']),
