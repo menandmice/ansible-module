@@ -28,6 +28,7 @@ cp -rp inventory ${TOPDIR}/inventory_example
 # Cleanup the docs directory
 rm -rf ${TOPDIR}/docs/{resources,Makefile,README_asciidoctor.adoc}
 mv ${TOPDIR}/docs/README_general.adoc ${TOPDIR}/docs/README.adoc
+find ${TOPDIR} -type d -name '__pycache__' | xargs rm -rf
 
 # Create localhost group_vars
 mkdir -p ${TOPDIR}/group_vars
