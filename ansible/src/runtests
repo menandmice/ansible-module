@@ -1,0 +1,106 @@
+#!/bin/bash
+# vi: set sw=4 ts=4 ai:
+# Ansibles debug is turned on, with '-vvvv'
+
+# Check DEBUG
+[[ ${DEBUG:-0} -eq 1 ]] && DBG='-vvvv' || DBG=''
+export DBG
+
+# Create a line of ${LEN} '=' signs
+LEN=70
+L=$(printf "%${LEN}s" " " | tr ' ' '=')
+
+disp() {
+	# Print the line
+	printf "= %-s ${L}\n" "${*}" | cut -c 1-${LEN}
+}
+
+BOOKS="
+	play-dhcp
+	play-dnsrecord
+	play-freeip
+	play-ipinfo
+	play-props
+	play-user
+	play-zone
+"
+
+MODULES="
+	mm_claimip.py
+	mm_dhcp.py
+	mm_dnsrecord.py
+	mm_ipprops.py
+	mm_props.py
+	mm_user.py
+	mm_zone.py
+"
+
+# And loop di loop
+PYANS="p2_ans27 p2_ans28 p2_ans29 p3_ans27 p3_ans28 p3_ans29"
+for f in ${PYANS}
+do
+	echo
+	disp "Running for ${f}"
+	echo
+
+	# Export everything, because we run all commands in a subshell to prevent
+	# tainting the environment
+	export f
+	export PYTHVER=$(echo ${f%%_*} | tr -d 'p')
+	[[ ${PYTHVER} -eq 2 ]] && PYTHVER="2.7" || PYTHVER="3.6"
+
+	(. ${HOME}/${f}/bin/activate
+	export ANSIBLE_PYTHON_INTERPRETER=${HOME}/${f}/bin/python
+	echo "${L}"
+	ansible-inventory --list
+	disp "RC=${?}"
+
+	for mod in ${MODULES}
+	do
+		disp "Documentation for ${mod}"
+		ansible-doc ${mod}
+		disp "RC=${?}"
+	done
+
+	for book in ${BOOKS}
+	do
+		disp "Running playbook ${book}"
+		ansible-playbook ${DBG} -e 'ansible_python_interpreter="/usr/bin/env python"' "docs/examples/${book}.yml" 0</dev/null
+		disp "RC=${?}"
+	done
+	)
+done
+
+# All done. Check native
+ansi=$(which ansible)
+if [[ x"${ansi}" = x"" ]]
+then
+	echo "No native Ansible found"
+	exit 0
+fi
+
+# Cleanup
+unset ANSIBLE_PYTHON_INTERPRETER
+
+# Show the native version
+ansible --version
+
+# And run all tests
+echo "${L}"
+ansible-inventory --list
+disp "RC=${?}"
+
+for mod in ${MODULES}
+do
+	disp "Documentation for ${mod}"
+	ansible-doc ${mod}
+	disp "RC=${?}"
+done
+
+for book in ${BOOKS}
+do
+	disp "Running playbook ${book}"
+	ansible-playbook ${DBG} "docs/examples/${book}.yml" 0</dev/null
+	disp "RC=${?}"
+done
+

@@ -30,9 +30,9 @@ rm -rf ${TOPDIR}/docs/{resources,Makefile,README_asciidoctor.adoc}
 mv ${TOPDIR}/docs/README_general.adoc ${TOPDIR}/docs/README.adoc
 find ${TOPDIR} -type d -name '__pycache__' | xargs rm -rf
 
-# Create localhost group_vars
+# Create the all group_vars
 mkdir -p ${TOPDIR}/group_vars
-cat <<- @EOF > /${TOPDIR}/group_vars/localhost_example
+cat <<- @EOF > /${TOPDIR}/group_vars/all_example
 	---
 	provider:
 	  mmurl: http://mmsuite.example.net

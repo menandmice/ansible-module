@@ -1,0 +1,37 @@
+# site.yml
+---
+- host: centos7
+  become: true
+  roles: []
+
+- host: centos8
+  become: true
+  roles: []
+
+- host: rhel7
+  become: true
+  roles: []
+
+- host: rhel8
+  become: true
+  roles: []
+
+- host: debian9
+  become: true
+  roles: []
+
+- host: debian10
+  become: true
+  roles: []
+
+- host: ubuntu1804
+  become: true
+  roles: []
+
+- host: ubuntu2004
+  become: true
+  roles: []
+
+- host: freebsd12
+  become: true
+  roles: []
