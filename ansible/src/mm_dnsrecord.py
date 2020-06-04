@@ -12,7 +12,7 @@ __metaclass__ = type
 import sys
 import os
 import urllib
-import mm_include as mm
+import include as mm
 from ansible.errors import AnsibleError
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
