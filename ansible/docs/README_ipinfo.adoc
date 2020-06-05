@@ -3,6 +3,11 @@
 This Men&Mice IPInfo lookup plugin finds a lot of info about a specified
 IP address, defined in the Men&Mice suite.
 
+=== Options
+
+- `ipaddress`: (required) The IP address that is examined
+- `provider`: (required) Definition of the Men&Mice suite API provider.
+
 === Usage
 
 The `mm_ipinfo` plugin delivers a complete set of information about an

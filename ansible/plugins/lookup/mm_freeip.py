@@ -79,7 +79,7 @@ DOCUMENTATION = r"""
         required: False
         default: False
       claim:
-        description: Claim the IP address(es) for the specified amount of time
+        description: Claim the IP address(es) for the specified amount of time in seconds
         type: int
         required: False
         default: False

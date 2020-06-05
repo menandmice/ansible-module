@@ -1,0 +1,11 @@
+{ "ANSIBLE_MODULE_ARGS": {
+    "state": "present",
+    "name": "localrole",
+    "desc": "My local role",
+    "provider" : {
+        "mmurl": "http://mandm.example.net",
+        "user": "apidude",
+        "password": "TheAPIDude"
+    }
+  }
+}

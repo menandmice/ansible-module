@@ -123,7 +123,7 @@ With the following meaning:
 files
 * `cache_connection`: Path in which the cache plugin will save the cache
 files
-* `cache_timeout`: Timeout for the cache
+* `cache_timeout`: Timeout for the cache in seconds
 
 Now the inventory plugin can be used with Ansible, like:
 
