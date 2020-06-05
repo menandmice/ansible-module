@@ -50,3 +50,5 @@ include::README_ipinfo.adoc[]
 include::README_modules.adoc[]
 
 include::README_playbooks.adoc[]
+
+include::README_credentials.adoc[]
