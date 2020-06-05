@@ -311,7 +311,7 @@ Not that often then:
     - In progress
 [X] (45) Inventory information to Ansible
 [ ] (46) Ansible Playbook
-    - In progress
+    - Continuously in progress
     - Currently a test playbook per module, eventually a playbook
       that does something useful.
 [ ] (47) Ansible roles for Men&Mice
@@ -351,3 +351,48 @@ Not that often then:
     [ ] (59) For a DHCP server
     [ ] (60) For a DHCP scope
 
+
+=== API calls per module
+
+mm_claimip.py:
+  - IPAMRecords: [ GET, PUT ]
+
+mm_dhcp:
+  - DHCPReservations: [ GET, PUT, POST, DELETE ]
+  - IPAMRecords: [ GET ]
+
+mm_dnsrecord:
+  - DNSRecords: [ GET, PUT, POST, DELETE ]
+  - DNSZones: [ GET ]
+
+mm_ipprops:
+  - IPAMRecords: [ GET, PUT ]
+
+mm_props:
+  - CloudNetworks:        [ GET, PUT, POST, DELETE ]
+  - CloudServiceAccounts: [ GET, PUT, POST, DELETE ]
+  - DHCPServers:          [ GET, PUT, POST, DELETE ]
+  - DNSServers:           [ GET, PUT, POST, DELETE ]
+  - DNSZones:             [ GET, PUT, POST, DELETE ]
+  - Devices:              [ GET, PUT, POST, DELETE ]
+  - IPAMRecords:          [ GET, PUT, POST, DELETE ]
+  - Interfaces:           [ GET, PUT, POST, DELETE ]
+  - Ranges:               [ GET, PUT, POST, DELETE ]
+
+mm_users:
+  - Groups: [ GET, PUT, POST, DELETE ]
+  - Roles:  [ GET, PUT, POST, DELETE ]
+  - Users:  [ GET, PUT, POST, DELETE ]
+
+mm_zones:
+  - DNSZones: [ GET, PUT, POST, DELETE ]
+
+mm_inventory:
+  - IPAMRecords: [ GET ]
+  - Ranges: [ GET ]
+
+mm_freeip:
+  - Ranges: [ GET ]
+
+mm_ipinfo:
+  - IPAMRecords: [ GET ]
