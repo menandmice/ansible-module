@@ -4,8 +4,9 @@ host: "http://mmsuite.example.net"
 user: apidude
 password: TheAPIDude
 
-filters:
-  - location: home
+#filters:
+#  - location: home
 
 ranges:
+  - 2001:db8::/64
   - 172.16.17.0/24
