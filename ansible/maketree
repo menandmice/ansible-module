@@ -16,6 +16,12 @@ TOPDIR="${CRD}/mand_suite"
 rm -rf ${TOPDIR}
 mkdir -p ${TOPDIR}
 
+# Make sure all modules are the newest version
+(cd src; ./doit)
+
+# Make sure documentation is up to date
+(cd docs; make)
+
 # Copy everything
 cp -rp README.adoc ${TOPDIR}
 cp -rp library ${TOPDIR}

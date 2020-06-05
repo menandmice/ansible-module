@@ -396,3 +396,49 @@ mm_freeip:
 
 mm_ipinfo:
   - IPAMRecords: [ GET ]
+
+
+=== Credential matrix
+
+....
+
+                   +---+---+---+---+---+---+---+
+                   | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
++------------------+---+---+---+---+---+---+---+
+| mm_claimip.py    |   |   |   | * |   |   |   |
++------------------+---+---+---+---+---+---+---+
+| mm_dhcp          |   |   | * | * |   |   |   |
++------------------+---+---+---+---+---+---+---+
+| mm_dnsrecord     |   | * |   |   |   |   |   |
++------------------+---+---+---+---+---+---+---+
+| mm_ipprops       |   |   | * |   |   |   |   |
++------------------+---+---+---+---+---+---+---+
+| mm_props         | * | * | * | * | * |   |   |
++------------------+---+---+---+---+---+---+---+
+| mm_users         |   |   |   |   | * |   |   |
++------------------+---+---+---+---+---+---+---+
+| mm_zones         |   | * |   |   |   |   |   |
++------------------+---+---+---+---+---+---+---+
+| mm_inventory     |   |   |   | * |   |   |   |
++------------------+---+---+---+---+---+---+---+
+| mm_freeip        |   |   |   | * |   |   |   |
++------------------+---+---+---+---+---+---+---+
+| mm_ipinfo        |   |   |   | * |   |   |   |
++------------------+---+---+---+---+---+---+---+
+....
+
+1 - Administrators (built-in)
+2 - DNS Administrators (built-in)
+3 - DHCP Administrators (built-in)
+4 - IPAM Administrators (built-in)
+5 - User Administrators (built-in)
+6 - Approvers (built-in)
+7 - Requesters (built-in)
+
+== Remarks
+
+- The `mm_props` module manages custom properties for all
+  types, like DNS servers, DHCP servers, zones, IP ranges etc.
+  When using the module for a type when no modify rights are
+  granted, an error will occur. It is possible to grant less
+  rights and allow only to modify a subset of the record types.
