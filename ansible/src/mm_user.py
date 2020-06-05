@@ -106,12 +106,12 @@ DOCUMENTATION = r'''
 EXAMPLES = r'''
 - name: Add the user 'johnd' as an admin
     mm_user:
-    username: johnd
-    password: password
-    full_name: John Doe
-    state: present
-    authentication_type: internal
-    roles:
+      username: johnd
+      password: password
+      full_name: John Doe
+      state: present
+      authentication_type: internal
+      roles:
         - Administrators (built-in)
         - DNS Administrators (built-in)
         - DHCP Administrators (built-in)
