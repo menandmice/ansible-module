@@ -42,6 +42,9 @@ do
 	echo
 	disp "Running for ${f}"
 	echo
+	disp "Removing stale Python cache"
+	find . -type f -name '*.pyc' -delete
+	echo
 
 	# Export everything, because we run all commands in a subshell to prevent
 	# tainting the environment
@@ -84,6 +87,10 @@ unset ANSIBLE_PYTHON_INTERPRETER
 
 # Show the native version
 ansible --version
+
+# Remove stale Python cache files
+disp "Removing stale Python cache"
+find . -type f -name '*.pyc' -delete
 
 # And run all tests
 echo "${L}"

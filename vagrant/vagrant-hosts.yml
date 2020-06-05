@@ -27,107 +27,49 @@
 # To enable *provisioning*, add these hosts to site.yml and assign some roles.
 #
 # [1] http://docs.vagrantup.com/v2/synced-folders/basic_usage.html
----
+#
 #  synced_folders:
 #    - src: test
 #      dest: /tmp/test
+#      options:
+#        :create: true
+#        :owner: root
+#        :group: root
+---
 
 - name: centos7
   box: centos/7
   ip: 192.168.56.10
-  synced_folders:
-    - src: test
-      dest: /tmp/test
-      options:
-        :create: true
-        :owner: root
-        :group: root
 
 - name: centos8
   box: centos/8
   ip: 192.168.56.11
-  synced_folders:
-    - src: test
-      dest: /tmp/test
-      options:
-        :create: true
-        :owner: root
-        :group: root
 
 - name: rhel7
   box: generic/rhel7
   ip: 192.168.56.12
-  synced_folders:
-    - src: test
-      dest: /tmp/test
-      options:
-        :create: true
-        :owner: root
-        :group: root
 
 - name: rhel8
   box: generic/rhel8
   ip: 192.168.56.13
-  synced_folders:
-    - src: test
-      dest: /tmp/test
-      options:
-        :create: true
-        :owner: root
-        :group: root
 
 - name: debian9
   box: generic/debian9
   ip: 192.168.56.14
-  synced_folders:
-    - src: test
-      dest: /tmp/test
-      options:
-        :create: true
-        :owner: root
-        :group: root
 
 - name: debian10
   box: generic/debian10
   ip: 192.168.56.15
-  synced_folders:
-    - src: test
-      dest: /tmp/test
-      options:
-        :create: true
-        :owner: root
-        :group: root
 
 - name: ubuntu1804
   box: generic/ubuntu1804
   ip: 192.168.56.16
-  synced_folders:
-    - src: test
-      dest: /tmp/test
-      options:
-        :create: true
-        :owner: root
-        :group: root
 
 - name: ubuntu2004
   box: generic/ubuntu2004
   ip: 192.168.56.17
-  synced_folders:
-    - src: test
-      dest: /tmp/test
-      options:
-        :create: true
-        :owner: root
-        :group: root
 
 - name: freebsd12
   box: generic/freebsd12
   ip: 192.168.56.18
-  synced_folders:
-    - src: test
-      dest: /tmp/test
-      options:
-        :create: true
-        :owner: root
-        :group: root
 

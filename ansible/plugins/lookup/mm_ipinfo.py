@@ -144,6 +144,10 @@ def doapi(url, method, provider, databody):
             response = resp.read()
             if resp.code == 200:
                 # 200 => Data in the body
+                # Sometimes (older Python) the data is not a string but a
+                # byte array.
+                if isinstance(response, bytes):
+                    response = response.decode('utf8')
                 result['message'] = json.loads(response)
             elif resp.code == 201:
                 # 201 => Sometimes data in the body??
