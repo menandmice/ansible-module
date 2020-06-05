@@ -162,9 +162,13 @@ provider:
   password: apipasswd
 ----
 
-Where the `apipasswd` should be encrypted with `ansible-vault` to
-prevent plain passwords in the Ansible tree. An example to achieve this
-is
+[NOTE]
+====
+Encrypt the `apipasswd` with `ansible-vault` to prevent plain passwords
+in the Ansible tree.
+====
+
+An example to achieve this is:
 
 [source,bash]
 ----
@@ -186,6 +190,10 @@ password: !vault |
   6332393063643531390a34366.....323631613034356565
   6138
 ----
+
+If a vault with multiple vault ID's is needed, please have a look at
+http://www.tonkersten.com/2019/07/151-ansible-with-multiple-vault-ids/
+for more information.
 
 The defined provider can be used in Ansible playbooks like:
 
