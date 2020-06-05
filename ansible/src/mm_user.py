@@ -105,24 +105,24 @@ DOCUMENTATION = r'''
 
 EXAMPLES = r'''
 - name: Add the user 'johnd' as an admin
-    mm_user:
-      username: johnd
-      password: password
-      full_name: John Doe
-      state: present
-      authentication_type: internal
-      roles:
-        - Administrators (built-in)
-        - DNS Administrators (built-in)
-        - DHCP Administrators (built-in)
-        - IPAM Administrators (built-in)
-        - User Administrators (built-in)
-        - Approvers (built-in)
-        - Requesters (built-in)
-    provider:
-      mmurl: http://mmsuite.example.net
-      user: apiuser
-      password: apipasswd
+  mm_user:
+    username: johnd
+    password: password
+    full_name: John Doe
+    state: present
+    authentication_type: internal
+    roles:
+      - Administrators (built-in)
+      - DNS Administrators (built-in)
+      - DHCP Administrators (built-in)
+      - IPAM Administrators (built-in)
+      - User Administrators (built-in)
+      - Approvers (built-in)
+      - Requesters (built-in)
+  provider:
+    mmurl: http://mmsuite.example.net
+    user: apiuser
+    password: apipasswd
   delegate_to: localhost
 
 - name: Remove user 'johnd'

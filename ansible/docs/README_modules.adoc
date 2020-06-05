@@ -224,7 +224,7 @@ Manage user accounts and user properties on the Men&Mice Suite
 [source,yaml]
 ----
 - name: Add the user 'johnd' as an admin
-    mm_user:
+  mm_user:
     username: johnd
     password: password
     full_name: John Doe
