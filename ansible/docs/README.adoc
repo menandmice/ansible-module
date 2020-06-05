@@ -4,8 +4,8 @@ include::resources/adocs/includes.adoc[]
 :toc: right
 :toclevels: 3
 :organization: Men&Mice
-:revnumber: 0.9
-:revdate: 2020-05-28
+:revnumber: 0.92 ({localdate})
+:revdate: 2020-06-05
 :reproducible:
 :figure-caption: Table
 :figure-caption: Figure
@@ -40,8 +40,13 @@ Ton Kersten <t.kersten@atcomputing.nl>
 :title-page:
 
 include::README_general.adoc[]
+
 include::README_freeip.adoc[]
+
 include::README_inventory.adoc[]
+
 include::README_ipinfo.adoc[]
+
 include::README_modules.adoc[]
+
 include::README_playbooks.adoc[]
