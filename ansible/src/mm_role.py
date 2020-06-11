@@ -57,11 +57,11 @@ DOCUMENTATION = r'''
       required: False
       type: str
     users:
-      description: List of users to add to this role
+      description: List of users to add to this role.
       type: list
       required: False
     groups:
-      description: List of groups to add to this role
+      description: List of groups to add to this role.
       type: list
       required: False
     provider:
@@ -92,8 +92,8 @@ EXAMPLES = r'''
     state: present
     users:
       - johndoe
-    roles:
-      - IPAM Administrators (built-in)
+    groups:
+      - my_local_group
   provider:
     mmurl: http://mmsuite.example.net
     user: apiuser
@@ -211,7 +211,7 @@ def run_module():
 
     # If requested state is "present"
     if state == "present":
-        # Check if all requested groups exist
+        # Check if all requested users exist
         if module.params['users']:
             # Create a list with all names, for easy checking
             names = []
@@ -347,8 +347,6 @@ def run_module():
 
     # If requested state is "absent"
     if state == "absent":
-        url = "Roles"
-        databody = {}
         if role_exists:
             # Role present, delete
             http_method = "DELETE"

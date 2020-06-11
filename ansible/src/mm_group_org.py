@@ -41,7 +41,7 @@ DOCUMENTATION = r'''
   options:
     state:
       description:
-        - Should the role exist or not.
+        - Should the group exist or not.
       type: str
       required: False
       choices: [ absent, present ]
@@ -56,14 +56,6 @@ DOCUMENTATION = r'''
       description: Description of the group.
       required: False
       type: str
-    users:
-      description: List of users to add to this group.
-      type: list
-      required: False
-    roles:
-      description: List of roles to add to this group.
-      type: list
-      required: False
     provider:
       description: Definition of the Men&Mice suite API provider.
       type: dict
@@ -86,18 +78,14 @@ DOCUMENTATION = r'''
 
 EXAMPLES = r'''
 - name: Add the 'local' group
-  mm_group:
-    name: local
-    desc: A local group
-    state: present
-    users:
-      - johndoe
-    roles:
-      - IPAM Administrators (built-in)
-  provider:
-    mmurl: http://mmsuite.example.net
-    user: apiuser
-    password: apipasswd
+    mm_group:
+      name: local
+      desc: A local group
+      state: present
+    provider:
+      mmurl: http://mmsuite.example.net
+      user: apiuser
+      password: apipasswd
   delegate_to: localhost
 
 - name: Remove the 'local' group
@@ -131,9 +119,6 @@ def run_module():
         state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
         name=dict(type='str', required=True, aliases=['group']),
         desc=dict(type='str', required=False),
-        users=dict(type='list', required=False),
-        roles=dict(type='list', required=False),
-        deleteunspecified=dict(type='bool', required=False, default=False),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -181,27 +166,11 @@ def run_module():
         module.fail_json(msg="Collecting groups: %s" % resp.get('warnings'))
     display.vvv("Groups:", groups)
 
-    # If users are requested, get all users
-    if module.params['users']:
-        resp = mm.getrefs("Users", provider)
-        if resp.get('warnings', None):
-            module.fail_json(msg="Collecting users: %s" % resp.get('warnings'))
-        users = resp['message']['result']['users']
-        display.vvv("Users:", users)
-
-    # If roles are requested, get all roles
-    if module.params['roles']:
-        resp = mm.getrefs("Roles", provider)
-        if resp.get('warnings', None):
-            module.fail_json(msg="Collecting roles: %s" % resp.get('warnings'))
-        groups = resp['message']['result']['roles']
-        display.vvv("Roles:", roles)
-
     # Setup loop vars
     group_exists = False
     group_ref = ""
 
-    # Check if the role already exists
+    # Check if the group already exists
     for group in groups:
         if group['name'] == module.params['name']:
             group_exists = True
@@ -211,50 +180,6 @@ def run_module():
 
     # If requested state is "present"
     if state == "present":
-        # Check if all requested users exist
-        if module.params['users']:
-            # Create a list with all names, for easy checking
-            names = []
-            for user in users:
-                names.append(user['name'])
-
-            # Check all requested names against the names list
-            for name in module.params['user']:
-                if name not in names:
-                    module.fail_json(msg="Requested a non existing user: %s" % name)
-
-        # Check if all requested roles exist
-        if module.params['roles']:
-            # Create a list with all names, for easy checking
-            names = []
-            for role in roles:
-                names.append(role['name'])
-
-            # Check all requested names against the names list
-            for name in module.params['roles']:
-                if name not in names:
-                    module.fail_json(msg="Requested a non existing role: %s" % name)
-
-        # Create a list of wanted users
-        wanted_users = []
-        if module.params['users']:
-            for user in users:
-                if user['name'] in module.params['users']:
-                    # This user is wanted
-                    wanted_users.append({"ref": user['ref'],
-                                         "objType": "Users",
-                                         "name": user['name']})
-
-        # Create a list of wanted roles
-        wanted_roles = []
-        if module.params['roles']:
-            for role in roles:
-                if role['name'] in module.params['roles']:
-                    # This role is wanted
-                    wanted_roles.append({"ref": role['ref'],
-                                         "objType": "Roles",
-                                         "name": role['name']})
-
         if group_exists:
             # Group already present, just update.
             http_method = "PUT"
@@ -267,60 +192,10 @@ def run_module():
                         ],
                         }
 
-            # Now figure out if users or roles need to be added or deleted
-            # The ones in the playbook are in `wanted_(users|roles)`
-            # and the groups ref is in `group_ref` and all groups data is
-            # in `group_data`.
-            display.vvv("wanted  roles =", wanted_roles)
-            display.vvv("current roles =", role_data['roles'])
-            display.vvv("wanted  users =", wanted_users)
-            display.vvv("current users =", role_data['users'])
-
-            # Add or delete a role to or from a group
-            # API call with PUT or DELETE
-            # http://mandm.example.net/mmws/api/Groups/6/Roles/31
-            databody = {"saveComment": "Ansible API"}
-            for thisrole in wanted_roles + group_data['roles']:
-                http_method = ""
-                if (thisrole in wanted_roles) and (thisrole not in group_data['roles']):
-                    # Wanted but not yet present.
-                    http_method = "PUT"
-                elif (thisrole not in wanted_roles) and (thisrole in group_data['roles']):
-                    # Present, but not wanted
-                    http_method = "DELETE"
-
-                # Execute wanted action
-                if http_method:
-                    display.vvv("Executing %s on %s for %s" % (http_method, thisrole['ref'], group_ref))
-                    url = "%s/%s" % (thisrole['ref'], group_ref)
-                    result = mm.doapi(url, http_method, provider, databody)
-                    result['changed'] = True
-
-            # Add or delete a group to or from a user
-            # API call with PUT or DELETE
-            # http://mandm.example.net/mmws/api/Users/31/Groups/2
-            for thisuser in wanted_users + group_data['users']:
-                http_method = ""
-                if (thisuser in wanted_users) and (thisuser not in group_data['users']):
-                    # Wanted but not yet present.
-                    http_method = "PUT"
-                elif (thisuser not in wanted_users) and (thisuser in group_data['users']):
-                    # Present, but not wanted
-                    http_method = "DELETE"
-
-                # Execute wanted action
-                if http_method:
-                    display.vvv("Executing %s on %s for %s" % (http_method, thisuser['ref'], group_ref))
-                    url = "%s/%s" % (thisuser['ref'], group_ref)
-                    result = mm.doapi(url, http_method, provider, databody)
-                    result['changed'] = True
-
             # Check idempotency
             change = False
-            if group_data['name'] != module.params['name']:
-                change = True
-            if group_data['description'] != module.params['desc']:
-                change = True
+            change = (group_data['name'] != module.params['name']) or change
+            change = (group_data['description'] != module.params['desc']) or change
 
             if change:
                 result = mm.doapi(url, http_method, provider, databody)
@@ -333,9 +208,8 @@ def run_module():
                         "group": {
                             "name": module.params['name'],
                             "description": module.params['desc'],
-                            "users": wanted_users,
-                            "roles": wanted_roles,
-                            "builtIn": False
+                            "builtIn": False,
+                            "adIntegrated": False,
                         }
                         }
             result = mm.doapi(url, http_method, provider, databody)
@@ -347,6 +221,8 @@ def run_module():
 
     # If requested state is "absent"
     if state == "absent":
+        url = "Groups"
+        databody = {}
         if group_exists:
             # Group present, delete
             http_method = "DELETE"
@@ -354,8 +230,11 @@ def run_module():
             databody = {"saveComment": "Ansible API"}
             result = mm.doapi(url, http_method, provider, databody)
         else:
-            # group not present, done
-            result['changed'] = False
+            # Group not present, done
+            result = {
+                'changed': False,
+                'message': "Group '%s' doesn't exist" % module.params['name']
+            }
 
     # return collected results
     module.exit_json(**result)

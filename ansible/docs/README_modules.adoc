@@ -130,6 +130,49 @@ Manage DNS records in the Men&Mice Suite
   delegate_to: localhost
 ----
 
+=== mm_group
+
+Manage groups on the Men&Mice Suite
+
+==== Options
+
+- `descr`: Description of the group.
+- `name`: (required) Name of the group to create, remove or modify.
+- `provider`: (required) Definition of the Men&Mice suite API provider.
+- `roles`: List of roles to add to this group.
+- `state`: Should the role exist or not. (`absent`, `present`)
+- `users`: List of users to add to this group.
+
+==== Examples
+
+[source,yaml]
+----
+- name: Add the 'local' group
+  mm_group:
+    name: local
+    desc: A local group
+    state: present
+    users:
+      - johndoe
+    roles:
+      - IPAM Administrators (built-in)
+  provider:
+    mmurl: http://mmsuite.example.net
+    user: apiuser
+    password: apipasswd
+  delegate_to: localhost
+
+- name: Remove the 'local' group
+  mm_group:
+    name: local
+    state: absent
+    provider:
+      mmurl: http://mmsuite.example.net
+      user: apiuser
+      password: apipasswd
+  delegate_to: localhost
+----
+
 === mm_ipprops
 
 Set properties on an IP address in the Men&Mice Suite
