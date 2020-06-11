@@ -1,0 +1,16 @@
+{ "ANSIBLE_MODULE_ARGS": {
+    "desc": "A local group",
+    "name": "local",
+    "roles": null,
+    "state": "present",
+    "users": [
+        "johndoe",
+        "angelina"
+    ],
+    "provider" : {
+        "mmurl": "http://mandm.example.net",
+        "user": "apidude",
+        "password": "TheAPIDude"
+    }
+  }
+}

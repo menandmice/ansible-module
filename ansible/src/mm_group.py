@@ -133,7 +133,6 @@ def run_module():
         desc=dict(type='str', required=False),
         users=dict(type='list', required=False),
         roles=dict(type='list', required=False),
-        deleteunspecified=dict(type='bool', required=False, default=False),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -176,9 +175,9 @@ def run_module():
 
     # Get list of all groups in the system
     resp = mm.getrefs("Groups", provider)
-    groups = resp['message']['result']['groups']
     if resp.get('warnings', None):
         module.fail_json(msg="Collecting groups: %s" % resp.get('warnings'))
+    groups = resp['message']['result']['groups']
     display.vvv("Groups:", groups)
 
     # If users are requested, get all users
@@ -219,7 +218,7 @@ def run_module():
                 names.append(user['name'])
 
             # Check all requested names against the names list
-            for name in module.params['user']:
+            for name in module.params['users']:
                 if name not in names:
                     module.fail_json(msg="Requested a non existing user: %s" % name)
 
@@ -254,7 +253,6 @@ def run_module():
                     wanted_roles.append({"ref": role['ref'],
                                          "objType": "Roles",
                                          "name": role['name']})
-
         if group_exists:
             # Group already present, just update.
             http_method = "PUT"
@@ -266,15 +264,16 @@ def run_module():
                             {"name": 'description', "value": module.params['desc']}
                         ],
                         }
+            result = mm.doapi(url, http_method, provider, databody)
 
             # Now figure out if users or roles need to be added or deleted
             # The ones in the playbook are in `wanted_(users|roles)`
             # and the groups ref is in `group_ref` and all groups data is
             # in `group_data`.
             display.vvv("wanted  roles =", wanted_roles)
-            display.vvv("current roles =", role_data['roles'])
+            display.vvv("current roles =", group_data['roles'])
             display.vvv("wanted  users =", wanted_users)
-            display.vvv("current users =", role_data['users'])
+            display.vvv("current users =", group_data['groupMembers'])
 
             # Add or delete a role to or from a group
             # API call with PUT or DELETE
@@ -292,26 +291,26 @@ def run_module():
                 # Execute wanted action
                 if http_method:
                     display.vvv("Executing %s on %s for %s" % (http_method, thisrole['ref'], group_ref))
-                    url = "%s/%s" % (thisrole['ref'], group_ref)
+                    url = "%s/%s" % (group_ref, thisrole['ref'])
                     result = mm.doapi(url, http_method, provider, databody)
                     result['changed'] = True
 
             # Add or delete a group to or from a user
             # API call with PUT or DELETE
             # http://mandm.example.net/mmws/api/Users/31/Groups/2
-            for thisuser in wanted_users + group_data['users']:
+            for thisuser in wanted_users + group_data['groupMembers']:
                 http_method = ""
-                if (thisuser in wanted_users) and (thisuser not in group_data['users']):
+                if (thisuser in wanted_users) and (thisuser not in group_data['groupMembers']):
                     # Wanted but not yet present.
                     http_method = "PUT"
-                elif (thisuser not in wanted_users) and (thisuser in group_data['users']):
+                elif (thisuser not in wanted_users) and (thisuser in group_data['groupMembers']):
                     # Present, but not wanted
                     http_method = "DELETE"
 
                 # Execute wanted action
                 if http_method:
                     display.vvv("Executing %s on %s for %s" % (http_method, thisuser['ref'], group_ref))
-                    url = "%s/%s" % (thisuser['ref'], group_ref)
+                    url = "%s/%s" % (group_ref, thisuser['ref'])
                     result = mm.doapi(url, http_method, provider, databody)
                     result['changed'] = True
 
@@ -333,7 +332,7 @@ def run_module():
                         "group": {
                             "name": module.params['name'],
                             "description": module.params['desc'],
-                            "users": wanted_users,
+                            "groupMembers": wanted_users,
                             "roles": wanted_roles,
                             "builtIn": False
                         }

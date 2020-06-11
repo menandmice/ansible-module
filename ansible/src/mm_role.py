@@ -176,9 +176,9 @@ def run_module():
 
     # Get list of all roles in the system
     resp = mm.getrefs("Roles", provider)
-    roles = resp['message']['result']['roles']
     if resp.get('warnings', None):
         module.fail_json(msg="Collecting roles: %s" % resp.get('warnings'))
+    roles = resp['message']['result']['roles']
     display.vvv("Roles:", roles)
 
     # If users are requested, get all users
@@ -219,7 +219,7 @@ def run_module():
                 names.append(user['name'])
 
             # Check all requested names against the names list
-            for name in module.params['user']:
+            for name in module.params['users']:
                 if name not in names:
                     module.fail_json(msg="Requested a non existing user: %s" % name)
 

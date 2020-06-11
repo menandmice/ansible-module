@@ -51,6 +51,7 @@
         users:
           - neverheardof
         provider: "{{ provider }}"
+      ignore_errors: true
 
     - name: Remove the 'local' role
       mm_role:
