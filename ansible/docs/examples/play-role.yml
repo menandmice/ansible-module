@@ -1,0 +1,59 @@
+---
+#
+# Add, delete and change roles on the Men&Mice Suite example
+#
+# The file <ansible_topdir>/group_vars/all contains:
+#
+#    ---
+#    provider:
+#      mmurl: http://mmsuite.example.net
+#      user: apiuser
+#      password: apipasswd
+#
+- name: Men&Mice users test play
+  hosts: localhost
+  connection: local
+  become: false
+
+  tasks:
+    - name: Get the free IP address and show info
+      debug:
+        msg:
+          - "Ansible version    : {{ ansible_version.full }}"
+          - "Python version     : {{ ansible_facts['python_version'] }}"
+          - "Python executable  : {{ ansible_facts['python']['executable'] }}"
+
+    - name: Add the 'local' role
+      mm_role:
+        name: local
+        desc: A local role
+        state: present
+        users:
+          - johndoe
+          - angelina
+        provider: "{{ provider }}"
+
+    - name: Check idempotency
+      mm_role:
+        name: local
+        desc: A local role
+        state: present
+        users:
+          - johndoe
+          - angelina
+        provider: "{{ provider }}"
+
+    - name: Add nonexisting user
+      mm_role:
+        name: local
+        desc: A local role
+        state: present
+        users:
+          - neverheardof
+        provider: "{{ provider }}"
+
+    - name: Remove the 'local' role
+      mm_role:
+        name: local
+        state: absent
+        provider: "{{ provider }}"
