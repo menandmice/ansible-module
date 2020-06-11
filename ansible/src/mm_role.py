@@ -56,10 +56,6 @@ DOCUMENTATION = r'''
       description: Description of the role.
       required: False
       type: str
-    deleteunspecified:
-      description: Clear properties that are not explicitly set.
-      type: bool
-      required: False
     users:
       description: List of users to add to this role
       type: list
@@ -94,6 +90,10 @@ EXAMPLES = r'''
     name: local
     desc: A local role
     state: present
+    users:
+      - johndoe
+    roles:
+      - IPAM Administrators (built-in)
   provider:
     mmurl: http://mmsuite.example.net
     user: apiuser
@@ -133,7 +133,7 @@ def run_module():
         desc=dict(type='str', required=False),
         users=dict(type='list', required=False),
         groups=dict(type='list', required=False),
-	deleteunspecified=dict(type='bool', required=False, default=False),
+        deleteunspecified=dict(type='bool', required=False, default=False),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -267,6 +267,54 @@ def run_module():
                         ],
                         }
 
+            # Now figure out if users or groups need to be added or deleted
+            # The ones in the playbook are in `wanted_(users|groups)`
+            # and the roles ref is in `role_ref` and all roles data is
+            # in `role_data`.
+            display.vvv("wanted  groups =", wanted_groups)
+            display.vvv("current groups =", role_data['groups'])
+            display.vvv("wanted  users  =", wanted_users)
+            display.vvv("current users  =", role_data['users'])
+
+            # Add or delete a role to or from a group
+            # API call with PUT or DELETE
+            # http://mandm.example.net/mmws/api/Groups/6/Roles/31
+            databody = {"saveComment": "Ansible API"}
+            for thisgrp in wanted_groups + role_data['groups']:
+                http_method = ""
+                if (thisgrp in wanted_groups) and (thisgrp not in role_data['groups']):
+                    # Wanted but not yet present.
+                    http_method = "PUT"
+                elif (thisgrp not in wanted_groups) and (thisgrp in role_data['groups']):
+                    # Present, but not wanted
+                    http_method = "DELETE"
+
+                # Execute wanted action
+                if http_method:
+                    display.vvv("Executing %s on %s for %s" % (http_method, thisgrp['ref'], role_ref))
+                    url = "%s/%s" % (thisgrp['ref'], role_ref)
+                    result = mm.doapi(url, http_method, provider, databody)
+                    result['changed'] = True
+
+            # Add or delete a role to or from a user
+            # API call with PUT or DELETE
+            # http://mandm.example.net/mmws/api/Users/31/Roles/2
+            for thisuser in wanted_users + role_data['users']:
+                http_method = ""
+                if (thisuser in wanted_users) and (thisuser not in role_data['users']):
+                    # Wanted but not yet present.
+                    http_method = "PUT"
+                elif (thisuser not in wanted_users) and (thisuser in role_data['users']):
+                    # Present, but not wanted
+                    http_method = "DELETE"
+
+                # Execute wanted action
+                if http_method:
+                    display.vvv("Executing %s on %s for %s" % (http_method, thisuser['ref'], role_ref))
+                    url = "%s/%s" % (thisuser['ref'], role_ref)
+                    result = mm.doapi(url, http_method, provider, databody)
+                    result['changed'] = True
+
             # Check idempotency
             change = False
             if role_data['name'] != module.params['name']:
@@ -309,10 +357,7 @@ def run_module():
             result = mm.doapi(url, http_method, provider, databody)
         else:
             # Role not present, done
-            result = {
-                'changed': False,
-                'message': "Role '%s' doesn't exist" % module.params['name']
-            }
+            result['changed'] = False
 
     # return collected results
     module.exit_json(**result)

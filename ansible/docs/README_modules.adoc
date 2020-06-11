@@ -208,7 +208,6 @@ Manage roles on the Men&Mice Suite
 
 ==== Options
 
-- `deleteunspecified`: Clear properties that are not explicitly set.
 - `descr`: Description of the role.
 - `groups`: List of groups to add to this role
 - `name`: (required) Name of the role to create, remove or modify.
