@@ -80,7 +80,6 @@ DOCUMENTATION = r"""
         description: Claim the IP address(es) for the specified amount of time in seconds
         type: int
         required: False
-        default: False
       ping:
         description: ping the address found before returning
         type: bool
@@ -303,9 +302,38 @@ class LookupModule(LookupBase):
                 databody['startAddress'] = startaddress
             url = '%s/NextFreeAddress' % ref
 
+            # Collect the options
+            options = ""
+            if claim:
+                options += "temporaryClaimTime=%d" % claim
+
             # Was a filter specified?
             if ipfilter:
-                url += '?filter=%s' % ipfilter
+                if options:
+                    options += '&'
+                options += 'filter=%s' % ipfilter
+
+            # Exclude DHCP ranges
+            if excludedhcp:
+                if options:
+                    options += '&'
+                options += 'excludeDHCP=%s' % excludedhcp
+
+            # Ping?
+            if ping:
+                if options:
+                    options += '&'
+                options += 'ping=%s' % ping
+
+            # Start address?
+            if startaddress:
+                if options:
+                    options += '&'
+                options += 'startAddress=%s' % startaddress
+
+            # Construct the url
+            if options:
+                url += "?%s" % options
 
             # Get requested number of free IP addresses
             for dummy in range(multi):

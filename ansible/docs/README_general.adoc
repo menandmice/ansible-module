@@ -12,7 +12,8 @@ so that the modules and plugins can be found by Ansible.
 
 Installing the Ansible modules and plugins is a straight forward
 process. Copy the Ansible modules and plugins to a directory on the
-Ansible control node, let us assume `/tmp/mandm`.
+Ansible control node, let us assume `/tmp/mandm`. Later on these files
+are copied to the destination directories on the control node.
 
 ==== Requirements
 
@@ -42,8 +43,8 @@ this directory, the Ansible `library` path needs to be set in the
 library = /etc/ansible/library
 ----
 
-After installing the Ansible modules a check can be run to determine if
-the modules are installed correctly, by running the command:
+After installing the Ansible modules a check can be made to determine if
+the modules are installed correctly. Run the command:
 
 [source,bash]
 ----
@@ -54,8 +55,9 @@ This should produce a list with all the Men&Mice Suite Ansible modules.
 
 ==== Ansible lookup plugins
 
-The set of Ansible modules consists of multiple sets (`lookup` and
-`inventory`) and these should be installed in their own directories
+The set of Ansible Integration modules consists of multiple sets
+(`lookup` and `inventory`) and these should be installed in their own
+directories.
 
 The `lookup` plugins can be installed in:
 
@@ -82,16 +84,13 @@ Ansible, issue the command:
 
 [source,bash]
 ----
-ansible-doc -t lookup -l
+ansible-doc -t lookup -l | grep '^mm_'
 ----
 
 Which should produce a list with all the Men&Mice Suite Ansible lookup
 plugins.
 
 ==== Ansible inventory plugins
-
-The set of Ansible modules consists of multiple sets (`lookup` and
-`inventory`) and these should be installed in their own directories
 
 The `inventory` plugins can be installed in:
 
@@ -118,14 +117,14 @@ Ansible, issue the command:
 
 [source,bash]
 ----
-ansible-doc -t inventory -l
+ansible-doc -t inventory -l | grep '^mm_'
 ----
 
 Which should produce a list with all the Men&Mice Suite Ansible
 inventory plugins.
 
 The `mm_inventory` plugin also needs some extra configuration, read the
-`README_inventory.md` for more information.
+`README_inventory.adoc` for more information.
 
 === API user
 
@@ -137,7 +136,9 @@ to be made.
 
 In the Men&Mice Suite a user needs to be defined that has all rights in
 the Men&Mice Suite (`administrator`) so it is able to perform all needed
-tasks.
+tasks. It is also possible to delegate only certain tasks to certain API
+users. The file `README_credentials.adoc` gives an overview which
+rights a required for every module.
 
 ==== API Provider in Ansible
 
@@ -164,8 +165,8 @@ provider:
 
 [NOTE]
 ====
-Encrypt the `apipasswd` with `ansible-vault` to prevent plain passwords
-in the Ansible tree.
+Encrypt the `apipasswd` with `ansible-vault` to prevent plaintext
+passwords in the Ansible tree.
 ====
 
 An example to achieve this is:
@@ -191,7 +192,8 @@ password: !vault |
   6138
 ----
 
-If a vault with multiple vault ID's is needed, please have a look at
+If an Ansible vault with multiple vault ID's is needed, please have
+a look at
 http://www.tonkersten.com/2019/07/151-ansible-with-multiple-vault-ids/
 for more information.
 
@@ -211,7 +213,7 @@ The reason for the `delegate_to: localhost` option, is that all commands
 can be performed on the Ansible control node. So, it is possible to
 protect the Men&Mice Suite API to only accept commands from the Ansible
 control node and not from everywhere. This can also be achieved by
-creating a playbook that has a connection with `localhost` and is
+creating a playbook that has `localhost` as the `connection` and is
 specific for the interaction with the Men&Mice Suite.
 
 [source,yaml]
@@ -232,9 +234,9 @@ specific for the interaction with the Men&Mice Suite.
 
 === Ansible configuration example
 
-Beneath the is an example Ansible configuration file (`ansible.cfg`)
-with the assumption that all Men&Mice plugins and modules are installed
-in the `/etc/ansible` directory.
+Beneath is an example Ansible configuration file (`ansible.cfg`) with
+the assumption that all Men&Mice plugins and modules are installed in
+the `/etc/ansible` directory.
 
 [source,bash]
 ----

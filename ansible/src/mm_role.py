@@ -56,6 +56,18 @@ DOCUMENTATION = r'''
       description: Description of the role.
       required: False
       type: str
+    deleteunspecified:
+      description: Clear properties that are not explicitly set.
+      type: bool
+      required: False
+    users:
+      description: List of users to add to this role
+      type: list
+      required: False
+    groups:
+      description: List of groups to add to this role
+      type: list
+      required: False
     provider:
       description: Definition of the Men&Mice suite API provider.
       type: dict
@@ -78,14 +90,14 @@ DOCUMENTATION = r'''
 
 EXAMPLES = r'''
 - name: Add the 'local' role
-    mm_role:
-      name: local
-      desc: A local role
-      state: present
-    provider:
-      mmurl: http://mmsuite.example.net
-      user: apiuser
-      password: apipasswd
+  mm_role:
+    name: local
+    desc: A local role
+    state: present
+  provider:
+    mmurl: http://mmsuite.example.net
+    user: apiuser
+    password: apipasswd
   delegate_to: localhost
 
 - name: Remove the 'local' role
@@ -119,6 +131,9 @@ def run_module():
         state=dict(type='str', required=False, default='present', choices=['absent', 'present']),
         name=dict(type='str', required=True, aliases=['role']),
         desc=dict(type='str', required=False),
+        users=dict(type='list', required=False),
+        groups=dict(type='list', required=False),
+	deleteunspecified=dict(type='bool', required=False, default=False),
         provider=dict(
             type='dict', required=True,
             options=dict(mmurl=dict(type='str', required=True, no_log=False),
@@ -166,6 +181,22 @@ def run_module():
         module.fail_json(msg="Collecting roles: %s" % resp.get('warnings'))
     display.vvv("Roles:", roles)
 
+    # If users are requested, get all users
+    if module.params['users']:
+        resp = mm.getrefs("Users", provider)
+        if resp.get('warnings', None):
+            module.fail_json(msg="Collecting users: %s" % resp.get('warnings'))
+        users = resp['message']['result']['users']
+        display.vvv("Users:", users)
+
+    # If groups are requested, get all groups
+    if module.params['groups']:
+        resp = mm.getrefs("Groups", provider)
+        if resp.get('warnings', None):
+            module.fail_json(msg="Collecting groups: %s" % resp.get('warnings'))
+        groups = resp['message']['result']['groups']
+        display.vvv("Groups:", groups)
+
     # Setup loop vars
     role_exists = False
     role_ref = ""
@@ -180,6 +211,50 @@ def run_module():
 
     # If requested state is "present"
     if state == "present":
+        # Check if all requested groups exist
+        if module.params['users']:
+            # Create a list with all names, for easy checking
+            names = []
+            for user in users:
+                names.append(user['name'])
+
+            # Check all requested names against the names list
+            for name in module.params['user']:
+                if name not in names:
+                    module.fail_json(msg="Requested a non existing user: %s" % name)
+
+        # Check if all requested groups exist
+        if module.params['groups']:
+            # Create a list with all names, for easy checking
+            names = []
+            for grp in groups:
+                names.append(grp['name'])
+
+            # Check all requested names against the names list
+            for name in module.params['groups']:
+                if name not in names:
+                    module.fail_json(msg="Requested a non existing group: %s" % name)
+
+        # Create a list of wanted users
+        wanted_users = []
+        if module.params['users']:
+            for user in users:
+                if user['name'] in module.params['users']:
+                    # This user is wanted
+                    wanted_users.append({"ref": user['ref'],
+                                         "objType": "Users",
+                                         "name": user['name']})
+
+        # Create a list of wanted groups
+        wanted_groups = []
+        if module.params['groups']:
+            for group in groups:
+                if group['name'] in module.params['groups']:
+                    # This group is wanted
+                    wanted_groups.append({"ref": group['ref'],
+                                          "objType": "Groups",
+                                          "name": group['name']})
+
         if role_exists:
             # Role already present, just update.
             http_method = "PUT"
@@ -210,6 +285,8 @@ def run_module():
                         "role": {
                             "name": module.params['name'],
                             "description": module.params['desc'],
+                            "users": wanted_users,
+                            "groups": wanted_groups,
                             "builtIn": False
                         }
                         }

@@ -36,12 +36,12 @@ named `mm_inventory.yml` and the options are:
 * user: UserID to connect with (`apiuser`)
 * password: The password to connect with (`apipasswd`)
 * filters: Filter on custom properties, can be more than 1 and should be
-a list. If multiple filters are given, they act as an ``and'' function
+a list. If multiple filters are given, they act as an *and* function
 * ranges: What IP ranges to examine (`172.16.17.0/24`) Multiple ranges
-can be given, they act as an ``or'' function
+can be given, they act as an *or* function
 
 When both _ranges_ and _filters_ are supplied that will result in an
-``and'' function.
+*and* function.
 
 Example:
 
@@ -56,8 +56,8 @@ ranges:
 ----
 
 Would result in an inventory for all host that have the `location: home`
-_and_ `owner: tonk` custom properties set _and_ are either a member of
-the `192.168.4.0/24` _or_ `172.16.17.0/24` range.
+*and* `owner: tonk` custom properties set *and* are either a member of
+the `192.168.4.0/24` *or* `172.16.17.0/24` range.
 
 An example of the `mm_inventory.yml` file:
 
