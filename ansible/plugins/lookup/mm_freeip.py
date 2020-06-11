@@ -45,8 +45,6 @@ DOCUMENTATION = r"""
         In such cases you may want to pass option C(wantlist=True) to the plugin,
         which will result in the record values being returned as a list
         over which you can iterate later on (or use C(query) instead)
-    requirements:
-      - requests (python library, https://requests.readthedocs.io)
     options:
       provider:
         description: Definition of the Men&Mice suite API provider

@@ -194,7 +194,6 @@ class LookupModule(LookupBase):
         - provider  -> Definition of the Men&Mice suite API provider
         - IPAddress -> The IPAddress to examine
         """
-        # Is the requests module available
         # Sufficient parameters
         if len(terms) < 2:
             raise AnsibleError("Insufficient parameters. Need at least: MMURL, User, Password and IPAddress.")
