@@ -4,8 +4,8 @@ include::resources/adocs/includes.adoc[]
 :toc: right
 :toclevels: 3
 :organization: Men&Mice
-:revnumber: 0.92 ({localdate})
-:revdate: 2020-06-05
+:revnumber: 0.95 ({localdate})
+:revdate: 2020-06-12
 :reproducible:
 :figure-caption: Table
 :figure-caption: Figure
@@ -19,26 +19,38 @@ include::resources/adocs/includes.adoc[]
 :compress:
 :xrefstyle: full
 :experimental:
+
+// Font icons are supported and the Foundation Icon set is
+// used as the default.
+// For a complete overview have a look at
+//    https://zurb.com/playground/foundation-icon-fonts-3
+//
 :icons: font
 :icon-set: fi
 
 // Define standard stuff
 :sldnum: 0
 :sectnums:
-:sourcedir: ./src
+:sourcedir: .
 :imagesdir: ./resources/images
 :iconsdir: ./resources/icons
 :pdf-themesdir: ./resources/themes
 :pdf-fontsdir: ./resources/fonts
 :pdf-theme: mandm.yml
 
+:source-highlighter: rouge
+:rouge-linenums-mode: table
+:rouge-style: github
+
 // URLs
 :uri-at: https://atcomputing.nl
 
+// Define title and author
 = Men&Mice Suite Ansible Integration
 Ton Kersten <t.kersten@atcomputing.nl>
 :title-page:
 
+// Include all chapters
 include::README_general.adoc[]
 
 include::README_freeip.adoc[]
@@ -52,3 +64,5 @@ include::README_modules.adoc[]
 include::README_playbooks.adoc[]
 
 include::README_credentials.adoc[]
+
+include::README_testmatrix.adoc[]

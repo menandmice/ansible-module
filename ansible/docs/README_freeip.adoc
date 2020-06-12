@@ -35,7 +35,9 @@ sure the factname is not used over multiple hosts.
 
 Example usage:
 
-....
+.Claim IP addresses in one or more ranges
+[source,yaml]
+----
 ---
 - name: Men&Mice FreeIP test play
   hosts: localhost
@@ -76,7 +78,7 @@ Example usage:
         msg:
           - "Next free IP      : {{ item }}"
       loop: "{{ freeips }}"
-....
+----
 
 ....
 # ansible-playbook mmtest.yml

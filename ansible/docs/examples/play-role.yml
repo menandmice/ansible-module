@@ -43,7 +43,7 @@
           - angelina
         provider: "{{ provider }}"
 
-    - name: Add nonexisting user
+    - name: Add nonexisting user to role
       mm_role:
         name: local
         desc: A local role

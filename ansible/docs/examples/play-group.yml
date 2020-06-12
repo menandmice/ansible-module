@@ -43,7 +43,7 @@
           - angelina
         provider: "{{ provider }}"
 
-    - name: Add nonexisting user
+    - name: Add nonexisting user to group
       mm_group:
         name: local
         desc: A local group

@@ -150,7 +150,7 @@ image:
 literal:
   font-family: GyreTeX Mono
   font-color: #1111ff
-  font-size: round($base_font_size * 0.90)
+  font-size: round($base_font_size * 0.85)
   caption:
     align: inherit
     side: bottom
@@ -158,14 +158,14 @@ literal:
 listing:
   font-family: GyreTeX Mono
   font-color: #1111ff
-  font-size: round($base_font_size * 0.90)
+  font-size: round($base_font_size * 0.85)
   caption:
     align: left
     side: bottom
 
 code:
   font-family: GyreTeX Mono
-  font-size: round($base_font_size * 0.90)
+  font-size: round($base_font_size * 0.85)
   caption:
     align: left
     side: bottom
@@ -190,7 +190,7 @@ role:
   red:
     font-color: #ff0000
   white:
-    font-color: #Ffffff
+    font-color: #ffffff
   cyan:
     font-color: #00ffff
   silver:

@@ -15,6 +15,7 @@ Claim IP addresses in DHCP in the Men&Mice Suite
 
 ==== Examples
 
+.Claim IP address example
 [source,yaml]
 ----
 - name: Claim IP address
@@ -62,6 +63,7 @@ Manage DHCP reservations on the Men&Mice Suite
 
 ==== Examples
 
+.DHCP reservation example
 [source,yaml]
 ----
 - name: Add a reservation for an IP address
@@ -101,6 +103,7 @@ Manage DNS records in the Men&Mice Suite
 
 ==== Examples
 
+.DNS record setting example
 [source,yaml]
 ----
 - name: Set DNS record in zone for a defined name
@@ -145,6 +148,7 @@ Manage groups on the Men&Mice Suite
 
 ==== Examples
 
+.Group example
 [source,yaml]
 ----
 - name: Add the 'local' group
@@ -188,6 +192,7 @@ Set properties on an IP address in the Men&Mice Suite
 
 ==== Examples
 
+.IP address custom properties example
 [source,yaml]
 ----
 - name: Set properties on IP
@@ -230,6 +235,7 @@ Manage custom properties in the Men&Mice Suite
 
 ==== Examples
 
+.Custom properties example
 [source,yaml]
 ----
 - name: Set deinition for custom properties
@@ -260,6 +266,7 @@ Manage roles on the Men&Mice Suite
 
 ==== Examples
 
+.Role example
 [source,yaml]
 ----
 - name: Add the 'local' role
@@ -303,6 +310,7 @@ Manage user accounts and user properties on the Men&Mice Suite
 
 ==== Examples
 
+.User example
 [source,yaml]
 ----
 - name: Add the user 'johnd' as an admin
@@ -369,6 +377,7 @@ Manage DNS zones in the Men&Mice Suite
 
 ==== Examples
 
+.Zone example
 [source,yaml]
 ----
 - name: Create a new zone

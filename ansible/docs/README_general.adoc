@@ -76,7 +76,8 @@ directory.
 
 [source,bash]
 ----
-lookup_plugins = /usr/share/ansible/plugins/lookup:/etc/ansible/plugins/lookup
+lookup_plugins = /usr/share/ansible/plugins/lookup:\
+                 /etc/ansible/plugins/lookup
 ----
 
 To check if the modules are installed correctly and are available to
@@ -109,7 +110,8 @@ directory.
 
 [source,bash]
 ----
-inventory_plugins = /usr/share/ansible/plugins/inventory:/etc/ansible/plugins/inventory
+inventory_plugins = /usr/share/ansible/plugins/inventory:\
+                    /etc/ansible/plugins/inventory
 ----
 
 To check if the modules are installed correctly and are available to
@@ -199,6 +201,7 @@ for more information.
 
 The defined provider can be used in Ansible playbooks like:
 
+.Run ansible playbook for another host and delegate to the control node
 [source,yaml]
 ----
 - name: Claim IP address
@@ -213,9 +216,10 @@ The reason for the `delegate_to: localhost` option, is that all commands
 can be performed on the Ansible control node. So, it is possible to
 protect the Men&Mice Suite API to only accept commands from the Ansible
 control node and not from everywhere. This can also be achieved by
-creating a playbook that has `localhost` as the `connection` and is
+creating a playbook that has `localhost` as the `hosts`-setting and is
 specific for the interaction with the Men&Mice Suite.
 
+.Run ansible playbook on the Ansible Control node
 [source,yaml]
 ----
 ---
@@ -236,9 +240,12 @@ specific for the interaction with the Men&Mice Suite.
 
 Beneath is an example Ansible configuration file (`ansible.cfg`) with
 the assumption that all Men&Mice plugins and modules are installed in
-the `/etc/ansible` directory.
+the `/etc/ansible` directory. Some lines end with a backslash (`\`),
+which indicates that the following should be appended, but these are
+aplit for code clarity.
 
-[source,bash]
+.Ansible configuration file example
+[source,ini]
 ----
 # ==============================================
 [defaults]
@@ -255,16 +262,19 @@ host_key_checking       = False
 interpreter_python      = auto_silent
 force_valid_group_names = true
 retry_files_enabled     = False
+callback_whitelist      = minimal, dense, oneline
+stdout_callback         = default
+nocows                  = 0
 library                 = /etc/ansible/library
 action_plugins          = /usr/share/ansible_plugins/action_plugins
 callback_plugins        = /etc/ansible/plugins/callback_plugins
 connection_plugins      = /usr/share/ansible_plugins/connection_plugins
 filter_plugins          = /usr/share/ansible_plugins/filter_plugins
-inventory_plugins       = /usr/share/ansible_plugins/inventory_plugins:/etc/ansible/plugins/inventory
-lookup_plugins          = /usr/share/ansible_plugins/lookup_plugins:/etc/ansible/plugins/lookup
 vars_plugins            = /usr/share/ansible_plugins/vars_plugins
-callback_whitelist      = minimal, dense, oneline
-stdout_callback         = default
+inventory_plugins       = /usr/share/ansible_plugins/inventory_plugins:\
+                          /etc/ansible/plugins/inventory
+lookup_plugins          = /usr/share/ansible_plugins/lookup_plugins:\
+                          /etc/ansible/plugins/lookup
 
 [inventory]
 enable_plugins   = mm_inventory, host_list, auto

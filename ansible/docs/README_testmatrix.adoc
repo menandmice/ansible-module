@@ -1,0 +1,60 @@
+== Testmatrix
+
+Below is an overview of the conducted tests for the Ansible modules and
+the plugins.
+
+After a fresh install, all systems first had a complete update (`yum -y
+update` for Red Hat based machines, `apt-get update; apt-get
+dist-upgrade` for Debian based machines and `freebsd-update fetch;
+freebsd-update install` for FreeBSD) followed by a reboot.
+
+When ansible, Python2, Python3 and virtualenv where not installed, yet,
+these packages where installed first, to make sure all tests can be run.
+
+Some systems (like CentOS6 and Ubuntu 18.04) have a default Ansible
+version below 2.7. This immediately reflects in the every test failing.
+On these systems Ansible is installed through Python PIP, to ensure
+a valid Ansible version. If possible an Ansible version for Python3 was
+chosen. At the time of writing ({docdate}) the latest stable version of
+Ansible is 2.9.9.
+
+For CentOS6 the CentOS Software Collection for Python 2 and 3 was
+installed, as both original packages are too old for Ansible 2.7+ (From
+`centos-release-scl`) CentOS6 is still maintained, but not all the
+different combinations where tested, as not all requirements where met.
+
+Running on Ubuntu 16 with Ansible 2.7 and Python 2.7 results in
+a `No module named errors`. This is a known error and it was fixed in
+2.8.
+
+:c: icon:check[role="green"]
+:x: icon:x[role="red"]
+
+.Ansible, Python and OS testmatrix
+[width="95%",cols="25%,^8%,^8%,^8%,^8%,^8%,^8%,^15,^15%",options="header"]
+|===
+
+|                 3+| Python 2            3+| Python 3              2+| Native
+
+| *Ansible version* | *2.7* | *2.8* | *2.9* | *2.7* | *2.8* | *2.9* | *Ansible* | *Python*
+
+| CentOS6           |  {x}  |  {x}  |  {c}  |  {x}  |  {x}  |  {c}  |  2.9.9    | 3.6.9
+
+| CentOS7           |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  2.9.9    | 2.7.5
+
+| CentOS8           |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  2.9.9    | 3.6.8
+
+| RHEL 8.2          |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  2.9.9    | 3.6.8
+
+| Ubuntu 16.04      |  {x}  |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  2.9.9    | 3.5.2
+
+| Ubuntu 18.04      |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  2.9.9    | 2.7.17
+
+| Ubuntu 20.04      |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  2.9.6    | 3.8.2
+
+| Debian 10         |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  2.7.2    | 3.7.3
+
+| FreeBSD 12        |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  {c}  |  2.8.11   | 3.7.7
+
+|===
+

@@ -41,7 +41,7 @@ DOCUMENTATION = r'''
   options:
     state:
       description:
-        - Should the role exist or not.
+        - Should the group exist or not.
       type: str
       required: False
       choices: [ absent, present ]
@@ -200,7 +200,7 @@ def run_module():
     group_exists = False
     group_ref = ""
 
-    # Check if the role already exists
+    # Check if the group already exists
     for group in groups:
         if group['name'] == module.params['name']:
             group_exists = True

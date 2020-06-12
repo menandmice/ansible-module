@@ -3,9 +3,9 @@
 This documentations is generated with
 https://asciidoctor.org[Asciidoctor].
 
-When installing AsciiDoctor you need to make a decision whether install
-it per single user, or install it system-wide. The default is to install
-it on a per user base, but to install it system-wide the
+When installing AsciiDoctor you need to make a decision to whether
+install it per single user, or install it system-wide. The default is to
+install it on a per user base, but to install it system-wide the
 `--no-user-install` install flag is required.
 
 == Fedora 31
@@ -37,7 +37,7 @@ gem install --no-user-install epubcheck
 gem install --no-user-install kindlegen
 ----
 
-== CentOS 7
+== CentOS7
 
 ----
 yum -y install centos-release-scl

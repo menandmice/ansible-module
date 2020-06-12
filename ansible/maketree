@@ -3,7 +3,8 @@
 #
 # This script creates a directory where all modules,
 # plugins and config files a placed. This for easy
-# porting to other OSes
+# porting to other OSes and for distribution to
+# customers
 #
 CRD="$( [[ "${0:0:2}" = "./" ]] &&
 	{	printf "${PWD}/${0#./}"
