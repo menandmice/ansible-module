@@ -33,7 +33,7 @@ DOCUMENTATION = r"""
     lookup: mm_ipinfo
     author: Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
     version_added: "2.7"
-    short_description: Find information Rof an IP address
+    short_description: Find information of an IP address
     description:
       - This lookup collects info of an IP address
     options:
