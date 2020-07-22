@@ -52,7 +52,10 @@ DOCUMENTATION = r'''
       type: str
       required: True
     data:
-      description: The record data in a tab-separated list.
+      description:
+          - The record data in a tab-separated list.
+          - The tab-seperation is written as "\t".
+          - Example: "10\tmail.example.com"
       type: str
       required: True
     dnszone:

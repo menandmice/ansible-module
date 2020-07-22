@@ -90,7 +90,9 @@ Manage DNS records in the Men&Mice Suite
   dynamic record.
 - `comment`: Comment string for the record. Note that only records in
   static DNS zones can have a comment string
-- `data`: (required) The record data in a tab-separated list.
+- `data`: (required) The record data in a tab-separated list. The
+  tab-separation is written as a `\t` character.
+  Example: `10\tmail.example.com`
 - `dnszone`: (required) The DNS zone where the action should take place.
 - `enabled`: True if the record is enabled. If the record is disabled the
   value is false
