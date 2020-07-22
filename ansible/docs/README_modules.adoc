@@ -97,7 +97,7 @@ Manage DNS records in the Men&Mice Suite
 - `name`: (required) The name of the DNS record. Can either be partially
   or fully qualified.
 - `provider`: (required) Definition of the Men&Mice suite API provider.
-- `rrtype`: Resource Record Type for the IP address.
+- `rrtype`: Resource Record Type for this DNS record.
 - `state`: The state of the properties. (`absent`, `present`)
 - `ttl`: The Time-To-Live of the DNS record.
 

@@ -60,7 +60,7 @@ DOCUMENTATION = r'''
       type: str
       required: True
     rrtype:
-      description: Resource Record Type for the IP address.
+      description: Resource Record Type for this DNS record.
       type: str
       required: False
       default: A
