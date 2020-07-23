@@ -1,0 +1,40 @@
+=== mm_claimip
+
+Claim IP addresses in DHCP in the Men&Mice Suite
+
+==== Options
+
+- `customproperties`: Custom properties for the IP address. These
+  properties must already exist. See also [mm_props]
+- `ipaddress`: (required) The IP address(es) to work on.
+- `provider`: (required) Definition of the Men&Mice suite API provider.
+- `state`: The state of the claim. (`absent`, `present`)
+
+==== Examples
+
+.Claim IP address example
+[source,yaml]
+----
+- name: Claim IP address
+  mm_claimip:
+    state: present
+    ipaddress: 172.16.12.14
+    provider:
+      mmurl: http://mmsuite.example.net
+      user: apiuser
+      password: apipasswd
+  delegate_to: localhost
+
+- name: Release claim on IP addresses
+  mm_claimip:
+    state: present
+    ipaddress:
+      - 172.16.12.14
+      - 172.16.12.15
+      - 172.16.12.16
+    provider:
+      mmurl: http://mmsuite.example.net
+      user: apiuser
+      password: apipasswd
+  delegate_to: localhost
+----
