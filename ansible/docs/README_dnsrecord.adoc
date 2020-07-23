@@ -2,6 +2,13 @@
 
 Manage DNS records in the Men&Mice Suite
 
+
+~    56           - The data that is added to the DNS record
+~    57           - The record data is a space-separated list
+~    58             when the resource type is one of
++    59             MX, SRV, NAPTR, CAA, CERT, HINFO, TLSA
+
+
 ==== Options
 
 - `aging`: The aging timestamp of dynamic records in AD integrated zones.
@@ -9,9 +16,9 @@ Manage DNS records in the Men&Mice Suite
   dynamic record.
 - `comment`: Comment string for the record. Note that only records in
   static DNS zones can have a comment string
-- `data`: (required) The record data in a tab-separated list. The
-  tab-separation is written as a `\t` character.
-  Example: `10\tmail.example.com`
+- `data`: (required) The data that is added to the DNS record.
+  The record data is a space-separated list, when the resource type is
+  one of: `MX`, `SRV`, `NAPTR`, `CAA`, `CERT`, `HINFO` or `TLSA`.
 - `dnszone`: (required) The DNS zone where the action should take place.
 - `enabled`: True if the record is enabled. If the record is disabled the
   value is false

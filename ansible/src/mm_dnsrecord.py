@@ -53,9 +53,10 @@ DOCUMENTATION = r'''
       required: True
     data:
       description:
-          - The record data in a tab-separated list.
-          - The tab-seperation is written as "\t".
-          - Example: "10\tmail.example.com"
+          - The data that is added to the DNS record
+          - The record data is a space-separated list
+            when the resource type is one of
+            MX, SRV, NAPTR, CAA, CERT, HINFO, TLSA
       type: str
       required: True
     dnszone:
@@ -170,6 +171,8 @@ RRTYPES = [
     'SPF', 'SRV', 'SSHFP', 'TLSA', 'TXT'
 ]
 
+# Resource types with tab seperation in the data field.
+RRTYPES_TAB = [ 'MX', 'SRV', 'NAPTR', 'CAA', 'CERT', 'HINFO', 'TLSA' ]
 
 def run_module():
     """Run Ansible module."""
@@ -220,6 +223,11 @@ def run_module():
     provider = module.params['provider']
     display.vvv(provider)
 
+    # Get the data field and make it tabbed when needed
+    rrdata = module.params.get('data').strip()
+    if module.params.get('rrtype') in RRTYPES_TAB:
+        rrdata = "\t".join(rrdata.split())
+
     # Try to get all name of DNS Zone info
     refs = "DNSZones?filter=%s" % module.params.get('dnszone')
     zoneresp = mm.get_single_refs(refs, provider)
@@ -234,7 +242,7 @@ def run_module():
     if module.params['rrtype'] == 'PTR':
         # With a PTR record, the search is for the name, not the
         # .in-addr-arpa address
-        refs = "%s/DNSRecords?filter=%s" % (zoneref, module.params.get('data'))
+        refs = "%s/DNSRecords?filter=%s" % (zoneref, rrdata)
     else:
         refs = "%s/DNSRecords?filter=%s" % (zoneref, module.params.get('name'))
     iparesp = mm.get_single_refs(refs, provider)
@@ -264,7 +272,7 @@ def run_module():
                 {
                     "name": module.params.get('name'),
                     "type": module.params.get('rrtype'),
-                    "data": module.params.get('data'),
+                    "data": rrdata,
                     "comment": module.params.get('comment', ''),
                     "enabled": module.params.get('enabled'),
                     "aging": module.params.get('aging', 0),
@@ -293,7 +301,7 @@ def run_module():
             "ref": iparef,
             "properties": [
                 {"name": "name", "value": module.params.get('name')},
-                {"name": "data", "value": module.params.get('data')},
+                {"name": "data", "value": rrdata},
                 {"name": "comment", "value": module.params.get('comment', "")},
                 {"name": "enabled", "value": module.params.get('enabled')},
             ]
@@ -317,7 +325,7 @@ def run_module():
                 if name == 'name' and 'arpa.' not in cur:
                     cur = module.params.get('name')
                 if name == 'data':
-                    val = module.params.get('data')
+                    val = rrdata
 
             if val != cur and not (isinstance(val, type(None)) and cur == ""):
                 # Sometimes the value is empty of type None and the current
