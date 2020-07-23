@@ -225,7 +225,8 @@ def run_module():
 
     # Get the data field and make it tabbed when needed
     rrdata = module.params.get('data').strip()
-    if module.params.get('rrtype') in RRTYPES_TAB:
+    rrtype = module.params.get('rrtype').strip().upper()
+    if rrtype in RRTYPES_TAB:
         rrdata = "\t".join(rrdata.split())
 
     # Try to get all name of DNS Zone info
@@ -239,7 +240,7 @@ def run_module():
     zoneref = zoneresp['dnsZones'][0]['ref']
 
     # And try to get the DNS record with this data
-    if module.params['rrtype'] == 'PTR':
+    if rrtype == 'PTR':
         # With a PTR record, the search is for the name, not the
         # .in-addr-arpa address
         refs = "%s/DNSRecords?filter=%s" % (zoneref, rrdata)
@@ -271,7 +272,7 @@ def run_module():
             "dnsRecords": [
                 {
                     "name": module.params.get('name'),
-                    "type": module.params.get('rrtype'),
+                    "type": rrtype,
                     "data": rrdata,
                     "comment": module.params.get('comment', ''),
                     "enabled": module.params.get('enabled'),
@@ -321,7 +322,7 @@ def run_module():
 
             # If it concerns a reverse record, make sure the name contains the
             # complete reverse record and that data contains the hostname
-            if module.params['rrtype'] == 'PTR':
+            if rrtype == 'PTR':
                 if name == 'name' and 'arpa.' not in cur:
                     cur = module.params.get('name')
                 if name == 'data':
