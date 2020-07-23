@@ -1,9 +1,9 @@
-== Ansible mm_freeip plugin
+=== mm_freeip plugin
 
 This Men&Mice FreeIP lookup plugin finds one or more free IP addresses
 in a certain network, defined in the Men&Mice suite.
 
-=== Options
+==== Options
 
 - `claim`: Claim the IP address(es) for the specified amount of time in seconds
 
@@ -23,7 +23,7 @@ in a certain network, defined in the Men&Mice suite.
 
 - `provider`: (required) Definition of the Men&Mice suite API provider.
 
-=== Usage
+==== Usage
 
 When using the Men&Mice FreeIP plugin something needs to be taken into
 account. When running an Ansible lookup plugin, this lookup action takes

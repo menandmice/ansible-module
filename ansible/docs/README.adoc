@@ -53,6 +53,8 @@ Ton Kersten <t.kersten@atcomputing.nl>
 // Include all chapters
 include::README_general.adoc[]
 
+== Ansible plugins
+
 include::README_freeip.adoc[]
 
 include::README_inventory.adoc[]
