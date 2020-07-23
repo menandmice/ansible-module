@@ -18,7 +18,8 @@ Manage DNS records in the Men&Mice Suite
   static DNS zones can have a comment string
 - `data`: (required) The data that is added to the DNS record.
   The record data is a space-separated list, when the resource type is
-  one of: `MX`, `SRV`, `NAPTR`, `CAA`, `CERT`, `HINFO` or `TLSA`.
+  one of: `MX`, `SRV`, `NAPTR`, `CAA`, `CERT`, `HINFO` or `TLSA`. +
+  Example: `data: "100 10 U E2U+sip !^.*$!sip:customer-service@example.com! ."`
 - `dnszone`: (required) The DNS zone where the action should take place.
 - `enabled`: True if the record is enabled. If the record is disabled the
   value is false
