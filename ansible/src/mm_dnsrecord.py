@@ -237,7 +237,16 @@ def run_module():
         # Set warning
         result['warnings'] = "DNS Zone '%s' does not exist" % module.params.get('dnszone')
         module.exit_json(**result)
-    zoneref = zoneresp['dnsZones'][0]['ref']
+
+    # find the correct zone from the returned group (could be more then one)
+    zoneref = None
+    if len(zoneresp['dnsZones']) == 1:
+        zoneref = zoneresp['dnsZones'][0]['ref']
+    else:
+        for zr in zoneresp['dnsZones']:
+            if zr['name'] == module.params.get('dnszone'):
+                zoneref = zr['ref']
+                break
 
     # And try to get the DNS record with this data
     if rrtype == 'PTR':
@@ -247,6 +256,22 @@ def run_module():
     else:
         refs = "%s/DNSRecords?filter=%s" % (zoneref, module.params.get('name'))
     iparesp = mm.get_single_refs(refs, provider)
+
+    # It could be that the result is empty. This sometimes happens when
+    # a record is stored with just the name and not the FQDN.
+    rrname = module.params.get('name')
+    if len(iparesp.get('dnsRecords', [])) == 0:
+        rrname = rrname.split('.')[0]
+        refs = "%s/DNSRecords?filter=%s" % (zoneref, rrname)
+        iparesp = mm.get_single_refs(refs, provider)
+
+    # If more then one result was found
+    if iparesp.get('totalResults', 1) > 1:
+        for res in iparesp['dnsRecords']:
+            # Is it the correct record type, if not, remove it
+            if res['type'] != rrtype:
+                iparesp['dnsRecords'].remove(res)
+                iparesp['totalResults'] -= 1
 
     # If absent is requested, make a quick delete
     if module.params['state'] == 'absent':
@@ -263,7 +288,23 @@ def run_module():
         module.exit_json(**result)
 
     # Come here the DNS record should be present
+    # Check if the complete record is already present?
     if iparesp.get('totalResults', 1) == 0:
+        # No record file. Always add it
+        add = True
+    else:
+        # A similar record is found, check if it is exactly the same.
+        if '.' in rrdata:
+            rrdatashort = rrdata.split('.')[0]
+        else:
+            rrdatashort = rrdata
+        add = False
+        add = add or (iparesp['dnsRecords'][0]['name'] != rrname)
+        add = add or (iparesp['dnsRecords'][0]['type'] != rrtype)
+        add = add or ((iparesp['dnsRecords'][0]['data'] != rrdata) and
+                    (iparesp['dnsRecords'][0]['data'] != rrdatashort))
+
+    if add:
         # Absent, create
         http_method = "POST"
         url = "DNSRecords"
@@ -271,7 +312,7 @@ def run_module():
             "saveComment": "Ansible API",
             "dnsRecords": [
                 {
-                    "name": module.params.get('name'),
+                    "name": rrname,
                     "type": rrtype,
                     "data": rrdata,
                     "comment": module.params.get('comment', ''),
@@ -291,53 +332,10 @@ def run_module():
             result['warnings'] = result['message']['result']['errors']
             result.pop('message', None)
     else:
-        # Present, check if an update is needed
-        iparef = iparesp['dnsRecords'][0]['ref']
-        http_method = "PUT"
-        url = "%s" % iparef
-        # Not all parameters are past for an update, as some are read/only
-        # e.g. 'type', 'aging'
-        databody = {
-            "saveComment": "Ansible API",
-            "ref": iparef,
-            "properties": [
-                {"name": "name", "value": module.params.get('name')},
-                {"name": "data", "value": rrdata},
-                {"name": "comment", "value": module.params.get('comment', "")},
-                {"name": "enabled", "value": module.params.get('enabled')},
-            ]
+        result = {
+            'changed': False,
+            'message': ''
         }
-        if module.params.get('ttl'):
-            databody['properties'].append({'name': 'ttl',
-                                           'value': str(module.params.get('ttl'))})
-
-        # Check if the requested data is equal to the current data
-        change = False
-        for key in databody['properties']:
-            name = key['name']
-            val = key['value']
-
-            # Check if it is in the current values
-            cur = iparesp['dnsRecords'][0].get(name, 'unknown')
-
-            # If it concerns a reverse record, make sure the name contains the
-            # complete reverse record and that data contains the hostname
-            if rrtype == 'PTR':
-                if name == 'name' and 'arpa.' not in cur:
-                    cur = module.params.get('name')
-                if name == 'data':
-                    val = rrdata
-
-            if val != cur and not (isinstance(val, type(None)) and cur == ""):
-                # Sometimes the value is empty of type None and the current
-                # value is 'null', type string. This is the same, both mean
-                # an empty field.
-                change = True
-                break
-
-        # If change needed, call the API
-        if change:
-            result = mm.doapi(url, http_method, provider, databody)
 
     # return collected results
     module.exit_json(**result)

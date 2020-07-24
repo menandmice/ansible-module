@@ -387,7 +387,6 @@ def run_module():
             for grp in wanted_groups:
                 http_method = "PUT"
                 url = "%s/%s" % (grp['ref'], user_ref)
-                print(url)
                 result = mm.doapi(url, http_method, provider, databody)
 
             # For some reason the Roles are not accepted, so just loop over it
@@ -395,7 +394,6 @@ def run_module():
             for role in wanted_roles:
                 http_method = "PUT"
                 url = "%s/%s" % (user_ref, role['ref'])
-                print(url)
                 result = mm.doapi(url, http_method, provider, databody)
 
         # Show some debugging

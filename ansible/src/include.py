@@ -94,6 +94,7 @@ def doapi(url, method, provider, databody):
 
         if result.get('message', "") == "No Content":
             result['message'] = ""
+
         return result
 
 
