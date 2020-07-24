@@ -34,10 +34,13 @@ DOCUMENTATION = r'''
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Manage DNS records in the Men&Mice Suite
+    - Manage DNS records in the Men&Mice Suite.
   notes:
     - When in check mode, this module pretends to have done things
       and returns C(changed = True).
+    - As it is very common in DNS to have multiple entries with the same name,
+      there is no possibility to change a record, the only way is to add the
+      new record with the updated data and remove the old one after that.
   options:
     state:
         description: The state of the properties.

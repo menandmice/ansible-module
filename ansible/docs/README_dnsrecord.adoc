@@ -2,12 +2,24 @@
 
 Manage DNS records in the Men&Mice Suite
 
+In DNS it is very common to have multiple entries with the same name, as
+the example below shows.
 
-~    56           - The data that is added to the DNS record
-~    57           - The record data is a space-separated list
-~    58             when the resource type is one of
-+    59             MX, SRV, NAPTR, CAA, CERT, HINFO, TLSA
+.Multiple DNS entries for a single name
+[source]
+----
+mail01.example.net.   7200   IN   A      192.0.2.25
+mail01.example.net.   7200   IN   A      192.0.2.143
+mail01.example.net.   7200   IN   AAAA   2001:db8::25
+mail01.example.net.   7200   IN   AAAA   2001:db8::587
+----
 
+[TIP]
+====
+To enable multiple records with the same name in the Ansible modules,
+there is no possibility to change a record, the only way is to add the new
+record with the updated data and remove the old one after that.
+====
 
 ==== Options
 
@@ -26,7 +38,7 @@ Manage DNS records in the Men&Mice Suite
 - `name`: (required) The name of the DNS record. Can either be partially
   or fully qualified.
 - `provider`: (required) Definition of the Men&Mice suite API provider.
-- `rrtype`: Resource Record Type for this DNS record.
+- `rrtype`: Resource Record Type for this DNS record. Default is `A`.
 - `state`: The state of the properties. (`absent`, `present`)
 - `ttl`: The Time-To-Live of the DNS record.
 
