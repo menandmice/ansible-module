@@ -79,20 +79,6 @@ DOCUMENTATION = r'''
       type: list
       elements: str
       required: False
-    dnssecsigned:
-      description: True if the zone is a DNSSEC signed zone.
-      type: bool
-      required: False
-    kskids:
-      description: A comma separated string of IDs of KSKs, starting with
-                   active keys, then inactive keys in parenthesis
-      type: str
-      required: False
-    zskids:
-      description: A comma separated string of IDs of ZSKs, starting with
-                   active keys, then inactive keys in parenthesis
-      type: str
-      required: False
     adintegrated:
       description: True if the zone is Active Directory integrated.
       type: bool
@@ -184,9 +170,6 @@ def run_module():
                       choices=['master', 'slave', 'stub', 'forward']),
         dynamic=dict(type='bool', required=False, default=False),
         masters=dict(type='list', required=False),
-        dnssecsigned=dict(type='bool', required=False),
-        kskids=dict(type='str', required=False),
-        zskids=dict(type='str', required=False),
         adintegrate=dict(type='bool', required=False),
         adreplicationtype=dict(type='str', required=False),
         adpartition=dict(type='str', required=False),
@@ -271,12 +254,6 @@ def run_module():
         masters = module.params.get('masters', None)
         if module.params['servtype'] != 'Master' and masters is not None:
             databody["properties"].append({"name": "masters", "value": masters})
-        if module.params.get('dnssecsigned'):
-            databody["properties"].append({"name": "dnssecSigned", "value": module.params.get('dnssecsigned')})
-        if module.params.get('kskids'):
-            databody["properties"].append({"name": "kskIDs", "value": module.params.get('kskids')})
-        if module.params.get('zskids'):
-            databody["properties"].append({"name": "zskIDs", "value": module.params.get('zskids')})
         if module.params.get('adIntegrated'):
             databody["properties"].append({"name": "adIntegrated", "value": module.params.get('adintegrated')})
         if module.params.get('adreplicationtype'):
@@ -344,12 +321,6 @@ def run_module():
         masters = module.params.get('masters', None)
         if module.params['servtype'] != 'Master' and masters is not None:
             databody["masters"] = masters
-        if module.params.get('dnssecsigned'):
-            databody["dnsZone"]["dnssecSigned"] = module.params.get('dnssecsigned')
-        if module.params.get('kskids'):
-            databody["dnsZone"]["kskIDs"] = module.params.get('kskids')
-        if module.params.get('zskids'):
-            databody["dnsZone"]["zskIDs"] = module.params.get('zskids')
         if module.params.get('adintegrated'):
             databody["dnsZone"]["adIntegrated"] = module.params.get('adintegrated')
         if module.params.get('adreplicationtype'):

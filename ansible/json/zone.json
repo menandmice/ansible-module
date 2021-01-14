@@ -4,7 +4,6 @@
     "name": "Tons zone",
     "dynamic": false,
     "type": "Master",
-    "dnssecSigned": false,
     "dnsViewRef": "DNSViews/1",
     "customProperties": [
       {"name": "owner", "value": "Ton Kersten"},

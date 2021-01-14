@@ -13,10 +13,7 @@ Manage DNS zones in the Men&Mice Suite
   Directory.
 - `customproperties`: Custom properties for the zone. These properties
   must already exist. See also [mm_props].
-- `dnssecsigned`: True if the zone is a DNSSEC signed zone.
 - `dynamic`: Dynamic DNS zone.
-- `kskids`: A comma separated string of IDs of KSKs, starting with active
-  keys, then inactive keys in parenthesis
 - `masters`: The IP addresses of the master servers if the new zone is
   not a master zone.
 - `name`: (required) Name of the zone.
@@ -25,8 +22,6 @@ Manage DNS zones in the Men&Mice Suite
 - `provider`: (required) Definition of the Men&Mice suite API provider.
 - `servtype`: Type of the master server.
 - `state`: The state of the zone. (`absent`, `present`)
-- `zskids`: A comma separated string of IDs of ZSKs, starting with active
-  keys, then inactive keys in parenthesis
 
 ==== Examples
 
