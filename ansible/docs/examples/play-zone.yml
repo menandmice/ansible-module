@@ -8,7 +8,7 @@
 #      user: apiuser
 #      password: apipasswd
 #
-- name: Men&Mice DHCP test play
+- name: Men&Mice zone test play
   hosts: localhost
   connection: local
   become: false

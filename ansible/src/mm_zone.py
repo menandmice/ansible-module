@@ -212,6 +212,20 @@ def run_module():
     # Get all API settings
     provider = module.params['provider']
 
+    # Nameserver is required
+    if not module.params['nameserver']:
+        module.fail_json(msg='missing required argument: nameserver')
+
+    # Get the existing DNS View for the nameserver
+    refs = "DNSViews?dnsServerRef=%s" % module.params.get('nameserver')
+    resp = mm.get_single_refs(refs, provider)
+
+    # If the 'invalid' key exists, the request failed.
+    if resp.get('invalid', None):
+        module.fail_json(msg='namserver does not exist: %s'
+                         % module.params['nameserver'])
+    dnsview_ref = resp['dnsViews'][0]['ref']
+
     # Try to get all zone info
     refs = "DNSZones/%s" % module.params.get('name')
     resp = mm.get_single_refs(refs, provider)
@@ -288,22 +302,6 @@ def run_module():
         if change:
             result = mm.doapi(url, http_method, provider, databody)
     else:
-        # Nameserver is required if state==present
-        if not module.params['nameserver']:
-            module.fail_json(msg='missing required argument: nameserver')
-
-        # Get the existing DNS View for the nameserver
-        refs = "DNSViews?dnsServerRef=%s" % module.params.get('nameserver')
-        resp = mm.get_single_refs(refs, provider)
-
-        # If the 'invalid' key exists, the request failed.
-        if resp.get('invalid', None):
-            result.pop('message', None)
-            result['warnings'] = resp.get('warnings', None)
-            result['changed'] = False
-            module.exit_json(**result)
-        dnsview_ref = resp['dnsViews'][0]['ref']
-
         # Create the API call
         http_method = "POST"
         url = "dnsZones"
