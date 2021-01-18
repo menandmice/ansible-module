@@ -173,14 +173,8 @@ def run_module():
     state = module.params['state']
     display.vvv("State:", state)
 
-    # Get list of all groups in the system
-    resp = mm.getrefs("Groups", provider)
-    if resp.get('warnings', None):
-        module.fail_json(msg="Collecting groups: %s" % resp.get('warnings'))
-    groups = resp['message']['result']['groups']
-    display.vvv("Groups:", groups)
-
     # If users are requested, get all users
+    users = []
     if module.params['users']:
         resp = mm.getrefs("Users", provider)
         if resp.get('warnings', None):
@@ -188,12 +182,22 @@ def run_module():
         users = resp['message']['result']['users']
         display.vvv("Users:", users)
 
+    # Get list of all groups in the system
+    groups = []
+    if module.params['groups']:
+        resp = mm.getrefs("Groups", provider)
+        if resp.get('warnings', None):
+            module.fail_json(msg="Collecting groups: %s" % resp.get('warnings'))
+        groups = resp['message']['result']['groups']
+        display.vvv("Groups:", groups)
+
     # If roles are requested, get all roles
+    roles = []
     if module.params['roles']:
         resp = mm.getrefs("Roles", provider)
         if resp.get('warnings', None):
             module.fail_json(msg="Collecting roles: %s" % resp.get('warnings'))
-        groups = resp['message']['result']['roles']
+        roles = resp['message']['result']['roles']
         display.vvv("Roles:", roles)
 
     # Setup loop vars
