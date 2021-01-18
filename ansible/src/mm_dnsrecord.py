@@ -60,6 +60,8 @@ DOCUMENTATION = r'''
           - The record data is a space-separated list
             when the resource type is one of
             MX, SRV, NAPTR, CAA, CERT, HINFO, TLSA
+          - For MX and SRV the hostname should be the short
+            name and not the FQDN
       type: str
       required: True
     dnszone:
@@ -150,6 +152,20 @@ EXAMPLES = r'''
       user: apiuser
       password: apipasswd
   delegate_to: localhost
+
+- name: Set MX record
+  mm_dnsrecord:
+    state: present
+    name: beatles
+    rrtype: MX
+    dnszone: example.net.
+    data: "10 ringo"
+    ttl: 86400
+    provider:
+      mmurl: http://mmsuite.example.net
+      user: apiuser
+      password: apipasswd
+  delegate_to: localhost
 '''
 
 RETURN = r'''
@@ -175,7 +191,8 @@ RRTYPES = [
 ]
 
 # Resource types with tab seperation in the data field.
-RRTYPES_TAB = [ 'MX', 'SRV', 'NAPTR', 'CAA', 'CERT', 'HINFO', 'TLSA' ]
+RRTYPES_TAB = ['MX', 'SRV', 'NAPTR', 'CAA', 'CERT', 'HINFO', 'TLSA']
+
 
 def run_module():
     """Run Ansible module."""
@@ -227,19 +244,23 @@ def run_module():
     display.vvv(provider)
 
     # Get the data field and make it tabbed when needed
+    rrname = module.params.get('name').strip()
     rrdata = module.params.get('data').strip()
     rrtype = module.params.get('rrtype').strip().upper()
     if rrtype in RRTYPES_TAB:
         rrdata = "\t".join(rrdata.split())
+    # Zone MUST end with a '.' and I can imagine that this
+    # is forgotten
+    rrzone = module.params.get('dnszone').strip()
+    if rrzone[-1] != '.':
+        rrzone += '.'
 
     # Try to get all name of DNS Zone info
-    refs = "DNSZones?filter=%s" % module.params.get('dnszone')
+    refs = "DNSZones?filter=%s" % rrzone
     zoneresp = mm.get_single_refs(refs, provider)
     if zoneresp.get('totalResults', 1) == 0:
         # Zone does not exists
-        # Set warning
-        result['warnings'] = "DNS Zone '%s' does not exist" % module.params.get('dnszone')
-        module.exit_json(**result)
+        module.fail_json(msg="DNS Zone '%s' does not exist" % rrzone)
 
     # find the correct zone from the returned group (could be more then one)
     zoneref = None
@@ -247,25 +268,28 @@ def run_module():
         zoneref = zoneresp['dnsZones'][0]['ref']
     else:
         for zr in zoneresp['dnsZones']:
-            if zr['name'] == module.params.get('dnszone'):
+            if zr['name'] == rrzone:
                 zoneref = zr['ref']
                 break
 
     # And try to get the DNS record with this data
-    if rrtype == 'PTR':
-        # With a PTR record, the search is for the name, not the
-        # .in-addr-arpa address
-        refs = "%s/DNSRecords?filter=%s" % (zoneref, rrdata)
-    else:
-        refs = "%s/DNSRecords?filter=%s" % (zoneref, module.params.get('name'))
+    # DNSRecords?filter=name=host2 and type=A and data=192.168.10.11
+    # name and data are required, type defaults to A (so all fields are
+    # always available). All spaces are translated into '%20'
+    # (hex code for space) and tabs are replaced with '\\t' to ensure
+    # the tabs reach the API ad '\t'.
+    refs = "%s/DNSRecords?filter=name=%s and type=%s and data=%s" % (zoneref, rrname, rrtype, rrdata)
+    refs = refs.replace(' ', '%20').replace('\t', '\\t')
     iparesp = mm.get_single_refs(refs, provider)
 
     # It could be that the result is empty. This sometimes happens when
-    # a record is stored with just the name and not the FQDN.
+    # a record is stored with just the name and not the FQDN. This depends on
+    # the recordtype
     rrname = module.params.get('name')
     if len(iparesp.get('dnsRecords', [])) == 0:
         rrname = rrname.split('.')[0]
-        refs = "%s/DNSRecords?filter=%s" % (zoneref, rrname)
+        refs = "%s/DNSRecords?filter=name=%s and type=%s and data=%s" % (zoneref, rrname, rrtype, rrdata)
+        refs = refs.replace(' ', '%20').replace('\t', '\\t')
         iparesp = mm.get_single_refs(refs, provider)
 
     # If more then one result was found
@@ -305,7 +329,7 @@ def run_module():
         add = add or (iparesp['dnsRecords'][0]['name'] != rrname)
         add = add or (iparesp['dnsRecords'][0]['type'] != rrtype)
         add = add or ((iparesp['dnsRecords'][0]['data'] != rrdata) and
-                    (iparesp['dnsRecords'][0]['data'] != rrdatashort))
+                      (iparesp['dnsRecords'][0]['data'] != rrdatashort))
 
     if add:
         # Absent, create
