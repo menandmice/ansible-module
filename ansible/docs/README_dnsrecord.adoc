@@ -32,6 +32,7 @@ record with the updated data and remove the old one after that.
   The record data is a space-separated list, when the resource type is
   one of: `MX`, `SRV`, `NAPTR`, `CAA`, `CERT`, `HINFO` or `TLSA`. +
   Example: `data: "100 10 U E2U+sip !^.*$!sip:customer-service@example.com! ."`
+  For MX and SRV the hostname should be the short name and not the FQDN.
 - `dnszone`: (required) The DNS zone where the action should take place.
 - `enabled`: True if the record is enabled. If the record is disabled the
   value is false
@@ -67,6 +68,20 @@ record with the updated data and remove the old one after that.
     data: beatles.example.net.
     rrtype: PTR
     dnszone: "17.16.172.in-addr.arpa."
+    provider:
+      mmurl: http://mmsuite.example.net
+      user: apiuser
+      password: apipasswd
+  delegate_to: localhost
+
+- name: Set MX record
+  mm_dnsrecord:
+    state: present
+    name: beatles
+    rrtype: MX
+    dnszone: example.net.
+    data: "10 ringo"
+    ttl: 86400
     provider:
       mmurl: http://mmsuite.example.net
       user: apiuser

@@ -9,3 +9,11 @@ and the development information.
   which contains the distribution files.
   This directory can be shared with everyone who wants
   to use Ansible with the Men&Mice Suite.
+
+
+== Running modules while testing
+
+- `ANSIBLE_KEEP_REMOTE_FILES=1 ansible-playbook play.yml`
+- Then in the $TMPDIR: `AnsiballZ_module.py explode`
+- In the module code add `module.log(....)` and follow the
+  systems logfiles

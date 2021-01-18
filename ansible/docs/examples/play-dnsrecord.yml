@@ -71,7 +71,7 @@
         provider: "{{ provider }}"
       delegate_to: localhost
 
-    - name: Do something stupid
+    - name: Add records to non existing zone
       mm_dnsrecord:
         state: present
         name: beatles
@@ -83,7 +83,7 @@
       delegate_to: localhost
       ignore_errors: true
 
-    - name: Do more something stupid things
+    - name: Use a very invalid IP address
       mm_dnsrecord:
         state: present
         name: beatles
