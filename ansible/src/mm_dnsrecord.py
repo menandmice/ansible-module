@@ -74,7 +74,7 @@ DOCUMENTATION = r'''
       required: False
       default: A
       choices: [
-                A, AAAA, CNAME, DNAME,
+                A, AAAA, CNAME, CAA, DNAME,
                 DLV, DNSKEY, DS, HINFO,
                 LOC, MX, NAPTR, NS,
                 NSEC3PARAM, PTR, RP, SOA,
@@ -183,7 +183,7 @@ display = Display()
 
 # Define all available Resource Record types
 RRTYPES = [
-    'A', 'AAAA', 'CNAME', 'DNAME',
+    'A', 'AAAA', 'CNAME', 'CAA', 'DNAME',
     'DLV', 'DNSKEY', 'DS', 'HINFO',
     'LOC', 'MX', 'NAPTR', 'NS',
     'NSEC3PARAM', 'PTR', 'RP', 'SOA',
