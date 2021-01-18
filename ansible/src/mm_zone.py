@@ -212,6 +212,10 @@ def run_module():
     # Get all API settings
     provider = module.params['provider']
 
+    # Name is required
+    if not module.params['name']:
+        module.fail_json(msg='missing required argument: name')
+
     # Nameserver is required
     if not module.params['nameserver']:
         module.fail_json(msg='missing required argument: nameserver')
@@ -222,33 +226,32 @@ def run_module():
 
     # If the 'invalid' key exists, the request failed.
     if resp.get('invalid', None):
-        module.fail_json(msg='namserver does not exist: %s'
+        module.fail_json(msg='nameserver does not exist: %s'
                          % module.params['nameserver'])
-    dnsview_ref = resp['dnsViews'][0]['ref']
+    # Only the refID is needed, strip the DNSViews/ text
+    dnsview_ref = resp['dnsViews'][0]['ref'].replace('DNSViews/', '')
 
-    # Try to get all zone info
-    refs = "DNSZones/%s" % module.params.get('name')
+    # Try to get all zone info for this zone on this DNSView
+    refs = "DNSZones?filter=%s&dnsViewRef=%s" % (module.params.get('name'), dnsview_ref)
     resp = mm.get_single_refs(refs, provider)
 
     # If absent is requested, make a quick delete
     if module.params['state'] == 'absent':
-        if resp.get('warnings', None):
+        if resp.get('totalResults', 1) == 0:
             # Zone does not exist. Just return
             result['change'] = False
             module.exit_json(**result)
 
         http_method = "DELETE"
-        url = "DNSZones/%s" % module.params.get('name')
+        url = "%s" % resp['dnsZones'][0]['ref']
         databody = {"saveComment": "Ansible API"}
         result = mm.doapi(url, http_method, provider, databody)
         module.exit_json(**result)
 
     # Come here the zone needs to be present
-    # If the API response to search for the zone contains the `invalid` field,
-    # the zone does not exist. So, if the invalid field does not exist, the zone
-    # does.
-    if not (resp.get('invalid', False) and
-            'Object not found for reference' in resp.get('warnings', "")):
+    # If the totalResults fiel contains '0', the zone does not exist
+    # otherwise it does and needs to be changed.
+    if resp.get('totalResults', 1) != 0:
         # Zone exists. Update
 
         # Create the API call.
