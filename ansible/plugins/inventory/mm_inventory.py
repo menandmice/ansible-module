@@ -194,6 +194,7 @@ def doapi(url, method, provider, databody):
         try:
             resp = open_url(apiurl,
                             method=method,
+                            force_basic_auth=True,
                             url_username=provider['user'],
                             url_password=provider['password'],
                             data=json.dumps(databody),
