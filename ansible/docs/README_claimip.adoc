@@ -1,13 +1,13 @@
 === mm_claimip
 
-Claim IP addresses in DHCP in the Men&Mice Suite
+Claim IP addresses in DHCP in Micetro
 
 ==== Options
 
 - `customproperties`: Custom properties for the IP address. These
   properties must already exist. See also [mm_props]
 - `ipaddress`: (required) The IP address(es) to work on.
-- `provider`: (required) Definition of the Men&Mice suite API provider.
+- `provider`: (required) Definition of the Micetro API provider.
 - `state`: The state of the claim. (`absent`, `present`)
 
 ==== Examples
@@ -20,7 +20,7 @@ Claim IP addresses in DHCP in the Men&Mice Suite
     state: present
     ipaddress: 172.16.12.14
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost
@@ -33,7 +33,7 @@ Claim IP addresses in DHCP in the Men&Mice Suite
       - 172.16.12.15
       - 172.16.12.16
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost

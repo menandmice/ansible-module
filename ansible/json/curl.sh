@@ -8,7 +8,7 @@ CMD="curl -vs"
 CMD="${CMD} --header Content-Type:application/json"
 CMD="${CMD} --user apidude:TheAPIDude"
 CMD="${CMD} ${@}"
-CMD="${CMD} http://mandm.example.net/mmws/api/${URL}"
+CMD="${CMD} http://micetro.example.net/mmws/api/${URL}"
 
 ${CMD} | jq .
 echo "${CMD}"

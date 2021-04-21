@@ -46,7 +46,7 @@ include::resources/adocs/includes.adoc[]
 :uri-at: https://atcomputing.nl
 
 // Define title and author
-= Men&Mice Suite Ansible Integration
+= Micetro Ansible Integration
 Ton Kersten <t.kersten@atcomputing.nl>
 :title-page:
 

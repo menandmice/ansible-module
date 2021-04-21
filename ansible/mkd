@@ -98,8 +98,8 @@ done) > docs/README_modules.adoc
 (cat <<- @EOF
 	== Example playbooks
 
-	To use the Men&Mice Suite Ansible Integration you need to create
-	playbooks that utilize the functionality of the Men&Mice Suite.
+	To use the Micetro Ansible Integration you need to create
+	playbooks that utilize the functionality of the Micetro.
 
 	Following are a couple of example playbooks for inspiration.
 

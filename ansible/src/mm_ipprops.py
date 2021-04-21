@@ -2,7 +2,7 @@
 
 Part of the Men&Mice Ansible integration
 
-Module to set properties on an IP addresses in the Men&Mice Suite
+Module to set properties on an IP addresses in Micetro
 """
 
 from __future__ import absolute_import, division, print_function
@@ -29,12 +29,12 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
 
 DOCUMENTATION = r'''
   module: mm_pprops
-  short_description: Set properties on an IP address in the Men&Mice Suite
+  short_description: Set properties on an IP address in Micetro
   author:
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Set properties on an IP address in the Men&Mice Suite
+    - Set properties on an IP address in Micetro
     - This can be properties as custom properties, claim and so on
   notes:
     - When in check mode, this module pretends to have done things
@@ -64,7 +64,7 @@ DOCUMENTATION = r'''
       type: dict
       required: True
     provider:
-      description: Definition of the Men&Mice suite API provider.
+      description: Definition of the Micetro API provider.
       type: dict
       required: True
       suboptions:
@@ -92,7 +92,7 @@ EXAMPLES = r'''
       claimed: false
       location: London
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost

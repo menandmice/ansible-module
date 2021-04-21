@@ -2,7 +2,7 @@
 
 Part of the Men&Mice Ansible integration
 
-Module to manage DHCP reservations in the Men&Mice Suite
+Module to manage DHCP reservations in Micetro
   - Set or release a DHCP reservation
 """
 
@@ -31,12 +31,12 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
 
 DOCUMENTATION = r'''
   module: mm_dhcp
-  short_description: Manage DHCP reservations on the Men&Mice Suite
+  short_description: Manage DHCP reservations in Micetro
   author:
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Manage DHCP reservations on the Men&Mice Suite
+    - Manage DHCP reservations in Micetro
   notes:
     - When in check mode, this module pretends to have done things
       and returns C(changed = True).
@@ -85,7 +85,7 @@ DOCUMENTATION = r'''
       type: bool
       required: False
     provider:
-      description: Definition of the Men&Mice suite API provider.
+      description: Definition of the Micetro API provider.
       type: dict
       required: True
       suboptions:
@@ -112,7 +112,7 @@ EXAMPLES = r'''
     ipaddress: 172.16.17.8
     macaddress: 44:55:66:77:88:99
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost

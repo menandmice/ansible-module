@@ -1,17 +1,17 @@
 === mm_ipinfo plugin
 
 This Men&Mice IPInfo lookup plugin finds a lot of info about a specified
-IP address, defined in the Men&Mice suite.
+IP address, defined in Micetro.
 
 ==== Options
 
 - `ipaddress`: (required) The IP address that is examined
-- `provider`: (required) Definition of the Men&Mice suite API provider.
+- `provider`: (required) Definition of the Micetro API provider.
 
 ==== Usage
 
 The `mm_ipinfo` plugin delivers a complete set of information about an
-IP address, as it is delivered by the Men&Mice Suite API.
+IP address, as it is delivered by the Micetro API.
 
 Example usage:
 

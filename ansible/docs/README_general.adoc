@@ -1,8 +1,8 @@
-== Ansible setup for Men&Mice Suite
+== Ansible setup for Micetro by Men&Mice
 
-With the Ansible setup for the Men&Mice suite you can manage a Men&Mice
+With the Ansible setup for Micetro you can manage a Men&Mice
 installation through Ansible. The Ansible modules and plugins connect to
-the Men&Mice Suite API and perform all needed actions.
+the Micetro API and perform all needed actions.
 
 The modules and plugins need to be installed on the Ansible control
 node, often called the Ansible Master and Ansible needs to be configured
@@ -12,7 +12,7 @@ so that the modules and plugins can be found by Ansible.
 
 Installing the Ansible modules and plugins is a straight forward
 process. Copy the Ansible modules and plugins to a directory on the
-Ansible control node, let us assume `/tmp/mandm`. Later on these files
+Ansible control node, let us assume `/tmp/micetro`. Later on these files
 are copied to the destination directories on the control node.
 
 ==== Requirements
@@ -51,7 +51,7 @@ the modules are installed correctly. Run the command:
 ansible-doc -l | grep '^mm_'
 ----
 
-This should produce a list with all the Men&Mice Suite Ansible modules.
+This should produce a list with all the Micetro Ansible modules.
 
 ==== Ansible lookup plugins
 
@@ -88,7 +88,7 @@ Ansible, issue the command:
 ansible-doc -t lookup -l | grep '^mm_'
 ----
 
-Which should produce a list with all the Men&Mice Suite Ansible lookup
+Which should produce a list with all the Micetro Ansible lookup
 plugins.
 
 ==== Ansible inventory plugins
@@ -122,7 +122,7 @@ Ansible, issue the command:
 ansible-doc -t inventory -l | grep '^mm_'
 ----
 
-Which should produce a list with all the Men&Mice Suite Ansible
+Which should produce a list with all the Micetro Ansible
 inventory plugins.
 
 The `mm_inventory` plugin also needs some extra configuration, read the
@@ -130,14 +130,14 @@ The `mm_inventory` plugin also needs some extra configuration, read the
 
 === API user
 
-As the Ansible modules and plugins connect to a Men&Mice Suite
-installation, a connection between Ansible and the Men&Mice Suite needs
+As the Ansible modules and plugins connect to a Micetro
+installation, a connection between Ansible and Micetro needs
 to be made.
 
-==== API user for Men&Mice Suite
+==== API user for Micetro
 
-In the Men&Mice Suite a user needs to be defined that has all rights in
-the Men&Mice Suite (`administrator`) so it is able to perform all needed
+In Micetro a user needs to be defined that has all rights in
+the system (`administrator`) so it is able to perform all needed
 tasks. It is also possible to delegate only certain tasks to certain API
 users. The file `README_credentials.adoc` gives an overview which
 rights a required for every module.
@@ -160,7 +160,7 @@ directory instead of a file) which contains something similar to:
 ----
 ---
 provider:
-  mmurl: http://mmsuite.example.net
+  mmurl: http://micetro.example.net
   user: apiuser
   password: apipasswd
 ----
@@ -214,10 +214,10 @@ The defined provider can be used in Ansible playbooks like:
 
 The reason for the `delegate_to: localhost` option, is that all commands
 can be performed on the Ansible control node. So, it is possible to
-protect the Men&Mice Suite API to only accept commands from the Ansible
+protect the Micetro API to only accept commands from the Ansible
 control node and not from everywhere. This can also be achieved by
 creating a playbook that has `localhost` as the `hosts`-setting and is
-specific for the interaction with the Men&Mice Suite.
+specific for the interaction with Micetro.
 
 .Run ansible playbook on the Ansible Control node
 [source,yaml]

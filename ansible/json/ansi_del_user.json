@@ -5,7 +5,7 @@
     "full_name": "John Doe",
     "authentication_type": "Internal",
     "provider" : {
-        "mmurl": "http://mandm.example.net",
+        "mmurl": "http://micetro.example.net",
         "user": "apidude",
         "password": "TheAPIDude"
     }

@@ -1,7 +1,7 @@
 { "ANSIBLE_MODULE_ARGS": {
     "state": "present",
     "name": "prutser.com",
-    "nameserver": "mandm.example.net",
+    "nameserver": "micetro.example.net",
     "masters": "172.16.32.65",
     "servtype": "master",
     "authority": "dns1.example.net",
@@ -10,7 +10,7 @@
       "place": "Groesbeek"
     },
     "provider" : {
-        "mmurl": "http://mandm.example.net",
+        "mmurl": "http://micetro.example.net",
         "user": "apidude",
         "password": "TheAPIDude"
     }

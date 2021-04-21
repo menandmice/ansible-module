@@ -1,4 +1,4 @@
-== Ansible Men&Mice Suite development environment
+== Ansible Micetro development environment
 
 See the `docs` directory for the complete documentation.
 

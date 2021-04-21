@@ -9,7 +9,7 @@
 """Ansible lookup plugin.
 
 Lookup plugin for finding the next free IP address in
-a network zone in the Men&Mice Suite.
+a network zone in Micetro.
 """
 
 from __future__ import (absolute_import, division, print_function)
@@ -35,7 +35,7 @@ DOCUMENTATION = r"""
     lookup: mm_freeip
     author: Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
     version_added: "2.7"
-    short_description: Find free IP address(es) in a given network range in the Men&Mice Suite
+    short_description: Find free IP address(es) in a given network range in Micetro
     description:
       - This lookup returns free IP address(es) in a range or ranges
         specified by the network names C(e.g. examplenet). This can be
@@ -47,7 +47,7 @@ DOCUMENTATION = r"""
         over which you can iterate later on (or use C(query) instead)
     options:
       provider:
-        description: Definition of the Men&Mice suite API provider
+        description: Definition of the Micetro API provider
         type: dict
         required: True
         suboptions:
@@ -99,9 +99,9 @@ DOCUMENTATION = r"""
         default: None
       filter:
         description:
-          - Men&Mice Suite filter statement
-          - Filter validation is done by the Men&Mice suite, not in the plugin
-          - More filter info on https://docs.menandmice.com/display/MM930/Quickfilter
+          - Micetro filter statement
+          - Filter validation is done by Micetro, not in the plugin
+          - More filter info on https://docs.menandmice.com/en/latest/guides/user-manual/webapp_quick_filter/
         type: str
         required: False
         default: None
@@ -113,7 +113,7 @@ EXAMPLES = r"""
     msg: "This is the next free IP: {{ lookup('mm_freeip', provider, network) }}"
   vars:
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
     network: examplenet
@@ -122,7 +122,7 @@ EXAMPLES = r"""
   debug:
     msg: "This is the next free IP: {{ query('mm_freeip', provider, network, multi=5, claim=60) }}"
   vars:
-    mmurl: http://mmsuite.example.net
+    mmurl: http://micetro.example.net
     user: apiuser
     passwd: apipasswd
     network:
@@ -133,7 +133,7 @@ EXAMPLES = r"""
     debug:
       msg: "This is the next free IP: {{ query('mm_freeip', provider, network, ping=True) }}"
     vars:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       passwd: apipasswd
       network: examplenet
@@ -251,7 +251,7 @@ class LookupModule(LookupBase):
     def run(self, terms, variables=None, **kwargs):
         """Variabele terms contains a list with supplied parameters.
 
-        - provider -> Definition of the Men&Mice suite API provider
+        - provider -> Definition of the Micetro API provider
         - Network  -> The zone from which the free IP address(es) are found
                       Either: CIDR notation, network notation or network name
                       e.g. 172.16.17.0/24 or 172.16.17.0 or examplenet

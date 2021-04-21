@@ -123,9 +123,9 @@
       mm_zone:
         state: present
         name: thetestzone.com
-        nameserver: mandm.example.com
-        authority: mandm.example.net
-        masters: mandm.example.net
+        nameserver: micetro.example.com
+        authority: micetro.example.net
+        masters: micetro.example.net
         servtype: master
         provider: "{{ provider }}"
       delegate_to: localhost
@@ -235,10 +235,9 @@
       mm_zone:
         state: absent
         name: thetestzone.com
-        nameserver: mandm.example.com
-        authority: mandm.example.net
-        masters: mandm.example.net
+        nameserver: micetro.example.com
+        authority: micetro.example.net
+        masters: micetro.example.net
         servtype: master
         provider: "{{ provider }}"
       delegate_to: localhost
-

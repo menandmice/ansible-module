@@ -1,6 +1,6 @@
 === mm_ipprops
 
-Set properties on an IP address in the Men&Mice Suite
+Set properties on an IP address in Micetro
 
 ==== Options
 
@@ -8,12 +8,12 @@ Set properties on an IP address in the Men&Mice Suite
 - `ipaddress`: (required) The IP address(es) to work on.
 - `properties`: (required) Custom properties for the IP address. These
   properties must already be defined.
-- `provider`: (required) Definition of the Men&Mice suite API provider.
+- `provider`: (required) Definition of the Micetro API provider.
 - `state`: Property present or not. (`absent`, `present`)
 
 ==== Examples
 
-.IP address custom properties example
+.IPmicetros custom properties example
 [source,yaml]
 ----
 - name: Set properties on IP
@@ -24,7 +24,7 @@ Set properties on an IP address in the Men&Mice Suite
       claimed: false
       location: London
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost

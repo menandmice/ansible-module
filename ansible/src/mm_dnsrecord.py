@@ -2,7 +2,7 @@
 
 Part of the Men&Mice Ansible integration
 
-Module to manage DNS entries for IP addresses in the Men&Mice Suite
+Module to manage DNS entries for IP addresses in Micetro
 """
 
 from __future__ import absolute_import, division, print_function
@@ -29,12 +29,12 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
 
 DOCUMENTATION = r'''
   module: mm_dnsrecord
-  short_description: Manage DNS records in the Men&Mice Suite
+  short_description: Manage DNS records in Micetro
   author:
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Manage DNS records in the Men&Mice Suite.
+    - Manage DNS records in Micetro.
   notes:
     - When in check mode, this module pretends to have done things
       and returns C(changed = True).
@@ -107,7 +107,7 @@ DOCUMENTATION = r'''
       required: False
       default: 0
     provider:
-      description: Definition of the Men&Mice suite API provider.
+      description: Definition of the Micetro API provider.
       type: dict
       required: True
       suboptions:
@@ -135,7 +135,7 @@ EXAMPLES = r'''
     rrtype: A
     dnszone: example.net.
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost
@@ -148,7 +148,7 @@ EXAMPLES = r'''
     rrtype: PTR
     dnszone: "17.16.172.in-addr.arpa."
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost
@@ -162,7 +162,7 @@ EXAMPLES = r'''
     data: "10 ringo"
     ttl: 86400
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost

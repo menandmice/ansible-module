@@ -2,7 +2,7 @@
 
 Part of the Men&Mice Ansible integration
 
-Module to claim IP addresses in DHCP in the Men&Mice Suite
+Module to claim IP addresses in DHCP in Micetro
 """
 
 from __future__ import absolute_import, division, print_function
@@ -29,12 +29,12 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
 
 DOCUMENTATION = r'''
   module: mm_claimip
-  short_description: Claim IP addresses in DHCP in the Men&Mice Suite
+  short_description: Claim IP addresses in DHCP in Micetro
   author:
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Claim IP addresses in DHCP in the Men&Mice Suite.
+    - Claim IP addresses in DHCP in Micetro.
     - These addresses can not be in a DHCP range.
   notes:
     - When in check mode, this module pretends to have done things
@@ -60,7 +60,7 @@ DOCUMENTATION = r'''
       type: dict
       required: False
     provider:
-      description: Definition of the Men&Mice suite API provider.
+      description: Definition of the Micetro API provider.
       type: dict
       required: True
       suboptions:
@@ -85,7 +85,7 @@ EXAMPLES = r'''
     state: present
     ipaddress: 172.16.12.14
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost
@@ -98,7 +98,7 @@ EXAMPLES = r'''
       - 172.16.12.15
       - 172.16.12.16
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost

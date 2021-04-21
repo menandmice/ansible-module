@@ -1,12 +1,12 @@
 ---
 #
-# Find a set of free IP addresses in a range on the Men&Mice Suite example
+# Find a set of free IP addresses in a range in Micetro example
 #
 # The file <ansible_topdir>/group_vars/all contains:
 #
 #    ---
 #    provider:
-#      mmurl: http://mmsuite.example.net
+#      mmurl: http://micetro.example.net
 #      user: apiuser
 #      password: apipasswd
 #
@@ -45,4 +45,3 @@
         msg:
           - "Next free IP       : {{ item }}"
       loop: "{{ freeips }}"
-

@@ -4,7 +4,7 @@
     "ipaddress": "172.16.17.3",
     "macaddress": "de:ad:be:ef:16:10",
     "provider" : {
-        "mmurl": "http://mandm.example.net",
+        "mmurl": "http://micetro.example.net",
         "user": "apidude",
         "password": "TheAPIDude"
     }

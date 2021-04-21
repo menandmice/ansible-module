@@ -42,7 +42,7 @@ mkdir -p ${TOPDIR}/group_vars
 cat <<- @EOF > /${TOPDIR}/group_vars/all_example
 	---
 	provider:
-	  mmurl: http://mmsuite.example.net
+	  mmurl: http://micetro.example.net
 	  user: apiuser
 	  password: apipasswd
 @EOF

@@ -2,7 +2,7 @@
 
 Part of the Men&Mice Ansible integration
 
-Module to manage DNS-Zones in the Men&Mice Suite
+Module to manage DNS-Zones in Micetro
 """
 
 from __future__ import absolute_import, division, print_function
@@ -29,12 +29,12 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
 
 DOCUMENTATION = r'''
   module: mm_zone
-  short_description: Manage DNS zones in the Men&Mice Suite
+  short_description: Manage DNS zones in Micetro
   author:
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Manage DNS zones in the Men&Mice Suite
+    - Manage DNS zones in Micetro
   notes:
     - When in check mode, this module pretends to have done things
       and returns C(changed = True).
@@ -100,7 +100,7 @@ DOCUMENTATION = r'''
       type: dict
       required: False
     provider:
-      description: Definition of the Men&Mice suite API provider.
+      description: Definition of the Micetro API provider.
       type: dict
       required: True
       suboptions:
@@ -125,11 +125,11 @@ EXAMPLES = r'''
     state: present
     name: example.com
     nameserver: ns1.example.com
-    authority: mmsuite.example.net
+    authority: micetro.example.net
     customproperties:
       location: Reykjavik
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost
@@ -139,7 +139,7 @@ EXAMPLES = r'''
     state: absent
     name: example.com
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost
@@ -336,7 +336,7 @@ def run_module():
                 props.append({"name": key, "value": val})
             databody["dnsZone"]['customProperties'] = props
 
-        # Create the zone on the Men&Mice Suite
+        # Create the zone on Micetro
         result = mm.doapi(url, http_method, provider, databody)
 
     # return collected results

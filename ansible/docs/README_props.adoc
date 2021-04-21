@@ -1,6 +1,6 @@
 === mm_props
 
-Manage custom properties in the Men&Mice Suite
+Manage custom properties in Micetro
 
 ==== Options
 
@@ -14,7 +14,7 @@ Manage custom properties in the Men&Mice Suite
 - `proptype`: Type of the property. These are not the types as described
   in the API, but the types as you can see them in the Men&Mice Management
   Console.
-- `provider`: (required) Definition of the Men&Mice suite API provider.
+- `provider`: (required) Definition of the Micetro API provider.
 - `readonly`: Is the property read only.
 - `state`: The state of the properties or properties. (`absent`,
   `present`)
@@ -34,7 +34,7 @@ Manage custom properties in the Men&Mice Suite
     proptype: text
     dest: zone
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost

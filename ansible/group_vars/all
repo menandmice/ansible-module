@@ -1,5 +1,5 @@
 ---
 provider:
-  mmurl: http://mmsuite.example.net
+  mmurl: http://micetro.example.net
   user: apidude
   password: TheAPIDude

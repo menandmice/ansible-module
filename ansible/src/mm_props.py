@@ -2,7 +2,7 @@
 
 Part of the Men&Mice Ansible integration
 
-Module to manage custom properties in the Men&Mice Suite
+Module to manage custom properties in Micetro
 """
 
 from __future__ import absolute_import, division, print_function
@@ -29,12 +29,12 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
 
 DOCUMENTATION = r'''
   module: mm_props
-  short_description: Manage custom properties in the Men&Mice Suite
+  short_description: Manage custom properties in Micetro
   author:
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Manage custom properties in the Men&Mice Suite
+    - Manage custom properties in Micetro
   notes:
     - When in check mode, this module pretends to have done things
       and returns C(changed = True).
@@ -109,7 +109,7 @@ DOCUMENTATION = r'''
       type: bool
       default: False
     provider:
-      description: Definition of the Men&Mice suite API provider.
+      description: Definition of the Micetro API provider.
       type: dict
       required: True
       suboptions:
@@ -136,7 +136,7 @@ EXAMPLES = r'''
     proptype: text
     dest: zone
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost

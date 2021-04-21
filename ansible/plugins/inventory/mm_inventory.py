@@ -10,7 +10,7 @@
 # python 3 headers, required if submitting to Ansible
 """Ansible inventory plugin.
 
-Inventory plugin for finding all hosts in an Men&Mice Suite
+Inventory plugin for finding all hosts in Micetro
 As this could a lot, use the 'filter' option to tune it down.
 """
 
@@ -47,12 +47,12 @@ DOCUMENTATION = '''
     name: mm_inventory
     plugin_type: inventory
     author: Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
-    short_description: Ansible dynamic inventory plugin for the Men&Mice Suite.
+    short_description: Ansible dynamic inventory plugin for Micetro.
     version_added: "2.7"
     extends_documentation_fragment:
       - inventory_cache
     description:
-      - Reads inventories from Men&Mice Suite.
+      - Reads inventories from Micetro.
       - Supports reading configuration from both YAML config file and environment variables.
       - If reading from the YAML file, the file name must end with mm_inv.(yml|yaml) or mm_inventory.(yml|yaml),
         the path in the command would be /path/to/mm_inventory.(yml|yaml). If some arguments in the config file
@@ -67,19 +67,19 @@ DOCUMENTATION = '''
         required: True
         choices: ['mm_inventory']
       host:
-        description: The network address of the Men&Mice Suite host
+        description: The network address of the Micetro host
         type: string
         env:
           - name: MM_HOST
         required: True
       user:
-        description: The user that you plan to use to access inventories on your Men&Mice Suite
+        description: The user that you plan to use to access inventories in your Micetro
         type: string
         env:
           - name: MM_USER
         required: True
       password:
-        description: The password for your your Men&Mice Suite user.
+        description: The password for your Micetro user.
         type: string
         env:
           - name: MM_PASSWORD
@@ -110,7 +110,7 @@ EXAMPLES = '''
 # Examples using mm_inventory.yml file
 
 plugin: mm_inventory
-host: "http://mmsuite.example.net"
+host: "http://micetro.example.net"
 user: apiuser
 password: apipasswd
 filters:
@@ -118,7 +118,7 @@ filters:
 
 
 plugin: mm_inventory
-host: "http://mmsuite.example.net"
+host: "http://micetro.example.net"
 user: apiuser
 password: apipasswd
 ranges:
@@ -158,7 +158,7 @@ cache_connection = /tmp/inv_cache
 # export MM_FILTERS=YOUR_MM_FILTERS
 # export MM_RANGES=YOUR_MM_RANGES
 
-# Read the inventory from the Men&Mice Suite, and list them.
+# Read the inventory from Micetro, and list them.
 # The inventory path must always be @mm_inventory if you are reading
 # all settings from environment variables.
 # ansible-inventory -i @mm_inventory --list
@@ -305,7 +305,7 @@ class InventoryModule(BaseInventoryPlugin, Cacheable):
 
              This is the dictionairy that will cached, if requested (2.8+)
         """
-        # Read inventory from Men&Mice Suite server
+        # Read inventory from the Micetro server
 
         # Get the needed connection information
         mmurl = self.get_option('host')

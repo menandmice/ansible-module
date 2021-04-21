@@ -1,12 +1,12 @@
 ---
 #
-# Add, delete and change roles on the Men&Mice Suite example
+# Add, delete and change roles in Micetro example
 #
 # The file <ansible_topdir>/group_vars/all contains:
 #
 #    ---
 #    provider:
-#      mmurl: http://mmsuite.example.net
+#      mmurl: http://micetro.example.net
 #      user: apiuser
 #      password: apipasswd
 #

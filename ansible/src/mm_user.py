@@ -2,7 +2,7 @@
 
 Part of the Men&Mice Ansible integration
 
-Module to manage users in the Men&Mice Suite.
+Module to manage users in Micetro.
 """
 
 from __future__ import absolute_import, division, print_function
@@ -29,13 +29,13 @@ ANSIBLE_METADATA = {'metadata_version': '0.1',
 
 DOCUMENTATION = r'''
   module: mm_user
-  short_description: Manage user accounts and user properties on the Men&Mice Suite
+  short_description: Manage user accounts and user properties in Micetro
   author:
     - Carsten Strotmann <carsten@menandmice.training>
     - Ton Kersten <t.kersten@atcomputing.nl> for Men&Mice
   version_added: "2.7"
   description:
-    - Manage user accounts and user attributes on a Men&Mice Suite installation
+    - Manage user accounts and user attributes in a Micetro installation
   notes:
     - When in check mode, this module pretends to have done things
       and returns C(changed = True).
@@ -84,7 +84,7 @@ DOCUMENTATION = r'''
       type: list
       elements: str
     provider:
-      description: Definition of the Men&Mice suite API provider.
+      description: Definition of the Micetro API provider.
       type: dict
       required: True
       suboptions:
@@ -120,7 +120,7 @@ EXAMPLES = r'''
       - Approvers (built-in)
       - Requesters (built-in)
   provider:
-    mmurl: http://mmsuite.example.net
+    mmurl: http://micetro.example.net
     user: apiuser
     password: apipasswd
   delegate_to: localhost
@@ -130,7 +130,7 @@ EXAMPLES = r'''
     username: johnd
     state: absent
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost
@@ -138,7 +138,7 @@ EXAMPLES = r'''
 
 RETURN = r'''
 message:
-    description: The output message from the Men&Mice Suite.
+    description: The output message from Micetro.
     type: str
     returned: always
 '''
@@ -325,7 +325,7 @@ def run_module():
 
             # Add or delete a user to or from a group
             # API call with PUT or DELETE
-            # http://mandm.example.net/mmws/api/Groups/6/Users/31
+            # http://micetro.example.net/mmws/api/Groups/6/Users/31
             databody = {"saveComment": "Ansible API"}
             for thisgrp in wanted_groups + user_data['groups']:
                 http_method = ""
@@ -345,7 +345,7 @@ def run_module():
 
             # Be aware. Calling adding and deleting roles and groups is just the
             # otherway around!
-            # http://mandm.example.net/mmws/api/Users/31/Roles/2
+            # http://micetro.example.net/mmws/api/Users/31/Roles/2
             for thisrole in wanted_roles + user_data['roles']:
                 http_method = ""
                 if (thisrole in wanted_roles) and (thisrole not in user_data['roles']):

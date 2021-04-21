@@ -1,6 +1,6 @@
 ---
 plugin: mm_inventory
-host: "http://mmsuite.example.net"
+host: "http://micetro.example.net"
 user: apidude
 password: TheAPIDude
 

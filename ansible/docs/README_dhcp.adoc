@@ -1,6 +1,6 @@
 === mm_dhcp
 
-Manage DHCP reservations on the Men&Mice Suite
+Manage DHCP reservations in Micetro
 
 ==== Options
 
@@ -13,7 +13,7 @@ Manage DHCP reservations on the Men&Mice Suite
 - `macaddress`: (required) MAC address for the IP address.
 - `name`: (required) Name of the reservation
 - `nextserver`: Next server as DHCP option (bootp).
-- `provider`: (required) Definition of the Men&Mice suite API provider.
+- `provider`: (required) Definition of the Micetro API provider.
 - `servername`: Server to place the entry in.
 - `state`: The state of the reservation. (`absent`, `present`)
 
@@ -29,7 +29,7 @@ Manage DHCP reservations on the Men&Mice Suite
     ipaddress: 172.16.17.8
     macaddress: 44:55:66:77:88:99
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost

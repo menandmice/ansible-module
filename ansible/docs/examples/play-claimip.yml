@@ -1,12 +1,12 @@
 ---
 #
-# Claim and release an IP address on the Men&Mice Suite example
+# Claim and release an IP address in Micetro example
 #
 # The file <ansible_topdir>/group_vars/all contains:
 #
 #    ---
 #    provider:
-#      mmurl: http://mmsuite.example.net
+#      mmurl: http://micetro.example.net
 #      user: apiuser
 #      password: apipasswd
 #
@@ -49,4 +49,3 @@
         state: present
         ipaddress: 456.978.12.14
         provider: "{{ provider }}"
-

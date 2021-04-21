@@ -171,7 +171,7 @@ looking like:
 { "ANSIBLE_MODULE_ARGS": {
     "state": "present",
     "name": "testzone",
-    "nameserver": "mmsuite.example.net",
+    "nameserver": "micetro.example.net",
      masters": "172.16.17.2",
     "dynamic": true,
     "servtype": "Master",
@@ -181,7 +181,7 @@ looking like:
       "place": "Groesbeek"
     },
     "provider" : {
-        "mmurl": "http://mmsuite.example.net",
+        "mmurl": "http://micetro.example.net",
         "user": "apiuser",
         "password": "apipasswd"
     }

@@ -1,6 +1,6 @@
 === mm_zone
 
-Manage DNS zones in the Men&Mice Suite
+Manage DNS zones in Micetro
 
 ==== Options
 
@@ -19,7 +19,7 @@ Manage DNS zones in the Men&Mice Suite
 - `name`: (required) Name of the zone.
 - `nameserver`: Nameserver to define the zone on. Required if
   `state=present`.
-- `provider`: (required) Definition of the Men&Mice suite API provider.
+- `provider`: (required) Definition of the Micetro API provider.
 - `servtype`: Type of the master server.
 - `state`: The state of the zone. (`absent`, `present`)
 
@@ -33,11 +33,11 @@ Manage DNS zones in the Men&Mice Suite
     state: present
     name: example.com
     nameserver: ns1.example.com
-    authority: mmsuite.example.net
+    authority: micetro.example.net
     customproperties:
       location: Reykjavik
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost
@@ -47,7 +47,7 @@ Manage DNS zones in the Men&Mice Suite
     state: absent
     name: example.com
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipasswd
   delegate_to: localhost

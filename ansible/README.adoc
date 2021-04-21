@@ -1,9 +1,10 @@
-== Ansible Integration for the Men&Mice Suite
+== Ansible Integration for Micetro by Men&Mice
 
-=== What is the Men&Mice Suite?
+=== What is Micetro by Men&Mice?
 
-Effectively and efficiently manage DNS, DHCP and IPAM with the Men&Mice
-Suite.
+Micetro by Men&Mice is a transformation-ready, automation-enabled,
+comprehensive DDI orchestration solution for your enterprise network,
+regardless of its location, scale or complexity.
 
 Easily manage DNS and DHCP servers and networking devices such as
 firewalls and routers. Get the visibility and management functionality
@@ -11,23 +12,22 @@ you need across your entire network, whether on-prem, hybrid or
 multi-cloud.
 
 The Men&Mice Web Application enables quick access to the most commonly
-used DNS and DHCP management functions and reports of the Men&Mice
-Suite.
+used DNS and DHCP management functions and reports of Micetro.
 
-See also: https://www.menandmice.com
+See also: https://menandmice.com
 
 === Ansible integration
 
-With the Ansible setup for the Men&Mice suite you can manage a Men&Mice
+With the Ansible setup for Micetro by Men&Mice you can manage a Micetro
 installation through Ansible. The Ansible modules and plugins connect to
-the Men&Mice Suite API and perform all needed actions.
+the Men&Mice API and perform all needed actions.
 
 The modules and plugins need to be installed on the Ansible control
 node, often called the Ansible Master and Ansible needs to be configured
 so that the modules and plugins can be found by Ansible.
 
 The file `ansible.cfg_example` contains an example configuration that
-you can use with the Ansible modules and plugins for the Men&Mice Suite.
+you can use with the Ansible modules and plugins for Micetro.
 
 For the complete documentation, see the `docs` directory.
 

@@ -4,7 +4,7 @@
 #
 #    ---
 #    provider:
-#      mmurl: http://mmsuite.example.net
+#      mmurl: http://micetro.example.net
 #      user: apiuser
 #      password: apipasswd
 #
@@ -25,9 +25,9 @@
       mm_zone:
         state: present
         name: example.com
-        nameserver: mandm.example.com
-        authority: mandm.example.net
-        masters: mandm.example.net
+        nameserver: micetro.example.com
+        authority: micetro.example.net
+        masters: micetro.example.net
         servtype: master
         customproperties:
           owner: Me, myself and I

@@ -1,7 +1,7 @@
 === mm_freeip plugin
 
 This Men&Mice FreeIP lookup plugin finds one or more free IP addresses
-in a certain network, defined in the Men&Mice suite.
+in a certain network, defined in Micetro.
 
 ==== Options
 
@@ -9,9 +9,9 @@ in a certain network, defined in the Men&Mice suite.
 
 - `excludedhcp`: exclude DHCP reserved ranges from result
 
-- `filter`: Men&Mice Suite filter statement.
-  Filter validation is done by the Men&Mice suite, not in the plugin.
-  More filter info on https://docs.menandmice.com/display/MM930/Quickfilter
+- `filter`: Micetro filter statement.
+  Filter validation is done by Micetro, not in the plugin.
+  More filter info on https://docs.menandmice.com/en/latest/guides/user-manual/webapp_quick_filter/
 
 - `multi`: Get a list of x number of free IP addresses from the requested zones.
 
@@ -21,7 +21,7 @@ in a certain network, defined in the Men&Mice suite.
 
 - `ping`: ping the address found before returning.
 
-- `provider`: (required) Definition of the Men&Mice suite API provider.
+- `provider`: (required) Definition of the Micetro API provider.
 
 ==== Usage
 
@@ -46,7 +46,7 @@ Example usage:
 
   vars:
     provider:
-      mmurl: http://mmsuite.example.net
+      mmurl: http://micetro.example.net
       user: apiuser
       password: apipassword
     network: examplenet

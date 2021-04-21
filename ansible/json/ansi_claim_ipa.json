@@ -2,7 +2,7 @@
     "ipaddress": "456.16.17.3",
     "state": "present",
     "provider" : {
-        "mmurl": "http://mandm.example.net",
+        "mmurl": "http://micetro.example.net",
         "user": "apidude",
         "password": "TheAPIDude"
     }

@@ -3,7 +3,7 @@
     "name": "localrole",
     "desc": "My local role",
     "provider" : {
-        "mmurl": "http://mandm.example.net",
+        "mmurl": "http://micetro.example.net",
         "user": "apidude",
         "password": "TheAPIDude"
     }
